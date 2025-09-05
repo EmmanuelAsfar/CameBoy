@@ -1,0 +1,44 @@
+# Règles pour le développement de CameBoy
+
+## Contexte du projet
+CameBoy est un émulateur Game Boy écrit en C, développé avec Cursor et ChatGPT. Le projet suit les spécifications Pan Docs et vise la conformité avec les tests Blargg et Mooneye.
+
+## Structure du code
+- `src/common.h` : Types de base, constantes Game Boy, macros utilitaires
+- `src/cpu.h/.c` : CPU LR35902 avec fetch-decode-execute, tables d'opcodes
+- `src/mmu.h/.c` : Bus mémoire, mapping, MBC (Memory Bank Controllers)
+- `src/ppu.h/.c` : Picture Processing Unit, rendu graphique
+- `src/timer.h/.c` : Timers DIV/TIMA, gestion des interruptions
+- `src/joypad.h/.c` : Contrôleur, gestion des entrées
+- `src/emulator.c` : Boucle principale d'émulation
+
+## Standards de code
+- C99 strict, portable
+- Pas de magie non documentée dans les specs
+- Commentaires en français pour la logique métier
+- Noms de variables en anglais (convention C)
+- Gestion d'erreurs explicite
+
+## Spécifications à respecter
+- Pan Docs (docs/pandocs/) : référence principale
+- Cycles exacts pour CPU/PPU/Timers
+- Conformité avec tests Blargg (CPU) et Mooneye (timing)
+- Gestion correcte des interruptions (EI délai, HALT bug)
+- Timing PPU précis (456 cycles par ligne)
+
+## Pièges à éviter
+- EI prend effet après l'instruction suivante
+- HALT bug : PC n'incrémente pas dans certaines races d'IRQ
+- PPU timing : transitions STAT, accès VRAM/OAM bloqués
+- OAM DMA : copie 160 octets, bus lock partiel
+- Valeurs d'initialisation exactes (pas tout à 0)
+
+## Tests
+- Utiliser tests/blargg/ pour la conformité CPU
+- Utiliser tests/mooneye/ pour le timing
+- Créer des micro-tests pour valider les fonctionnalités
+
+## Développement
+- Implémenter d'abord la précision, puis optimiser
+- Tester chaque composant individuellement
+- Suivre l'ordre : MMU → CPU → Timers → PPU → MBC → APU

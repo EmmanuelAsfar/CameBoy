@@ -1,0 +1,366 @@
+=== Compilation de CameBoy (version test) === 
+ 
+Compilation... 
+src\cpu.c: In function 'inst_nop':
+src\cpu.c:46:29: warning: unused parameter 'memory' [-Wunused-parameter]
+   46 | void inst_nop(CPU* cpu, u8* memory) {
+      |                         ~~~~^~~~~~
+src\cpu.c: In function 'inst_halt':
+src\cpu.c:50:30: warning: unused parameter 'memory' [-Wunused-parameter]
+   50 | void inst_halt(CPU* cpu, u8* memory) {
+      |                          ~~~~^~~~~~
+src\cpu.c: In function 'inst_stop':
+src\cpu.c:55:30: warning: unused parameter 'memory' [-Wunused-parameter]
+   55 | void inst_stop(CPU* cpu, u8* memory) {
+      |                          ~~~~^~~~~~
+src\cpu.c: In function 'inst_di':
+src\cpu.c:60:28: warning: unused parameter 'memory' [-Wunused-parameter]
+   60 | void inst_di(CPU* cpu, u8* memory) {
+      |                        ~~~~^~~~~~
+src\cpu.c: In function 'inst_ei':
+src\cpu.c:66:28: warning: unused parameter 'memory' [-Wunused-parameter]
+   66 | void inst_ei(CPU* cpu, u8* memory) {
+      |                        ~~~~^~~~~~
+src\cpu.c: In function 'inst_jp_hl':
+src\cpu.c:210:31: warning: unused parameter 'memory' [-Wunused-parameter]
+  210 | void inst_jp_hl(CPU* cpu, u8* memory) {
+      |                           ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_ld_sp_hl':
+src\cpu_instructions.c:214:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  214 | void inst_ld_sp_hl(CPU* cpu, u8* memory) {
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rlca':
+src\cpu_instructions.c:292:30: warning: unused parameter 'memory' [-Wunused-parameter]
+  292 | void inst_rlca(CPU* cpu, u8* memory) {
+      |                          ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rrca':
+src\cpu_instructions.c:307:30: warning: unused parameter 'memory' [-Wunused-parameter]
+  307 | void inst_rrca(CPU* cpu, u8* memory) {
+      |                          ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rla':
+src\cpu_instructions.c:322:29: warning: unused parameter 'memory' [-Wunused-parameter]
+  322 | void inst_rla(CPU* cpu, u8* memory) {
+      |                         ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rra':
+src\cpu_instructions.c:338:29: warning: unused parameter 'memory' [-Wunused-parameter]
+  338 | void inst_rra(CPU* cpu, u8* memory) {
+      |                         ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_daa':
+src\cpu_instructions.c:358:29: warning: unused parameter 'memory' [-Wunused-parameter]
+  358 | void inst_daa(CPU* cpu, u8* memory) {
+      |                         ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_cpl':
+src\cpu_instructions.c:389:29: warning: unused parameter 'memory' [-Wunused-parameter]
+  389 | void inst_cpl(CPU* cpu, u8* memory) {
+      |                         ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_scf':
+src\cpu_instructions.c:397:29: warning: unused parameter 'memory' [-Wunused-parameter]
+  397 | void inst_scf(CPU* cpu, u8* memory) {
+      |                         ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_ccf':
+src\cpu_instructions.c:405:29: warning: unused parameter 'memory' [-Wunused-parameter]
+  405 | void inst_ccf(CPU* cpu, u8* memory) {
+      |                         ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rlc_r8':
+src\cpu_instructions.c:816:32: warning: unused parameter 'memory' [-Wunused-parameter]
+  816 | void inst_rlc_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                            ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rrc_r8':
+src\cpu_instructions.c:817:32: warning: unused parameter 'memory' [-Wunused-parameter]
+  817 | void inst_rrc_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                            ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rl_r8':
+src\cpu_instructions.c:818:31: warning: unused parameter 'memory' [-Wunused-parameter]
+  818 | void inst_rl_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                           ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rr_r8':
+src\cpu_instructions.c:819:31: warning: unused parameter 'memory' [-Wunused-parameter]
+  819 | void inst_rr_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                           ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_sla_r8':
+src\cpu_instructions.c:820:32: warning: unused parameter 'memory' [-Wunused-parameter]
+  820 | void inst_sla_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                            ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_sra_r8':
+src\cpu_instructions.c:821:32: warning: unused parameter 'memory' [-Wunused-parameter]
+  821 | void inst_sra_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                            ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_swap_r8':
+src\cpu_instructions.c:822:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  822 | void inst_swap_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_srl_r8':
+src\cpu_instructions.c:823:32: warning: unused parameter 'memory' [-Wunused-parameter]
+  823 | void inst_srl_r8(CPU* cpu, u8* memory) { cpu->pc += 2; } // Placeholder
+      |                            ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_0_r8':
+src\cpu_instructions.c:826:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  826 | void inst_bit_0_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_1_r8':
+src\cpu_instructions.c:827:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  827 | void inst_bit_1_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_2_r8':
+src\cpu_instructions.c:828:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  828 | void inst_bit_2_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_3_r8':
+src\cpu_instructions.c:829:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  829 | void inst_bit_3_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_4_r8':
+src\cpu_instructions.c:830:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  830 | void inst_bit_4_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_5_r8':
+src\cpu_instructions.c:831:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  831 | void inst_bit_5_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_6_r8':
+src\cpu_instructions.c:832:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  832 | void inst_bit_6_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_7_r8':
+src\cpu_instructions.c:833:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  833 | void inst_bit_7_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_0_hl':
+src\cpu_instructions.c:835:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  835 | void inst_bit_0_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_1_hl':
+src\cpu_instructions.c:836:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  836 | void inst_bit_1_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_2_hl':
+src\cpu_instructions.c:837:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  837 | void inst_bit_2_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_3_hl':
+src\cpu_instructions.c:838:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  838 | void inst_bit_3_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_4_hl':
+src\cpu_instructions.c:839:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  839 | void inst_bit_4_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_5_hl':
+src\cpu_instructions.c:840:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  840 | void inst_bit_5_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_6_hl':
+src\cpu_instructions.c:841:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  841 | void inst_bit_6_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_bit_7_hl':
+src\cpu_instructions.c:842:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  842 | void inst_bit_7_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_0_r8':
+src\cpu_instructions.c:845:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  845 | void inst_res_0_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_1_r8':
+src\cpu_instructions.c:846:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  846 | void inst_res_1_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_2_r8':
+src\cpu_instructions.c:847:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  847 | void inst_res_2_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_3_r8':
+src\cpu_instructions.c:848:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  848 | void inst_res_3_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_4_r8':
+src\cpu_instructions.c:849:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  849 | void inst_res_4_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_5_r8':
+src\cpu_instructions.c:850:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  850 | void inst_res_5_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_6_r8':
+src\cpu_instructions.c:851:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  851 | void inst_res_6_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_7_r8':
+src\cpu_instructions.c:852:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  852 | void inst_res_7_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_0_hl':
+src\cpu_instructions.c:854:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  854 | void inst_res_0_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_1_hl':
+src\cpu_instructions.c:855:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  855 | void inst_res_1_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_2_hl':
+src\cpu_instructions.c:856:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  856 | void inst_res_2_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_3_hl':
+src\cpu_instructions.c:857:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  857 | void inst_res_3_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_4_hl':
+src\cpu_instructions.c:858:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  858 | void inst_res_4_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_5_hl':
+src\cpu_instructions.c:859:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  859 | void inst_res_5_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_6_hl':
+src\cpu_instructions.c:860:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  860 | void inst_res_6_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_res_7_hl':
+src\cpu_instructions.c:861:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  861 | void inst_res_7_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_0_r8':
+src\cpu_instructions.c:863:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  863 | void inst_set_0_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_1_r8':
+src\cpu_instructions.c:864:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  864 | void inst_set_1_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_2_r8':
+src\cpu_instructions.c:865:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  865 | void inst_set_2_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_3_r8':
+src\cpu_instructions.c:866:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  866 | void inst_set_3_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_4_r8':
+src\cpu_instructions.c:867:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  867 | void inst_set_4_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_5_r8':
+src\cpu_instructions.c:868:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  868 | void inst_set_5_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_6_r8':
+src\cpu_instructions.c:869:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  869 | void inst_set_6_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_7_r8':
+src\cpu_instructions.c:870:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  870 | void inst_set_7_r8(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_0_hl':
+src\cpu_instructions.c:872:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  872 | void inst_set_0_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_1_hl':
+src\cpu_instructions.c:873:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  873 | void inst_set_1_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_2_hl':
+src\cpu_instructions.c:874:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  874 | void inst_set_2_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_3_hl':
+src\cpu_instructions.c:875:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  875 | void inst_set_3_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_4_hl':
+src\cpu_instructions.c:876:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  876 | void inst_set_4_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_5_hl':
+src\cpu_instructions.c:877:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  877 | void inst_set_5_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_6_hl':
+src\cpu_instructions.c:878:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  878 | void inst_set_6_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_set_7_hl':
+src\cpu_instructions.c:879:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  879 | void inst_set_7_hl(CPU* cpu, u8* memory) { cpu->pc += 2; }
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_jp_nz_n16':
+src\cpu_instructions.c:884:35: warning: unused parameter 'memory' [-Wunused-parameter]
+  884 | void inst_jp_nz_n16(CPU* cpu, u8* memory) { cpu->pc += 3; } // Placeholder
+      |                               ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_jp_z_n16':
+src\cpu_instructions.c:885:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  885 | void inst_jp_z_n16(CPU* cpu, u8* memory) { cpu->pc += 3; } // Placeholder
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_jp_nc_n16':
+src\cpu_instructions.c:886:35: warning: unused parameter 'memory' [-Wunused-parameter]
+  886 | void inst_jp_nc_n16(CPU* cpu, u8* memory) { cpu->pc += 3; } // Placeholder
+      |                               ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_jp_c_n16':
+src\cpu_instructions.c:887:34: warning: unused parameter 'memory' [-Wunused-parameter]
+  887 | void inst_jp_c_n16(CPU* cpu, u8* memory) { cpu->pc += 3; } // Placeholder
+      |                              ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_00h':
+src\cpu_instructions.c:894:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  894 | void inst_rst_00h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_08h':
+src\cpu_instructions.c:895:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  895 | void inst_rst_08h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_10h':
+src\cpu_instructions.c:896:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  896 | void inst_rst_10h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_18h':
+src\cpu_instructions.c:897:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  897 | void inst_rst_18h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_20h':
+src\cpu_instructions.c:898:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  898 | void inst_rst_20h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_28h':
+src\cpu_instructions.c:899:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  899 | void inst_rst_28h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_30h':
+src\cpu_instructions.c:900:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  900 | void inst_rst_30h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\cpu_instructions.c: In function 'inst_rst_38h':
+src\cpu_instructions.c:901:33: warning: unused parameter 'memory' [-Wunused-parameter]
+  901 | void inst_rst_38h(CPU* cpu, u8* memory) { cpu->pc += 1; } // Placeholder
+      |                             ~~~~^~~~~~
+src\mmu.c: In function 'mmu_load_rom':
+src\mmu.c:101:20: warning: comparison of integer expressions of different signedness: 'size_t' {aka 'long long unsigned int'} and 'long int' [-Wsign-compare]
+  101 |     if (bytes_read != file_size) {
+      |                    ^~
+src\mmu.c: In function 'mmu_read8':
+src\mmu.c:150:17: warning: comparison is always true due to limited range of data type [-Wtype-limits]
+  150 |     if (address >= 0x0000 && address <= 0x7FFF) {
+      |                 ^~
+src\mmu.c: In function 'mmu_write8':
+src\mmu.c:196:17: warning: comparison is always true due to limited range of data type [-Wtype-limits]
+  196 |     if (address >= 0x0000 && address <= 0x7FFF) {
+      |                 ^~
+src\mmu.c: In function 'mbc_write':
+src\mmu.c:248:21: warning: unused parameter 'mmu' [-Wunused-parameter]
+  248 | void mbc_write(MMU* mmu, u16 address, u8 value) {
+      |                ~~~~~^~~
+src\mmu.c:248:30: warning: unused parameter 'address' [-Wunused-parameter]
+  248 | void mbc_write(MMU* mmu, u16 address, u8 value) {
+      |                          ~~~~^~~~~~~
+src\mmu.c:248:42: warning: unused parameter 'value' [-Wunused-parameter]
+  248 | void mbc_write(MMU* mmu, u16 address, u8 value) {
+      |                                       ~~~^~~~~
+src\ppu.c: In function 'ppu_render_line':
+src\ppu.c:201:36: warning: unused parameter 'vram' [-Wunused-parameter]
+  201 | void ppu_render_line(PPU* ppu, u8* vram) {
+      |                                ~~~~^~~~
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccleo5av.o: in function `inst_cp_a_n8':
+C:\Users\Emmanuel Asfar\Documents\GitHub\CameBoy/src/cpu_instructions.c:799: multiple definition of `inst_cp_a_n8'; C:\Users\EMMANU~1\AppData\Local\Temp\ccuF5ZID.o:C:\Users\Emmanuel Asfar\Documents\GitHub\CameBoy/src/cpu.c:343: first defined here
+collect2.exe: error: ld returned 1 exit status
+❌ Erreur de compilation 
+Terminé. 

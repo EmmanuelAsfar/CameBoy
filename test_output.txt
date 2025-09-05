@@ -1,0 +1,34 @@
+Tentative de chargement de la ROM: .\tests\test_rom.gb
+ROM chargée: TEST ROM
+Type: ROM Only
+Taille ROM: 32 KB
+ROM chargée avec succès!
+ROM chargée: TEST ROM
+Type de cartouche: ROM Only
+Taille ROM: 0 KB
+Démarrage de l'émulation simple...
+Cycles maximum: 10000
+PC initial: 0x0100
+Première instruction: 0x00
+
+PC: 0x0100, Opcode: 0x00, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0101, Opcode: 0xC3, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Émulation terminée après 10004 cycles
+PC final: 0x0150
+AF: 0x01B0, BC: 0x0013, DE: 0x00D8, HL: 0x014D
+SP: 0xFFFE

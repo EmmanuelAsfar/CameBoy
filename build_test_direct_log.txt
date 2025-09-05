@@ -1,0 +1,22 @@
+src\mmu.c: In function 'mmu_load_rom':
+src\mmu.c:101:20: warning: comparison of integer expressions of different signedness: 'size_t' {aka 'long long unsigned int'} and 'long int' [-Wsign-compare]
+  101 |     if (bytes_read != file_size) {
+      |                    ^~
+src\mmu.c: In function 'mmu_read8':
+src\mmu.c:150:17: warning: comparison is always true due to limited range of data type [-Wtype-limits]
+  150 |     if (address >= 0x0000 && address <= 0x7FFF) {
+      |                 ^~
+src\mmu.c: In function 'mmu_write8':
+src\mmu.c:196:17: warning: comparison is always true due to limited range of data type [-Wtype-limits]
+  196 |     if (address >= 0x0000 && address <= 0x7FFF) {
+      |                 ^~
+src\mmu.c: In function 'mbc_write':
+src\mmu.c:247:21: warning: unused parameter 'mmu' [-Wunused-parameter]
+  247 | void mbc_write(MMU* mmu, u16 address, u8 value) {
+      |                ~~~~~^~~
+src\mmu.c:247:30: warning: unused parameter 'address' [-Wunused-parameter]
+  247 | void mbc_write(MMU* mmu, u16 address, u8 value) {
+      |                          ~~~~^~~~~~~
+src\mmu.c:247:42: warning: unused parameter 'value' [-Wunused-parameter]
+  247 | void mbc_write(MMU* mmu, u16 address, u8 value) {
+      |                                       ~~~^~~~~
