@@ -404,48 +404,52 @@ void inst_pop_af(CPU* cpu, MMU* mmu) {
 
 void inst_jr_nz_e8(CPU* cpu, MMU* mmu) {
     s8 offset = (s8)mmu->memory[cpu->pc + 1];
-    cpu->pc += 2;
+    
+    printf("JR NZ: offset=%d, Z=%d, PC avant=0x%04X", offset, get_flag(cpu, FLAG_Z), cpu->pc);
     
     if (!get_flag(cpu, FLAG_Z)) {
-        cpu->pc += offset;
+        cpu->pc += 2 + offset;
         cpu->branch_taken = true;
+        printf(" -> SAUT vers 0x%04X\n", cpu->pc);
     } else {
+        cpu->pc += 2;
         cpu->branch_taken = false;
+        printf(" -> PAS DE SAUT, PC=0x%04X\n", cpu->pc);
     }
 }
 
 void inst_jr_z_e8(CPU* cpu, MMU* mmu) {
     s8 offset = (s8)mmu->memory[cpu->pc + 1];
-    cpu->pc += 2;
     
     if (get_flag(cpu, FLAG_Z)) {
-        cpu->pc += offset;
+        cpu->pc += 2 + offset;
         cpu->branch_taken = true;
     } else {
+        cpu->pc += 2;
         cpu->branch_taken = false;
     }
 }
 
 void inst_jr_nc_e8(CPU* cpu, MMU* mmu) {
     s8 offset = (s8)mmu->memory[cpu->pc + 1];
-    cpu->pc += 2;
     
     if (!get_flag(cpu, FLAG_C)) {
-        cpu->pc += offset;
+        cpu->pc += 2 + offset;
         cpu->branch_taken = true;
     } else {
+        cpu->pc += 2;
         cpu->branch_taken = false;
     }
 }
 
 void inst_jr_c_e8(CPU* cpu, MMU* mmu) {
     s8 offset = (s8)mmu->memory[cpu->pc + 1];
-    cpu->pc += 2;
     
     if (get_flag(cpu, FLAG_C)) {
-        cpu->pc += offset;
+        cpu->pc += 2 + offset;
         cpu->branch_taken = true;
     } else {
+        cpu->pc += 2;
         cpu->branch_taken = false;
     }
 }
@@ -1503,14 +1507,91 @@ void inst_ccf(CPU* cpu, MMU* mmu) {
 // Pour l'instant, on a l'infrastructure de base pour le port série
 
 void inst_srl_r8(CPU* cpu, MMU* mmu) {
-    // Placeholder - sera implémenté si nécessaire
-    printf("SRL r8 pas encore implémenté\n");
+    (void)mmu; // Suppression du warning
+    
+    u8 opcode = mmu->memory[cpu->pc + 1];
+    u8 reg = opcode & 0x07;
+    
+    u8 value = 0;
+    u8 result = 0;
+    
+    // Lire la valeur du registre
+    switch (reg) {
+        case 0: value = get_reg_b(cpu); break;
+        case 1: value = get_reg_c(cpu); break;
+        case 2: value = get_reg_d(cpu); break;
+        case 3: value = get_reg_e(cpu); break;
+        case 4: value = get_reg_h(cpu); break;
+        case 5: value = get_reg_l(cpu); break;
+        case 6: value = mmu->memory[cpu->hl]; break;  // (HL)
+        case 7: value = get_reg_a(cpu); break;
+    }
+    
+    result = value >> 1;
+    
+    // Mettre à jour les flags
+    set_flag(cpu, FLAG_Z, result == 0);
+    set_flag(cpu, FLAG_N, 0);
+    set_flag(cpu, FLAG_H, 0);
+    set_flag(cpu, FLAG_C, value & 0x01);
+    
+    // Mettre à jour le registre
+    switch (reg) {
+        case 0: set_reg_b(cpu, result); break;
+        case 1: set_reg_c(cpu, result); break;
+        case 2: set_reg_d(cpu, result); break;
+        case 3: set_reg_e(cpu, result); break;
+        case 4: set_reg_h(cpu, result); break;
+        case 5: set_reg_l(cpu, result); break;
+        case 6: mmu->memory[cpu->hl] = result; break;  // (HL)
+        case 7: set_reg_a(cpu, result); break;
+    }
+    
     cpu->pc += 2;
 }
 
 void inst_rr_r8(CPU* cpu, MMU* mmu) {
-    // Placeholder - sera implémenté si nécessaire  
-    printf("RR r8 pas encore implémenté\n");
+    (void)mmu; // Suppression du warning
+    
+    u8 opcode = mmu->memory[cpu->pc + 1];
+    u8 reg = opcode & 0x07;
+    
+    u8 value = 0;
+    u8 result = 0;
+    
+    // Lire la valeur du registre
+    switch (reg) {
+        case 0: value = get_reg_b(cpu); break;
+        case 1: value = get_reg_c(cpu); break;
+        case 2: value = get_reg_d(cpu); break;
+        case 3: value = get_reg_e(cpu); break;
+        case 4: value = get_reg_h(cpu); break;
+        case 5: value = get_reg_l(cpu); break;
+        case 6: value = mmu->memory[cpu->hl]; break;  // (HL)
+        case 7: value = get_reg_a(cpu); break;
+    }
+    
+    u8 carry_in = get_flag(cpu, FLAG_C) ? 1 : 0;
+    result = (value >> 1) | (carry_in << 7);
+    
+    // Mettre à jour les flags
+    set_flag(cpu, FLAG_Z, result == 0);
+    set_flag(cpu, FLAG_N, 0);
+    set_flag(cpu, FLAG_H, 0);
+    set_flag(cpu, FLAG_C, value & 0x01);
+    
+    // Mettre à jour le registre
+    switch (reg) {
+        case 0: set_reg_b(cpu, result); break;
+        case 1: set_reg_c(cpu, result); break;
+        case 2: set_reg_d(cpu, result); break;
+        case 3: set_reg_e(cpu, result); break;
+        case 4: set_reg_h(cpu, result); break;
+        case 5: set_reg_l(cpu, result); break;
+        case 6: mmu->memory[cpu->hl] = result; break;  // (HL)
+        case 7: set_reg_a(cpu, result); break;
+    }
+    
     cpu->pc += 2;
 }
 

@@ -56,7 +56,7 @@ void mmu_reset(MMU* mmu) {
     mmu->memory[0xFF41] = 0x85;  // STAT
     mmu->memory[0xFF42] = 0x00;  // SCY
     mmu->memory[0xFF43] = 0x00;  // SCX
-    mmu->memory[0xFF44] = 0x00;  // LY
+    mmu->memory[0xFF44] = 0x90;  // LY (valeur attendue par les tests Blargg)
     mmu->memory[0xFF45] = 0x00;  // LYC
     mmu->memory[0xFF46] = 0x00;  // DMA
     mmu->memory[0xFF47] = 0xFC;  // BGP

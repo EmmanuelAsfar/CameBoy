@@ -44,6 +44,7 @@ bool graphics_win32_init(GraphicsWin32* gfx) {
     gfx->width = 160;   // Largeur Game Boy
     gfx->height = 144;  // Hauteur Game Boy
     gfx->running = true;
+    gfx->visible = false;  // Commencer caché
     
     // Allouer le framebuffer
     gfx->framebuffer = calloc(gfx->width * gfx->height * 3, 1);
@@ -68,7 +69,7 @@ bool graphics_win32_init(GraphicsWin32* gfx) {
     wc.hInstance = GetModuleHandle(NULL);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wc.lpszClassName = L"CameBoy";
+    wc.lpszClassName = "CameBoy";
     
     if (!RegisterClassEx(&wc)) {
         printf("Erreur: Impossible d'enregistrer la classe de fenêtre\n");
@@ -76,11 +77,11 @@ bool graphics_win32_init(GraphicsWin32* gfx) {
         return false;
     }
     
-    // Créer la fenêtre
+    // Créer la fenêtre (cachée par défaut)
     gfx->hwnd = CreateWindowEx(
         0,
-        L"CameBoy",
-        L"CameBoy - Game Boy Emulator",
+        "CameBoy",
+        "CameBoy - Game Boy LCD",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         gfx->width * 4, gfx->height * 4, // 4x zoom
@@ -132,26 +133,20 @@ void graphics_win32_cleanup(GraphicsWin32* gfx) {
 }
 
 // Mettre à jour le framebuffer
-void graphics_win32_update(GraphicsWin32* gfx, u8* framebuffer) {
-    if (!gfx || !framebuffer) return;
+void graphics_win32_update(GraphicsWin32* gfx, u32* ppu_framebuffer) {
+    if (!gfx || !ppu_framebuffer) return;
     
-    // Copier les données du framebuffer Game Boy vers notre framebuffer RGB
+    // Copier les données du framebuffer PPU (u32 ARGB) vers notre framebuffer RGB
     for (int y = 0; y < gfx->height; y++) {
         for (int x = 0; x < gfx->width; x++) {
             int src_idx = y * gfx->width + x;
             int dst_idx = (y * gfx->width + x) * 3;
             
-            // Convertir de 2-bit Game Boy vers RGB
-            u8 pixel = framebuffer[src_idx];
-            u8 r, g, b;
-            
-            switch (pixel) {
-                case 0: r = g = b = 255; break; // Blanc
-                case 1: r = g = b = 192; break; // Gris clair
-                case 2: r = g = b = 96; break;  // Gris foncé
-                case 3: r = g = b = 0; break;   // Noir
-                default: r = g = b = 255; break;
-            }
+            // Convertir de u32 ARGB vers RGB
+            u32 pixel = ppu_framebuffer[src_idx];
+            u8 r = (pixel >> 16) & 0xFF;
+            u8 g = (pixel >> 8) & 0xFF;
+            u8 b = pixel & 0xFF;
             
             gfx->framebuffer[dst_idx + 0] = b; // B
             gfx->framebuffer[dst_idx + 1] = g; // G
@@ -184,4 +179,21 @@ void graphics_win32_handle_events(GraphicsWin32* gfx, bool* running) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+}
+
+// Afficher la fenêtre
+void graphics_win32_show(GraphicsWin32* gfx) {
+    if (!gfx || !gfx->hwnd) return;
+    
+    gfx->visible = true;
+    ShowWindow(gfx->hwnd, SW_SHOW);
+    UpdateWindow(gfx->hwnd);
+}
+
+// Cacher la fenêtre
+void graphics_win32_hide(GraphicsWin32* gfx) {
+    if (!gfx || !gfx->hwnd) return;
+    
+    gfx->visible = false;
+    ShowWindow(gfx->hwnd, SW_HIDE);
 }

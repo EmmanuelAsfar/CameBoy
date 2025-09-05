@@ -1,3 +1,4 @@
+Graphiques initialisés avec succès
 Tentative de chargement de la ROM: .\tests\test_rom.gb
 ROM chargée: TEST ROM
 Type: ROM Only
@@ -6,29 +7,444 @@ ROM chargée avec succès!
 ROM chargée: TEST ROM
 Type de cartouche: ROM Only
 Taille ROM: 0 KB
+Affichage LCD activé
+Rendu de la frame initiale...
+Frame initiale rendue
+Affichage LCD activé - cycles augmentés à 10000000
 Démarrage de l'émulation simple...
-Cycles maximum: 10000
+Cycles maximum: 10000000
 PC initial: 0x0100
 Première instruction: 0x00
 
 PC: 0x0100, Opcode: 0x00, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 4: PC=0x0101, Opcode=0xC3, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=2, mode_cycles=4, line_cycles=4, ly=143
 PC: 0x0101, Opcode: 0xC3, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 20: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=2, mode_cycles=20, line_cycles=20, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 32: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=2, mode_cycles=32, line_cycles=32, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 44: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=2, mode_cycles=44, line_cycles=44, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 56: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=2, mode_cycles=56, line_cycles=56, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 68: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=2, mode_cycles=68, line_cycles=68, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 80: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=2, mode_cycles=80, line_cycles=80, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 92: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=12, line_cycles=92, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 104: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=24, line_cycles=104, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 116: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=36, line_cycles=116, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 128: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=48, line_cycles=128, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 140: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=60, line_cycles=140, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 152: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=72, line_cycles=152, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 164: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=84, line_cycles=164, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 176: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=96, line_cycles=176, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
+Cycle 188: PC=0x0150, Opcode=0x18, AF=0x01B0, BC=0x0013, DE=0x00D8, HL=0x014D, SP=0xFFFE
+PPU: mode=3, mode_cycles=108, line_cycles=188, ly=143
 PC: 0x0150, Opcode: 0x18, AF: 0x01B0, Flags: Z=1 N=0 H=1 C=1
-Émulation terminée après 10004 cycles
-PC final: 0x0150
-AF: 0x01B0, BC: 0x0013, DE: 0x00D8, HL: 0x014D
-SP: 0xFFFE
+PPU: mode=3, mode_cycles=120, line_cycles=200, ly=143
+PPU: mode=3, mode_cycles=132, line_cycles=212, ly=143
+PPU: mode=3, mode_cycles=144, line_cycles=224, ly=143
+PPU: mode=3, mode_cycles=156, line_cycles=236, ly=143
+PPU: mode=3, mode_cycles=168, line_cycles=248, ly=143
+PPU: mode=3, mode_cycles=180, line_cycles=260, ly=143
+PPU: mode=0, mode_cycles=12, line_cycles=272, ly=143
+PPU: mode=0, mode_cycles=24, line_cycles=284, ly=143
+PPU: mode=0, mode_cycles=36, line_cycles=296, ly=143
+PPU: mode=0, mode_cycles=48, line_cycles=308, ly=143
+PPU: mode=0, mode_cycles=60, line_cycles=320, ly=143
+PPU: mode=0, mode_cycles=72, line_cycles=332, ly=143
+PPU: mode=0, mode_cycles=84, line_cycles=344, ly=143
+PPU: mode=0, mode_cycles=96, line_cycles=356, ly=143
+PPU: mode=0, mode_cycles=108, line_cycles=368, ly=143
+PPU: mode=0, mode_cycles=120, line_cycles=380, ly=143
+PPU: mode=0, mode_cycles=132, line_cycles=392, ly=143
+PPU: mode=0, mode_cycles=144, line_cycles=404, ly=143
+PPU: mode=0, mode_cycles=156, line_cycles=416, ly=143
+PPU: mode=0, mode_cycles=168, line_cycles=428, ly=143
+PPU: mode=0, mode_cycles=180, line_cycles=440, ly=143
+PPU: mode=0, mode_cycles=192, line_cycles=452, ly=143
+PPU: mode=0, mode_cycles=204, line_cycles=464, ly=143
+PPU interrupt déclenchée: 0x01
+PPU: mode=1, mode_cycles=12, line_cycles=12, ly=144
+PPU: mode=1, mode_cycles=24, line_cycles=24, ly=144
+PPU: mode=1, mode_cycles=36, line_cycles=36, ly=144
+PPU: mode=1, mode_cycles=48, line_cycles=48, ly=144
+PPU: mode=1, mode_cycles=60, line_cycles=60, ly=144
+PPU: mode=1, mode_cycles=72, line_cycles=72, ly=144
+PPU: mode=1, mode_cycles=84, line_cycles=84, ly=144
+PPU: mode=1, mode_cycles=96, line_cycles=96, ly=144
+PPU: mode=1, mode_cycles=108, line_cycles=108, ly=144
+PPU: mode=1, mode_cycles=120, line_cycles=120, ly=144
+PPU: mode=1, mode_cycles=132, line_cycles=132, ly=144
+PPU: mode=1, mode_cycles=144, line_cycles=144, ly=144
+PPU: mode=1, mode_cycles=156, line_cycles=156, ly=144
+PPU: mode=1, mode_cycles=168, line_cycles=168, ly=144
+PPU: mode=1, mode_cycles=180, line_cycles=180, ly=144
+PPU: mode=1, mode_cycles=192, line_cycles=192, ly=144
+PPU: mode=1, mode_cycles=204, line_cycles=204, ly=144
+PPU: mode=1, mode_cycles=216, line_cycles=216, ly=144
+PPU: mode=1, mode_cycles=228, line_cycles=228, ly=144
+PPU: mode=1, mode_cycles=240, line_cycles=240, ly=144
+PPU: mode=1, mode_cycles=252, line_cycles=252, ly=144
+PPU: mode=1, mode_cycles=264, line_cycles=264, ly=144
+PPU: mode=1, mode_cycles=276, line_cycles=276, ly=144
+PPU: mode=1, mode_cycles=288, line_cycles=288, ly=144
+PPU: mode=1, mode_cycles=300, line_cycles=300, ly=144
+PPU: mode=1, mode_cycles=312, line_cycles=312, ly=144
+PPU: mode=1, mode_cycles=324, line_cycles=324, ly=144
+PPU: mode=1, mode_cycles=336, line_cycles=336, ly=144
+PPU: mode=1, mode_cycles=348, line_cycles=348, ly=144
+PPU: mode=1, mode_cycles=360, line_cycles=360, ly=144
+PPU: mode=1, mode_cycles=372, line_cycles=372, ly=144
+PPU: mode=1, mode_cycles=384, line_cycles=384, ly=144
+PPU: mode=1, mode_cycles=396, line_cycles=396, ly=144
+PPU: mode=1, mode_cycles=408, line_cycles=408, ly=144
+PPU: mode=1, mode_cycles=420, line_cycles=420, ly=144
+PPU: mode=1, mode_cycles=432, line_cycles=432, ly=144
+PPU: mode=1, mode_cycles=444, line_cycles=444, ly=144
+PPU: mode=1, mode_cycles=456, line_cycles=456, ly=144
+PPU: mode=1, mode_cycles=468, line_cycles=12, ly=145
+PPU: mode=1, mode_cycles=480, line_cycles=24, ly=145
+PPU: mode=1, mode_cycles=492, line_cycles=36, ly=145
+PPU: mode=1, mode_cycles=504, line_cycles=48, ly=145
+PPU: mode=1, mode_cycles=516, line_cycles=60, ly=145
+PPU: mode=1, mode_cycles=528, line_cycles=72, ly=145
+PPU: mode=1, mode_cycles=540, line_cycles=84, ly=145
+PPU: mode=1, mode_cycles=552, line_cycles=96, ly=145
+PPU: mode=1, mode_cycles=564, line_cycles=108, ly=145
+PPU: mode=1, mode_cycles=576, line_cycles=120, ly=145
+PPU: mode=1, mode_cycles=588, line_cycles=132, ly=145
+PPU: mode=1, mode_cycles=600, line_cycles=144, ly=145
+PPU: mode=1, mode_cycles=612, line_cycles=156, ly=145
+PPU: mode=1, mode_cycles=624, line_cycles=168, ly=145
+PPU: mode=1, mode_cycles=636, line_cycles=180, ly=145
+PPU: mode=1, mode_cycles=648, line_cycles=192, ly=145
+PPU: mode=1, mode_cycles=660, line_cycles=204, ly=145
+PPU: mode=1, mode_cycles=672, line_cycles=216, ly=145
+PPU: mode=1, mode_cycles=684, line_cycles=228, ly=145
+PPU: mode=1, mode_cycles=696, line_cycles=240, ly=145
+PPU: mode=1, mode_cycles=708, line_cycles=252, ly=145
+PPU: mode=1, mode_cycles=720, line_cycles=264, ly=145
+PPU: mode=1, mode_cycles=732, line_cycles=276, ly=145
+PPU: mode=1, mode_cycles=744, line_cycles=288, ly=145
+PPU: mode=1, mode_cycles=756, line_cycles=300, ly=145
+PPU: mode=1, mode_cycles=768, line_cycles=312, ly=145
+PPU: mode=1, mode_cycles=780, line_cycles=324, ly=145
+PPU: mode=1, mode_cycles=792, line_cycles=336, ly=145
+PPU: mode=1, mode_cycles=804, line_cycles=348, ly=145
+PPU: mode=1, mode_cycles=816, line_cycles=360, ly=145
+PPU: mode=1, mode_cycles=828, line_cycles=372, ly=145
+PPU: mode=1, mode_cycles=840, line_cycles=384, ly=145
+PPU: mode=1, mode_cycles=852, line_cycles=396, ly=145
+PPU: mode=1, mode_cycles=864, line_cycles=408, ly=145
+PPU: mode=1, mode_cycles=876, line_cycles=420, ly=145
+PPU: mode=1, mode_cycles=888, line_cycles=432, ly=145
+PPU: mode=1, mode_cycles=900, line_cycles=444, ly=145
+PPU: mode=1, mode_cycles=912, line_cycles=456, ly=145
+PPU: mode=1, mode_cycles=924, line_cycles=12, ly=146
+PPU: mode=1, mode_cycles=936, line_cycles=24, ly=146
+PPU: mode=1, mode_cycles=948, line_cycles=36, ly=146
+PPU: mode=1, mode_cycles=960, line_cycles=48, ly=146
+PPU: mode=1, mode_cycles=972, line_cycles=60, ly=146
+PPU: mode=1, mode_cycles=984, line_cycles=72, ly=146
+PPU: mode=1, mode_cycles=996, line_cycles=84, ly=146
+PPU: mode=1, mode_cycles=1008, line_cycles=96, ly=146
+PPU: mode=1, mode_cycles=1020, line_cycles=108, ly=146
+PPU: mode=1, mode_cycles=1032, line_cycles=120, ly=146
+PPU: mode=1, mode_cycles=1044, line_cycles=132, ly=146
+PPU: mode=1, mode_cycles=1056, line_cycles=144, ly=146
+PPU: mode=1, mode_cycles=1068, line_cycles=156, ly=146
+PPU: mode=1, mode_cycles=1080, line_cycles=168, ly=146
+PPU: mode=1, mode_cycles=1092, line_cycles=180, ly=146
+PPU: mode=1, mode_cycles=1104, line_cycles=192, ly=146
+PPU: mode=1, mode_cycles=1116, line_cycles=204, ly=146
+PPU: mode=1, mode_cycles=1128, line_cycles=216, ly=146
+PPU: mode=1, mode_cycles=1140, line_cycles=228, ly=146
+PPU: mode=1, mode_cycles=1152, line_cycles=240, ly=146
+PPU: mode=1, mode_cycles=1164, line_cycles=252, ly=146
+PPU: mode=1, mode_cycles=1176, line_cycles=264, ly=146
+PPU: mode=1, mode_cycles=1188, line_cycles=276, ly=146
+PPU: mode=1, mode_cycles=1200, line_cycles=288, ly=146
+PPU: mode=1, mode_cycles=1212, line_cycles=300, ly=146
+PPU: mode=1, mode_cycles=1224, line_cycles=312, ly=146
+PPU: mode=1, mode_cycles=1236, line_cycles=324, ly=146
+PPU: mode=1, mode_cycles=1248, line_cycles=336, ly=146
+PPU: mode=1, mode_cycles=1260, line_cycles=348, ly=146
+PPU: mode=1, mode_cycles=1272, line_cycles=360, ly=146
+PPU: mode=1, mode_cycles=1284, line_cycles=372, ly=146
+PPU: mode=1, mode_cycles=1296, line_cycles=384, ly=146
+PPU: mode=1, mode_cycles=1308, line_cycles=396, ly=146
+PPU: mode=1, mode_cycles=1320, line_cycles=408, ly=146
+PPU: mode=1, mode_cycles=1332, line_cycles=420, ly=146
+PPU: mode=1, mode_cycles=1344, line_cycles=432, ly=146
+PPU: mode=1, mode_cycles=1356, line_cycles=444, ly=146
+PPU: mode=1, mode_cycles=1368, line_cycles=456, ly=146
+PPU: mode=1, mode_cycles=1380, line_cycles=12, ly=147
+PPU: mode=1, mode_cycles=1392, line_cycles=24, ly=147
+PPU: mode=1, mode_cycles=1404, line_cycles=36, ly=147
+PPU: mode=1, mode_cycles=1416, line_cycles=48, ly=147
+PPU: mode=1, mode_cycles=1428, line_cycles=60, ly=147
+PPU: mode=1, mode_cycles=1440, line_cycles=72, ly=147
+PPU: mode=1, mode_cycles=1452, line_cycles=84, ly=147
+PPU: mode=1, mode_cycles=1464, line_cycles=96, ly=147
+PPU: mode=1, mode_cycles=1476, line_cycles=108, ly=147
+PPU: mode=1, mode_cycles=1488, line_cycles=120, ly=147
+PPU: mode=1, mode_cycles=1500, line_cycles=132, ly=147
+PPU: mode=1, mode_cycles=1512, line_cycles=144, ly=147
+PPU: mode=1, mode_cycles=1524, line_cycles=156, ly=147
+PPU: mode=1, mode_cycles=1536, line_cycles=168, ly=147
+PPU: mode=1, mode_cycles=1548, line_cycles=180, ly=147
+PPU: mode=1, mode_cycles=1560, line_cycles=192, ly=147
+PPU: mode=1, mode_cycles=1572, line_cycles=204, ly=147
+PPU: mode=1, mode_cycles=1584, line_cycles=216, ly=147
+PPU: mode=1, mode_cycles=1596, line_cycles=228, ly=147
+PPU: mode=1, mode_cycles=1608, line_cycles=240, ly=147
+PPU: mode=1, mode_cycles=1620, line_cycles=252, ly=147
+PPU: mode=1, mode_cycles=1632, line_cycles=264, ly=147
+PPU: mode=1, mode_cycles=1644, line_cycles=276, ly=147
+PPU: mode=1, mode_cycles=1656, line_cycles=288, ly=147
+PPU: mode=1, mode_cycles=1668, line_cycles=300, ly=147
+PPU: mode=1, mode_cycles=1680, line_cycles=312, ly=147
+PPU: mode=1, mode_cycles=1692, line_cycles=324, ly=147
+PPU: mode=1, mode_cycles=1704, line_cycles=336, ly=147
+PPU: mode=1, mode_cycles=1716, line_cycles=348, ly=147
+PPU: mode=1, mode_cycles=1728, line_cycles=360, ly=147
+PPU: mode=1, mode_cycles=1740, line_cycles=372, ly=147
+PPU: mode=1, mode_cycles=1752, line_cycles=384, ly=147
+PPU: mode=1, mode_cycles=1764, line_cycles=396, ly=147
+PPU: mode=1, mode_cycles=1776, line_cycles=408, ly=147
+PPU: mode=1, mode_cycles=1788, line_cycles=420, ly=147
+PPU: mode=1, mode_cycles=1800, line_cycles=432, ly=147
+PPU: mode=1, mode_cycles=1812, line_cycles=444, ly=147
+PPU: mode=1, mode_cycles=1824, line_cycles=456, ly=147
+PPU: mode=1, mode_cycles=1836, line_cycles=12, ly=148
+PPU: mode=1, mode_cycles=1848, line_cycles=24, ly=148
+PPU: mode=1, mode_cycles=1860, line_cycles=36, ly=148
+PPU: mode=1, mode_cycles=1872, line_cycles=48, ly=148
+PPU: mode=1, mode_cycles=1884, line_cycles=60, ly=148
+PPU: mode=1, mode_cycles=1896, line_cycles=72, ly=148
+PPU: mode=1, mode_cycles=1908, line_cycles=84, ly=148
+PPU: mode=1, mode_cycles=1920, line_cycles=96, ly=148
+PPU: mode=1, mode_cycles=1932, line_cycles=108, ly=148
+PPU: mode=1, mode_cycles=1944, line_cycles=120, ly=148
+PPU: mode=1, mode_cycles=1956, line_cycles=132, ly=148
+PPU: mode=1, mode_cycles=1968, line_cycles=144, ly=148
+PPU: mode=1, mode_cycles=1980, line_cycles=156, ly=148
+PPU: mode=1, mode_cycles=1992, line_cycles=168, ly=148
+PPU: mode=1, mode_cycles=2004, line_cycles=180, ly=148
+PPU: mode=1, mode_cycles=2016, line_cycles=192, ly=148
+PPU: mode=1, mode_cycles=2028, line_cycles=204, ly=148
+PPU: mode=1, mode_cycles=2040, line_cycles=216, ly=148
+PPU: mode=1, mode_cycles=2052, line_cycles=228, ly=148
+PPU: mode=1, mode_cycles=2064, line_cycles=240, ly=148
+PPU: mode=1, mode_cycles=2076, line_cycles=252, ly=148
+PPU: mode=1, mode_cycles=2088, line_cycles=264, ly=148
+PPU: mode=1, mode_cycles=2100, line_cycles=276, ly=148
+PPU: mode=1, mode_cycles=2112, line_cycles=288, ly=148
+PPU: mode=1, mode_cycles=2124, line_cycles=300, ly=148
+PPU: mode=1, mode_cycles=2136, line_cycles=312, ly=148
+PPU: mode=1, mode_cycles=2148, line_cycles=324, ly=148
+PPU: mode=1, mode_cycles=2160, line_cycles=336, ly=148
+PPU: mode=1, mode_cycles=2172, line_cycles=348, ly=148
+PPU: mode=1, mode_cycles=2184, line_cycles=360, ly=148
+PPU: mode=1, mode_cycles=2196, line_cycles=372, ly=148
+PPU: mode=1, mode_cycles=2208, line_cycles=384, ly=148
+PPU: mode=1, mode_cycles=2220, line_cycles=396, ly=148
+PPU: mode=1, mode_cycles=2232, line_cycles=408, ly=148
+PPU: mode=1, mode_cycles=2244, line_cycles=420, ly=148
+PPU: mode=1, mode_cycles=2256, line_cycles=432, ly=148
+PPU: mode=1, mode_cycles=2268, line_cycles=444, ly=148
+PPU: mode=1, mode_cycles=2280, line_cycles=456, ly=148
+PPU: mode=1, mode_cycles=2292, line_cycles=12, ly=149
+PPU: mode=1, mode_cycles=2304, line_cycles=24, ly=149
+PPU: mode=1, mode_cycles=2316, line_cycles=36, ly=149
+PPU: mode=1, mode_cycles=2328, line_cycles=48, ly=149
+PPU: mode=1, mode_cycles=2340, line_cycles=60, ly=149
+PPU: mode=1, mode_cycles=2352, line_cycles=72, ly=149
+PPU: mode=1, mode_cycles=2364, line_cycles=84, ly=149
+PPU: mode=1, mode_cycles=2376, line_cycles=96, ly=149
+PPU: mode=1, mode_cycles=2388, line_cycles=108, ly=149
+PPU: mode=1, mode_cycles=2400, line_cycles=120, ly=149
+PPU: mode=1, mode_cycles=2412, line_cycles=132, ly=149
+PPU: mode=1, mode_cycles=2424, line_cycles=144, ly=149
+PPU: mode=1, mode_cycles=2436, line_cycles=156, ly=149
+PPU: mode=1, mode_cycles=2448, line_cycles=168, ly=149
+PPU: mode=1, mode_cycles=2460, line_cycles=180, ly=149
+PPU: mode=1, mode_cycles=2472, line_cycles=192, ly=149
+PPU: mode=1, mode_cycles=2484, line_cycles=204, ly=149
+PPU: mode=1, mode_cycles=2496, line_cycles=216, ly=149
+PPU: mode=1, mode_cycles=2508, line_cycles=228, ly=149
+PPU: mode=1, mode_cycles=2520, line_cycles=240, ly=149
+PPU: mode=1, mode_cycles=2532, line_cycles=252, ly=149
+PPU: mode=1, mode_cycles=2544, line_cycles=264, ly=149
+PPU: mode=1, mode_cycles=2556, line_cycles=276, ly=149
+PPU: mode=1, mode_cycles=2568, line_cycles=288, ly=149
+PPU: mode=1, mode_cycles=2580, line_cycles=300, ly=149
+PPU: mode=1, mode_cycles=2592, line_cycles=312, ly=149
+PPU: mode=1, mode_cycles=2604, line_cycles=324, ly=149
+PPU: mode=1, mode_cycles=2616, line_cycles=336, ly=149
+PPU: mode=1, mode_cycles=2628, line_cycles=348, ly=149
+PPU: mode=1, mode_cycles=2640, line_cycles=360, ly=149
+PPU: mode=1, mode_cycles=2652, line_cycles=372, ly=149
+PPU: mode=1, mode_cycles=2664, line_cycles=384, ly=149
+PPU: mode=1, mode_cycles=2676, line_cycles=396, ly=149
+PPU: mode=1, mode_cycles=2688, line_cycles=408, ly=149
+PPU: mode=1, mode_cycles=2700, line_cycles=420, ly=149
+PPU: mode=1, mode_cycles=2712, line_cycles=432, ly=149
+PPU: mode=1, mode_cycles=2724, line_cycles=444, ly=149
+PPU: mode=1, mode_cycles=2736, line_cycles=456, ly=149
+PPU: mode=1, mode_cycles=2748, line_cycles=12, ly=150
+PPU: mode=1, mode_cycles=2760, line_cycles=24, ly=150
+PPU: mode=1, mode_cycles=2772, line_cycles=36, ly=150
+PPU: mode=1, mode_cycles=2784, line_cycles=48, ly=150
+PPU: mode=1, mode_cycles=2796, line_cycles=60, ly=150
+PPU: mode=1, mode_cycles=2808, line_cycles=72, ly=150
+PPU: mode=1, mode_cycles=2820, line_cycles=84, ly=150
+PPU: mode=1, mode_cycles=2832, line_cycles=96, ly=150
+PPU: mode=1, mode_cycles=2844, line_cycles=108, ly=150
+PPU: mode=1, mode_cycles=2856, line_cycles=120, ly=150
+PPU: mode=1, mode_cycles=2868, line_cycles=132, ly=150
+PPU: mode=1, mode_cycles=2880, line_cycles=144, ly=150
+PPU: mode=1, mode_cycles=2892, line_cycles=156, ly=150
+PPU: mode=1, mode_cycles=2904, line_cycles=168, ly=150
+PPU: mode=1, mode_cycles=2916, line_cycles=180, ly=150
+PPU: mode=1, mode_cycles=2928, line_cycles=192, ly=150
+PPU: mode=1, mode_cycles=2940, line_cycles=204, ly=150
+PPU: mode=1, mode_cycles=2952, line_cycles=216, ly=150
+PPU: mode=1, mode_cycles=2964, line_cycles=228, ly=150
+PPU: mode=1, mode_cycles=2976, line_cycles=240, ly=150
+PPU: mode=1, mode_cycles=2988, line_cycles=252, ly=150
+PPU: mode=1, mode_cycles=3000, line_cycles=264, ly=150
+PPU: mode=1, mode_cycles=3012, line_cycles=276, ly=150
+PPU: mode=1, mode_cycles=3024, line_cycles=288, ly=150
+PPU: mode=1, mode_cycles=3036, line_cycles=300, ly=150
+PPU: mode=1, mode_cycles=3048, line_cycles=312, ly=150
+PPU: mode=1, mode_cycles=3060, line_cycles=324, ly=150
+PPU: mode=1, mode_cycles=3072, line_cycles=336, ly=150
+PPU: mode=1, mode_cycles=3084, line_cycles=348, ly=150
+PPU: mode=1, mode_cycles=3096, line_cycles=360, ly=150
+PPU: mode=1, mode_cycles=3108, line_cycles=372, ly=150
+PPU: mode=1, mode_cycles=3120, line_cycles=384, ly=150
+PPU: mode=1, mode_cycles=3132, line_cycles=396, ly=150
+PPU: mode=1, mode_cycles=3144, line_cycles=408, ly=150
+PPU: mode=1, mode_cycles=3156, line_cycles=420, ly=150
+PPU: mode=1, mode_cycles=3168, line_cycles=432, ly=150
+PPU: mode=1, mode_cycles=3180, line_cycles=444, ly=150
+PPU: mode=1, mode_cycles=3192, line_cycles=456, ly=150
+PPU: mode=1, mode_cycles=3204, line_cycles=12, ly=151
+PPU: mode=1, mode_cycles=3216, line_cycles=24, ly=151
+PPU: mode=1, mode_cycles=3228, line_cycles=36, ly=151
+PPU: mode=1, mode_cycles=3240, line_cycles=48, ly=151
+PPU: mode=1, mode_cycles=3252, line_cycles=60, ly=151
+PPU: mode=1, mode_cycles=3264, line_cycles=72, ly=151
+PPU: mode=1, mode_cycles=3276, line_cycles=84, ly=151
+PPU: mode=1, mode_cycles=3288, line_cycles=96, ly=151
+PPU: mode=1, mode_cycles=3300, line_cycles=108, ly=151
+PPU: mode=1, mode_cycles=3312, line_cycles=120, ly=151
+PPU: mode=1, mode_cycles=3324, line_cycles=132, ly=151
+PPU: mode=1, mode_cycles=3336, line_cycles=144, ly=151
+PPU: mode=1, mode_cycles=3348, line_cycles=156, ly=151
+PPU: mode=1, mode_cycles=3360, line_cycles=168, ly=151
+PPU: mode=1, mode_cycles=3372, line_cycles=180, ly=151
+PPU: mode=1, mode_cycles=3384, line_cycles=192, ly=151
+PPU: mode=1, mode_cycles=3396, line_cycles=204, ly=151
+PPU: mode=1, mode_cycles=3408, line_cycles=216, ly=151
+PPU: mode=1, mode_cycles=3420, line_cycles=228, ly=151
+PPU: mode=1, mode_cycles=3432, line_cycles=240, ly=151
+PPU: mode=1, mode_cycles=3444, line_cycles=252, ly=151
+PPU: mode=1, mode_cycles=3456, line_cycles=264, ly=151
+PPU: mode=1, mode_cycles=3468, line_cycles=276, ly=151
+PPU: mode=1, mode_cycles=3480, line_cycles=288, ly=151
+PPU: mode=1, mode_cycles=3492, line_cycles=300, ly=151
+PPU: mode=1, mode_cycles=3504, line_cycles=312, ly=151
+PPU: mode=1, mode_cycles=3516, line_cycles=324, ly=151
+PPU: mode=1, mode_cycles=3528, line_cycles=336, ly=151
+PPU: mode=1, mode_cycles=3540, line_cycles=348, ly=151
+PPU: mode=1, mode_cycles=3552, line_cycles=360, ly=151
+PPU: mode=1, mode_cycles=3564, line_cycles=372, ly=151
+PPU: mode=1, mode_cycles=3576, line_cycles=384, ly=151
+PPU: mode=1, mode_cycles=3588, line_cycles=396, ly=151
+PPU: mode=1, mode_cycles=3600, line_cycles=408, ly=151
+PPU: mode=1, mode_cycles=3612, line_cycles=420, ly=151
+PPU: mode=1, mode_cycles=3624, line_cycles=432, ly=151
+PPU: mode=1, mode_cycles=3636, line_cycles=444, ly=151
+PPU: mode=1, mode_cycles=3648, line_cycles=456, ly=151
+PPU: mode=1, mode_cycles=3660, line_cycles=12, ly=152
+PPU: mode=1, mode_cycles=3672, line_cycles=24, ly=152
+PPU: mode=1, mode_cycles=3684, line_cycles=36, ly=152
+PPU: mode=1, mode_cycles=3696, line_cycles=48, ly=152
+PPU: mode=1, mode_cycles=3708, line_cycles=60, ly=152
+PPU: mode=1, mode_cycles=3720, line_cycles=72, ly=152
+PPU: mode=1, mode_cycles=3732, line_cycles=84, ly=152
+PPU: mode=1, mode_cycles=3744, line_cycles=96, ly=152
+PPU: mode=1, mode_cycles=3756, line_cycles=108, ly=152
+PPU: mode=1, mode_cycles=3768, line_cycles=120, ly=152
+PPU: mode=1, mode_cycles=3780, line_cycles=132, ly=152
+PPU: mode=1, mode_cycles=3792, line_cycles=144, ly=152
+PPU: mode=1, mode_cycles=3804, line_cycles=156, ly=152
+PPU: mode=1, mode_cycles=3816, line_cycles=168, ly=152
+PPU: mode=1, mode_cycles=3828, line_cycles=180, ly=152
+PPU: mode=1, mode_cycles=3840, line_cycles=192, ly=152
+PPU: mode=1, mode_cycles=3852, line_cycles=204, ly=152
+PPU: mode=1, mode_cycles=3864, line_cycles=216, ly=152
+PPU: mode=1, mode_cycles=3876, line_cycles=228, ly=152
+PPU: mode=1, mode_cycles=3888, line_cycles=240, ly=152
+PPU: mode=1, mode_cycles=3900, line_cycles=252, ly=152
+PPU: mode=1, mode_cycles=3912, line_cycles=264, ly=152
+PPU: mode=1, mode_cycles=3924, line_cycles=276, ly=152
+PPU: mode=1, mode_cycles=3936, line_cycles=288, ly=152
+PPU: mode=1, mode_cycles=3948, line_cycles=300, ly=152
+PPU: mode=1, mode_cycles=3960, line_cycles=312, ly=152
+PPU: mode=1, mode_cycles=3972, line_cycles=324, ly=152
+PPU: mode=1, mode_cycles=3984, line_cycles=336, ly=152
+PPU: mode=1, mode_cycles=3996, line_cycles=348, ly=152
+PPU: mode=1, mode_cycles=4008, line_cycles=360, ly=152
+PPU: mode=1, mode_cycles=4020, line_cycles=372, ly=152
+PPU: mode=1, mode_cycles=4032, line_cycles=384, ly=152
+PPU: mode=1, mode_cycles=4044, line_cycles=396, ly=152
+PPU: mode=1, mode_cycles=4056, line_cycles=408, ly=152
+PPU: mode=1, mode_cycles=4068, line_cycles=420, ly=152
+PPU: mode=1, mode_cycles=4080, line_cycles=432, ly=152
+PPU: mode=1, mode_cycles=4092, line_cycles=444, ly=152
+PPU: mode=1, mode_cycles=4104, line_cycles=456, ly=152
+PPU: mode=1, mode_cycles=4116, line_cycles=12, ly=153
+PPU: mode=1, mode_cycles=4128, line_cycles=24, ly=153
+PPU: mode=1, mode_cycles=4140, line_cycles=36, ly=153
+PPU: mode=1, mode_cycles=4152, line_cycles=48, ly=153
+PPU: mode=1, mode_cycles=4164, line_cycles=60, ly=153
+PPU: mode=1, mode_cycles=4176, line_cycles=72, ly=153
+PPU: mode=1, mode_cycles=4188, line_cycles=84, ly=153
+PPU: mode=1, mode_cycles=4200, line_cycles=96, ly=153
+PPU: mode=1, mode_cycles=4212, line_cycles=108, ly=153
+PPU: mode=1, mode_cycles=4224, line_cycles=120, ly=153
+PPU: mode=1, mode_cycles=4236, line_cycles=132, ly=153
+PPU: mode=1, mode_cycles=4248, line_cycles=144, ly=153
+PPU: mode=1, mode_cycles=4260, line_cycles=156, ly=153
+PPU: mode=1, mode_cycles=4272, line_cycles=168, ly=153
+PPU: mode=1, mode_cycles=4284, line_cycles=180, ly=153
+PPU: mode=1, mode_cycles=4296, line_cycles=192, ly=153
+PPU: mode=1, mode_

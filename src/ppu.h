@@ -46,7 +46,7 @@ typedef struct {
 // Fonctions PPU
 void ppu_init(PPU* ppu);
 void ppu_reset(PPU* ppu);
-void ppu_tick(PPU* ppu, u8 cycles);
+u8 ppu_tick(PPU* ppu, u8 cycles);  // Retourne les interruptions déclenchées
 void ppu_write(PPU* ppu, u16 address, u8 value);
 u8 ppu_read(PPU* ppu, u16 address);
 

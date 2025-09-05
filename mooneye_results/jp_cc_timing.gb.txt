@@ -1,0 +1,3 @@
+Tentative de chargement de la ROM: tests\mooneye\acceptance\jp_cc_timing.gb
+Erreur: Impossible d'ouvrir le fichier tests\mooneye\acceptance\jp_cc_timing.gb
+Erreur: Impossible de charger la ROM tests\mooneye\acceptance\jp_cc_timing.gb

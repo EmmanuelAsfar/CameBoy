@@ -20,7 +20,7 @@ void ppu_reset(PPU* ppu) {
     ppu->wy = 0;
     ppu->wx = 0;
     
-    ppu->mode = PPU_MODE_HBLANK;
+    ppu->mode = PPU_MODE_OAM_SEARCH;
     ppu->mode_cycles = 0;
     ppu->line_cycles = 0;
     
@@ -32,10 +32,19 @@ void ppu_reset(PPU* ppu) {
     ppu_update_palettes(ppu);
 }
 
-// Tick du PPU
-void ppu_tick(PPU* ppu, u8 cycles) {
+// Tick du PPU - Retourne les interruptions déclenchées
+u8 ppu_tick(PPU* ppu, u8 cycles) {
+    u8 interrupts = 0;
     ppu->mode_cycles += cycles;
     ppu->line_cycles += cycles;
+    
+    // Debug: log les changements de mode
+    static u32 debug_cycles = 0;
+    debug_cycles += cycles;
+    if (debug_cycles < 5000) { // Log plus de cycles
+        printf("PPU: mode=%d, mode_cycles=%d, line_cycles=%d, ly=%d\n", 
+               ppu->mode, ppu->mode_cycles, ppu->line_cycles, ppu->ly);
+    }
     
     // Gestion des modes PPU
     switch (ppu->mode) {
@@ -50,7 +59,8 @@ void ppu_tick(PPU* ppu, u8 cycles) {
             if (ppu->mode_cycles >= 172) {
                 ppu->mode = PPU_MODE_HBLANK;
                 ppu->mode_cycles = 0;
-                // TODO: Rendre la ligne
+                // Rendre la ligne actuelle
+                ppu_render_line(ppu, NULL);
             }
             break;
             
@@ -62,7 +72,7 @@ void ppu_tick(PPU* ppu, u8 cycles) {
                 
                 if (ppu->ly >= 144) {
                     ppu->mode = PPU_MODE_VBLANK;
-                    // TODO: Déclencher interrupt VBLANK
+                    interrupts |= 0x01;  // Déclencher interrupt VBLANK
                 } else {
                     ppu->mode = PPU_MODE_OAM_SEARCH;
                 }
@@ -92,6 +102,8 @@ void ppu_tick(PPU* ppu, u8 cycles) {
     } else {
         ppu->stat &= ~0x04;  // Clear LYC flag
     }
+    
+    return interrupts;
 }
 
 // Écriture dans les registres PPU
@@ -200,11 +212,35 @@ void ppu_update_palettes(PPU* ppu) {
 // Rendu d'une ligne (simplifié)
 void ppu_render_line(PPU* ppu, u8* vram) {
     (void)vram; // Suppress unused parameter warning
-    if (!(ppu->lcdc & 0x80)) return;  // LCD disabled
+    if (!(ppu->lcdc & 0x80)) {
+        // LCD désactivé - afficher un pattern de test
+        for (int x = 0; x < GB_WIDTH; x++) {
+            u32 color = 0x808080FF; // Gris
+            ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
+        }
+        return;
+    }
     
-    // Pour l'instant, on rend juste un fond uni
-    u8 color = ppu->bg_palette[0];
+    // Rendre un pattern visible pour les tests
     for (int x = 0; x < GB_WIDTH; x++) {
+        u32 color;
+        
+        // Pattern de test : lignes alternées
+        if ((ppu->ly + x) % 32 < 16) {
+            color = 0xFFFFFFFF; // Blanc
+        } else {
+            color = 0x000000FF; // Noir
+        }
+        
+        // Ajouter un pattern basé sur la ligne
+        if (ppu->ly < 10) {
+            color = 0xFF0000FF; // Rouge pour les 10 premières lignes
+        } else if (ppu->ly < 20) {
+            color = 0x00FF00FF; // Vert pour les lignes 10-20
+        } else if (ppu->ly < 30) {
+            color = 0x0000FFFF; // Bleu pour les lignes 20-30
+        }
+        
         ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
     }
 }
