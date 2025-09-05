@@ -56,9 +56,10 @@ u8 ppu_tick(PPU* ppu, u8 cycles) {
             break;
             
         case PPU_MODE_PIXEL_TRANSFER:
-            if (ppu->mode_cycles >= 172) {
+            if (ppu->line_cycles >= 456) { // Utiliser line_cycles au lieu de mode_cycles
                 ppu->mode = PPU_MODE_HBLANK;
                 ppu->mode_cycles = 0;
+                ppu->line_cycles = 0;
                 // Rendre la ligne actuelle
                 ppu_render_line(ppu, NULL);
             }
