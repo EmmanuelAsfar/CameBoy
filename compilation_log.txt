@@ -1,10 +1,10 @@
 src\cpu.c: In function 'inst_srl_r8':
-src\cpu.c:1500:33: warning: unused parameter 'mmu' [-Wunused-parameter]
- 1500 | void inst_srl_r8(CPU* cpu, MMU* mmu) {
+src\cpu.c:1505:33: warning: unused parameter 'mmu' [-Wunused-parameter]
+ 1505 | void inst_srl_r8(CPU* cpu, MMU* mmu) {
       |                            ~~~~~^~~
 src\cpu.c: In function 'inst_rr_r8':
-src\cpu.c:1506:32: warning: unused parameter 'mmu' [-Wunused-parameter]
- 1506 | void inst_rr_r8(CPU* cpu, MMU* mmu) {
+src\cpu.c:1511:32: warning: unused parameter 'mmu' [-Wunused-parameter]
+ 1511 | void inst_rr_r8(CPU* cpu, MMU* mmu) {
       |                           ~~~~~^~~
 src\emulator_simple.c: In function 'emulator_simple_run':
 src\emulator_simple.c:97:25: warning: comparison is always false due to limited range of data type [-Wtype-limits]

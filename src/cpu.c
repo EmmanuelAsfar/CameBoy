@@ -1277,6 +1277,11 @@ void inst_inc_r8(CPU* cpu, MMU* mmu) {
     set_flag(cpu, FLAG_N, false);
     set_flag(cpu, FLAG_H, (value & 0x0F) == 0x0F);
     
+    // Debug pour INC E
+    if (reg == 3) { // E
+        printf("INC E: %d -> %d, Z=%d\n", value, result, result == 0 ? 1 : 0);
+    }
+    
     switch (reg) {
         case 0: set_reg_b(cpu, result); break;
         case 1: set_reg_c(cpu, result); break;
