@@ -222,10 +222,10 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
             // Si bit 7 est activé, transmettre le caractère
             if (value & 0x80) {
                 u8 data = mmu->io[0xFF01 - 0xFF00];
-                if (data >= 32 && data <= 126) {  // Caractères imprimables
-                    printf("%c", data);
-                    fflush(stdout);
-                }
+                printf("%c", data);  // Afficher tous les caractères
+                fflush(stdout);
+                // Remettre le bit 7 à 0 après transmission
+                mmu->io[address - 0xFF00] = 0x00;
             }
         }
     } else if (address >= 0xFF80 && address <= 0xFFFE) {
