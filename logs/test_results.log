@@ -1,0 +1,72 @@
+======================================== 
+CameBoy Unit Tests - 06/09/2025 13:14:41,76 
+======================================== 
+ 
+Running test_cpu... 
+=== TESTS UNITAIRES CPU LR35902 ===
+
+Test 1: CPU Initialisation... PASS
+Test 2: CPU Reset... PASS
+Test 3: CPU Flags... PASS
+Test 4: CPU Registers... PASS
+Test 5: Arithmetic ADD... PASS
+Test 6: Arithmetic SUB... PASS
+Test 7: Arithmetic ADC... PASS
+Test 8: Arithmetic SBC... Assertion failed: !get_flag(&cpu, FLAG_H), file tests\unit\test_cpu.c, line 306
+ERREUR test_cpu FAILED 
+ 
+Running test_mmu... 
+=== TESTS UNITAIRES MMU ===
+
+Test 1: MMU Initialisation... PASS
+Test 2: MMU Reset... PASS
+Test 3: MMU Memory Mapping... Assertion failed: mmu_read8(&mmu, 0x0000) == 0xFF, file tests\unit\test_mmu.c, line 138
+ERREUR test_mmu FAILED 
+ 
+Running test_ppu... 
+=== TESTS UNITAIRES PPU ===
+
+Test 1: PPU Initialisation... PASS
+Test 2: PPU Reset... PASS
+Test 3: PPU Registers... Assertion failed: ppu_read(&ppu, STAT_REG) == 0x45, file tests\unit\test_ppu.c, line 144
+ERREUR test_ppu FAILED 
+ 
+Running test_timer... 
+=== TESTS UNITAIRES TIMER ===
+
+Test 1: Timer Initialisation... PASS
+Test 2: Timer Reset... PASS
+Test 3: Timer DIV Counter... PASS
+Test 4: Timer TIMA Counter... Assertion failed: timer.tima_period == 64, file tests\unit\test_timer.c, line 147
+ERREUR test_timer FAILED 
+ 
+Running test_interrupt... 
+=== TESTS UNITAIRES INTERRUPTIONS ===
+
+Test 1: Interrupt Initialisation... PASS
+Test 2: Interrupt Request... PASS
+Test 3: Interrupt Clear... PASS
+Test 4: Interrupt Priority... PASS
+Test 5: Interrupt Enable... PASS
+Test 6: Interrupt Service Routine... PASS
+Test 7: Interrupt VBlank... PASS
+Test 8: Interrupt LCD STAT... PASS
+
+=== RÉSULTATS ===
+Tests passés: 8/8
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_interrupt PASSED 
+ 
+Running test_joypad... 
+=== TESTS UNITAIRES JOYPAD ===
+
+Test 1: Joypad Initialisation... PASS
+Test 2: Joypad Reset... PASS
+Test 3: Joypad Write... PASS
+Test 4: Joypad Read... PASS
+Test 5: Joypad Buttons... Assertion failed: (result & 0x0F) == 0x0C, file tests\unit\test_joypad.c, line 172
+ERREUR test_joypad FAILED 
+ 
+======================================== 
+Total: 1/6 tests passed 
+CERTAINS TESTS ONT ECHOUE 

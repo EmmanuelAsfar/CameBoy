@@ -2,6 +2,8 @@
 #define INTERRUPT_H
 
 #include "common.h"
+#include "cpu.h"
+#include "mmu.h"
 
 // Types d'interruptions (selon Pan Docs)
 #define VBLANK_INT   0x01   // INT $40 - VBlank interrupt (priorité la plus haute)

@@ -1,3 +1,0 @@
-Tentative de chargement de la ROM: tests\mooneye\acceptance\halt_ime0_ei.gb
-Erreur: Impossible d'ouvrir le fichier tests\mooneye\acceptance\halt_ime0_ei.gb
-Erreur: Impossible de charger la ROM tests\mooneye\acceptance\halt_ime0_ei.gb

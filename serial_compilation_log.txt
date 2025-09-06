@@ -1,4 +1,0 @@
-test_serial.c: In function 'main':
-test_serial.c:70:12: warning: unused variable 'cycles' [-Wunused-variable]
-   70 |         u8 cycles = cpu_step(&cpu, &mmu);
-      |            ^~~~~~

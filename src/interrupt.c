@@ -1,6 +1,4 @@
 #include "interrupt.h"
-#include "cpu.h"
-#include "mmu.h"
 #include <stdio.h>
 
 // Initialisation du gestionnaire d'interruptions

@@ -1,4 +1,0 @@
-src\emulator_simple.c: In function 'emulator_simple_run':
-src\emulator_simple.c:173:25: warning: comparison is always false due to limited range of data type [-Wtype-limits]
-  173 |         if (emu->cpu.pc >= 0x10000) {
-      |                         ^~

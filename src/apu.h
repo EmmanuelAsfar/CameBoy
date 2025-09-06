@@ -92,6 +92,7 @@ typedef struct {
     
     // État interne
     u16 lfsr;           // Linear Feedback Shift Register
+    u16 frequency;      // Fréquence calculée
     u16 period_counter; // Compteur de période
     u8 volume;          // Volume actuel
     u8 envelope_volume; // Volume de l'envelope
@@ -99,6 +100,7 @@ typedef struct {
     u8 envelope_timer;  // Timer de l'envelope
     bool envelope_increasing; // Direction de l'envelope
     u16 length_counter; // Compteur de longueur
+    u8 sample_buffer;   // Buffer d'échantillon
     bool enabled;       // Canal activé
     bool dac_enabled;   // DAC activé
 } NoiseChannel;

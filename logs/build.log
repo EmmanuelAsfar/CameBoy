@@ -1,0 +1,8 @@
+======================================== 
+Build started 06/09/2025 13:14:34,92 
+src\emulator_simple.c: In function 'emulator_simple_run':
+src\emulator_simple.c:446:25: warning: comparison is always false due to limited range of data type [-Wtype-limits]
+  446 |         if (emu->cpu.pc >= 0x10000) {
+      |                         ^~
+Build SUCCES at 06/09/2025 13:14:38,60 
+======================================== 

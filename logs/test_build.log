@@ -1,0 +1,10 @@
+======================================== 
+Test build started 06/09/2025 13:14:38,66 
+OK: test_cpu compiled at 06/09/2025 13:14:39,50 
+OK: test_mmu compiled at 06/09/2025 13:14:39,95 
+OK: test_ppu compiled at 06/09/2025 13:14:40,26 
+OK: test_timer compiled at 06/09/2025 13:14:40,57 
+OK: test_interrupt compiled at 06/09/2025 13:14:41,49 
+OK: test_joypad compiled at 06/09/2025 13:14:41,76 
+Test build ended 06/09/2025 13:14:46,54 
+======================================== 

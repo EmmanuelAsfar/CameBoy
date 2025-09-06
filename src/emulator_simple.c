@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include "common.h"
-#include "mmu.h"
 #include "cpu.h"
+#include "mmu.h"
+#include "interrupt.h"
 #include "timer.h"
 #include "ppu.h"
 #include "joypad.h"
 #include "apu.h"
-#include "interrupt.h"
 #include "graphics_win32.h"
+
+// Déclaration anticipée
+void load_ascii_tiles(u8* vram);
 
 // Charger des tiles de caractères ASCII depuis console.bin
 void load_console_tiles(u8* vram) {

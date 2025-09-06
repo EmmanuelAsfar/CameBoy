@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include "common.h"
+#include "mmu.h"
 
 // Constantes des flags (selon Pan Docs - LR35902)
 #define FLAG_Z 0x80  // Zero flag (bit 7) - Résultat = 0
@@ -81,6 +82,7 @@ void inst_nop(CPU* cpu, MMU* mmu);
 void inst_halt(CPU* cpu, MMU* mmu);
 void inst_cb_prefix(CPU* cpu, MMU* mmu);
 void inst_stop(CPU* cpu, MMU* mmu);
+void inst_illegal(CPU* cpu, MMU* mmu);
 void inst_di(CPU* cpu, MMU* mmu);
 void inst_ei(CPU* cpu, MMU* mmu);
 

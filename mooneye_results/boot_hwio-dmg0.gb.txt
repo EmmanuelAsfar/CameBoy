@@ -1,3 +1,0 @@
-Tentative de chargement de la ROM: tests\mooneye\acceptance\boot_hwio-dmg0.gb
-Erreur: Impossible d'ouvrir le fichier tests\mooneye\acceptance\boot_hwio-dmg0.gb
-Erreur: Impossible de charger la ROM tests\mooneye\acceptance\boot_hwio-dmg0.gb

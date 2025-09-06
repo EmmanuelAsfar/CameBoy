@@ -77,11 +77,12 @@ void inst_halt(CPU* cpu, MMU* mmu) {
     if (!cpu->ime && (ie & if_reg) != 0) {
         // HALT bug : PC n'incrémente pas
         cpu->halt_bug = true;
+        // Dans ce cas, la CPU ne s'arrête pas réellement
+        cpu->halted = false;
     } else {
         cpu->pc += 1;
+        cpu->halted = true;
     }
-    
-    cpu->halted = true;
 }
 
 void inst_stop(CPU* cpu, MMU* mmu) {
@@ -94,6 +95,12 @@ void inst_di(CPU* cpu, MMU* mmu) {
     (void)mmu;  // Paramètre non utilisé
     cpu->ime = false;
     cpu->ei_pending = false;
+    cpu->pc += 1;
+}
+
+void inst_illegal(CPU* cpu, MMU* mmu) {
+    (void)mmu;  // Paramètre non utilisé
+    // Instruction illégale - on ne fait rien, juste avancer le PC
     cpu->pc += 1;
 }
 
@@ -563,17 +570,22 @@ void inst_cb_prefix(CPU* cpu, MMU* mmu) {
 // ============================================================================
 
 u8 cpu_step(CPU* cpu, MMU* mmu) {
-    
+    // Sortie de HALT si une interruption devient en attente
     if (cpu->halted) {
-        return 4;  // Cycle de HALT
+        u8 ie = mmu_read8(mmu, IE_REG);
+        u8 if_reg = mmu_read8(mmu, IF_REG);
+        if ((ie & if_reg) != 0) {
+            // Une interruption est en attente
+            cpu->halted = false;
+            if (!cpu->ime) {
+                // HALT bug : reprendre avec duplication du premier octet
+                cpu->halt_bug = true;
+            }
+        } else {
+            return 4;  // Rester en HALT
+        }
     }
-    
-    // Gestion du délai EI (prend effet après l'instruction suivante)
-    if (cpu->ei_pending) {
-        cpu->ei_pending = false;
-        cpu->ime = true;
-    }
-    
+
     u8 opcode = mmu_read8(mmu, cpu->pc);
     const Instruction* inst = &opcodes[opcode];
     
@@ -585,6 +597,12 @@ u8 cpu_step(CPU* cpu, MMU* mmu) {
     
     // Exécuter l'instruction
     inst->execute(cpu, mmu);
+
+    // Gestion du délai EI (prend effet après l'instruction suivante)
+    if (cpu->ei_pending) {
+        cpu->ei_pending = false;
+        cpu->ime = true;
+    }
     
     // Retourner les cycles (avec cycles conditionnels si applicable)
     return cpu->branch_taken ? inst->cycles_cond : inst->cycles;
@@ -605,7 +623,7 @@ void cpu_init(CPU* cpu) {
     
     // État initial selon Pan Docs
     cpu->halted = false;
-    cpu->ime = true;            // Interruptions activées pour les tests
+    cpu->ime = false;           // IME désactivé au démarrage (conforme tests/Pan Docs)
     cpu->ei_pending = false;    // Pas de EI en attente
     cpu->halt_bug = false;      // Pas de HALT bug actif
     cpu->branch_taken = false;  // Pas de saut conditionnel pris
