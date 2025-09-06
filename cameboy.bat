@@ -21,6 +21,7 @@ if not exist "%LOGS_DIR%" mkdir "%LOGS_DIR%" 2>nul
 REM Gestion des arguments
 if "%1"=="clean" goto clean
 if "%1"=="test" goto test
+if "%1"=="testrom" goto testrom
 if "%1"=="build" goto build
 if "%1"=="run" goto run
 if "%1"=="help" goto help
@@ -46,7 +47,7 @@ REM Compiler directement avec GCC
 echo Compilation en cours...
 set "CFLAGS=-Wall -Wextra -std=c99 -O2 -g -Isrc"
 set "LDFLAGS=-lgdi32 -luser32 -lkernel32"
-set "SOURCES=src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\ppu.c src\joypad.c src\interrupt.c src\apu.c src\graphics_win32.c src\emulator_simple.c"
+set "SOURCES=src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\ppu.c src\joypad.c src\interrupt.c src\apu.c src\graphics_win32.c src\emulator_win32.c"
 set "BUILD_LOG=%LOGS_DIR%\build.log"
 
 echo ======================================== > "%BUILD_LOG%"
@@ -82,7 +83,7 @@ echo ========================================
 echo.
 
 if not exist "%EXE%" (
-    echo L'emulateur n'est pas compile. Lancez d'abord: cameboy.bat build
+    echo L'emulateur n'est pas compile. Lancez d'abord:cameboy.bat build
     exit /b 1
 )
 
@@ -198,6 +199,20 @@ if errorlevel 1 (
 echo.
 echo Test build ended %DATE% %TIME% >> "%TEST_BUILD_LOG%"
 echo ======================================== >> "%TEST_BUILD_LOG%"
+goto end
+
+:testrom
+echo ========================================
+echo TESTS ROM (SERIAL)
+echo ========================================
+echo.
+call tests\rom\run_rom_tests.bat
+if errorlevel 1 (
+    echo CERTAINS TESTS ROM ONT ECHOUE
+    exit /b 1
+) else (
+    echo TOUS LES TESTS ROM SONT PASSES
+)
 goto end
 
 :run

@@ -7,8 +7,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     
     switch (uMsg) {
         case WM_CLOSE:
-            if (gfx) gfx->running = false;
-            PostQuitMessage(0);
+            // Ignorer la fermeture via la croix pour maintenir la fenêtre ouverte
+            // (Utiliser Échap pour quitter proprement)
+            OutputDebugStringA("WM_CLOSE ignoré (utiliser ESC)\n");
             return 0;
             
         case WM_KEYDOWN:
@@ -136,17 +137,17 @@ void graphics_win32_cleanup(GraphicsWin32* gfx) {
 void graphics_win32_update(GraphicsWin32* gfx, u32* ppu_framebuffer) {
     if (!gfx || !ppu_framebuffer) return;
     
-    // Copier les données du framebuffer PPU (u32 ARGB) vers notre framebuffer RGB
+    // Copier les données du framebuffer PPU (u32 RGBA: RRGGBBAA) vers notre framebuffer RGB
     for (int y = 0; y < gfx->height; y++) {
         for (int x = 0; x < gfx->width; x++) {
             int src_idx = y * gfx->width + x;
             int dst_idx = (y * gfx->width + x) * 3;
             
-            // Convertir de u32 ARGB vers RGB
+            // Convertir de u32 RGBA (RRGGBBAA) vers RGB
             u32 pixel = ppu_framebuffer[src_idx];
-            u8 r = (pixel >> 16) & 0xFF;
-            u8 g = (pixel >> 8) & 0xFF;
-            u8 b = pixel & 0xFF;
+            u8 r = (pixel >> 24) & 0xFF; // R
+            u8 g = (pixel >> 16) & 0xFF; // G
+            u8 b = (pixel >> 8)  & 0xFF; // B
             
             gfx->framebuffer[dst_idx + 0] = b; // B
             gfx->framebuffer[dst_idx + 1] = g; // G

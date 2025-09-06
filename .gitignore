@@ -1,0 +1,12 @@
+# Logs
+logs/**
+
+# Build outputs
+build/**
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+
+# Keep ROMs tracked (do NOT ignore .gb)
+# (intentionally no pattern for *.gb)

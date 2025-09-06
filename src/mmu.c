@@ -155,18 +155,16 @@ bool mmu_load_rom(MMU* mmu, const char* filename) {
 // Lecture d'un octet
 u8 mmu_read8(MMU* mmu, u16 address) {
     if (address <= 0x7FFF) {
-        // ROM
-        if (address < 0x4000) {
-            return mmu->rom[address];
-        } else {
-            // Banking ROM
-            return mbc_read(mmu, address);
+        // ROM (via MBC mapping). Fallback to raw memory if no ROM loaded (unit tests)
+        if (mmu->cart.rom_data == NULL || mmu->cart.rom_size == 0) {
+            return mmu->memory[address];
         }
+        return mbc_read(mmu, address);
     } else if (address >= 0x8000 && address <= 0x9FFF) {
         // VRAM
         return mmu->vram[address - 0x8000];
     } else if (address >= 0xA000 && address <= 0xBFFF) {
-        // ERAM (External RAM)
+        // ERAM (External RAM via MBC)
         return mbc_read(mmu, address);
     } else if (address >= 0xC000 && address <= 0xDFFF) {
         // WRAM
@@ -210,13 +208,13 @@ u16 mmu_read16(MMU* mmu, u16 address) {
 // Écriture d'un octet
 void mmu_write8(MMU* mmu, u16 address, u8 value) {
     if (address <= 0x7FFF) {
-        // ROM - écriture vers MBC
+        // ROM area - route vers MBC
         mbc_write(mmu, address, value);
     } else if (address >= 0x8000 && address <= 0x9FFF) {
         // VRAM
         mmu->vram[address - 0x8000] = value;
     } else if (address >= 0xA000 && address <= 0xBFFF) {
-        // ERAM - écriture vers MBC
+        // ERAM via MBC
         mbc_write(mmu, address, value);
     } else if (address >= 0xC000 && address <= 0xDFFF) {
         // WRAM
@@ -249,6 +247,8 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
             if (value & 0x80) {
                 u8 data = mmu->io[0xFF01 - 0xFF00];
                 printf("SERIAL: 0x%02X ('%c')\n", data, (data >= 32 && data <= 126) ? data : '.');
+                // Écrire aussi le caractère brut pour un parsing simple par les tests ROM
+                putchar((int)data);
                 fflush(stdout);
                 // Remettre le bit 7 à 0 après transmission
                 mmu->io[address - 0xFF00] = 0x00;
@@ -274,21 +274,71 @@ void mmu_write16(MMU* mmu, u16 address, u16 value) {
 
 // Fonctions MBC (simplifiées)
 void mbc_write(MMU* mmu, u16 address, u8 value) {
-    (void)mmu;     // Suppress unused parameter warning
-    (void)address; // Suppress unused parameter warning
-    (void)value;   // Suppress unused parameter warning
-    // Pour l'instant, on ne gère que les ROMs sans MBC
-    // Les MBC seront implémentés plus tard
+    // Implement minimal MBC1 (common in Blargg ROMs)
+    // 0000-1FFF: RAM enable
+    // 2000-3FFF: ROM bank low 5 bits (bank 0 -> map to 1)
+    // 4000-5FFF: Upper 2 bits of ROM bank or RAM bank (mode dependent)
+    // 6000-7FFF: Banking mode select (0=ROM banking, 1=RAM banking)
+    if (mmu->cart.type == CART_MBC1 || mmu->cart.type == CART_MBC1_RAM || mmu->cart.type == CART_MBC1_RAM_BATTERY) {
+        if (address <= 0x1FFF) {
+            mmu->cart.ram_enabled = ((value & 0x0F) == 0x0A);
+        } else if (address >= 0x2000 && address <= 0x3FFF) {
+            u8 bank = value & 0x1F;
+            if (bank == 0) bank = 1; // bank 0 forbidden for 4000-7FFF
+            mmu->cart.rom_bank = (mmu->cart.rom_bank & 0x60) | bank;
+        } else if (address >= 0x4000 && address <= 0x5FFF) {
+            u8 upper = (value & 0x03) << 5; // bits 5-6
+            if (mmu->cart.rom_banking_mode) {
+                mmu->cart.rom_bank = (mmu->cart.rom_bank & 0x1F) | upper;
+            } else {
+                mmu->cart.ram_bank = value & 0x03;
+            }
+        } else if (address >= 0x6000 && address <= 0x7FFF) {
+            mmu->cart.rom_banking_mode = ((value & 0x01) != 0);
+        } else if (address >= 0xA000 && address <= 0xBFFF) {
+            if (mmu->cart.ram_enabled && mmu->cart.ram_data) {
+                u32 ram_offset = (u32)mmu->cart.ram_bank * 0x2000 + (address - 0xA000);
+                if (ram_offset < mmu->cart.ram_size) {
+                    mmu->cart.ram_data[ram_offset] = value;
+                }
+            }
+        }
+        return;
+    }
+    // Other MBCs not implemented yet
 }
 
 u8 mbc_read(MMU* mmu, u16 address) {
-    if (address >= 0x4000 && address <= 0x7FFF) {
-        // Pour les ROMs de 32KB, mapper la zone 0x4000-0x7FFF vers 0x4000-0x7FFF de la ROM
-        u32 rom_address = address;
-        if (rom_address < mmu->cart.rom_size) {
-            return mmu->cart.rom_data[rom_address];
+    if (address <= 0x7FFF) {
+        if (mmu->cart.type == CART_MBC1 || mmu->cart.type == CART_MBC1_RAM || mmu->cart.type == CART_MBC1_RAM_BATTERY) {
+            if (address < 0x4000) {
+                // Bank 0 (or upper bank in RAM banking mode)
+                u32 base_bank = 0;
+                if (!mmu->cart.rom_banking_mode) {
+                    // RAM banking mode: 0000-3FFF may map to 0x00,0x20,0x40,0x60
+                    base_bank = ((mmu->cart.rom_bank & 0x60) * 0x4000) / 0x20; // extract bits 5-6
+                }
+                u32 rom_address = base_bank + address;
+                if (rom_address < mmu->cart.rom_size) return mmu->cart.rom_data[rom_address];
+                return 0xFF;
+            } else {
+                u8 bank = mmu->cart.rom_bank;
+                if ((bank & 0x1F) == 0) bank |= 0x01; // ensure not 0
+                u32 rom_address = (u32)bank * 0x4000 + (address - 0x4000);
+                if (rom_address < mmu->cart.rom_size) return mmu->cart.rom_data[rom_address];
+                return 0xFF;
+            }
+        } else {
+            // ROM only
+            if (mmu->cart.rom_data && address < mmu->cart.rom_size) return mmu->cart.rom_data[address];
+            // Fallback for unit tests where instructions are placed in mmu->memory
+            return mmu->memory[address];
         }
-        // Si on dépasse la taille de la ROM, retourner 0xFF
+    } else if (address >= 0xA000 && address <= 0xBFFF) {
+        if (mmu->cart.ram_enabled && mmu->cart.ram_data) {
+            u32 ram_offset = (u32)mmu->cart.ram_bank * 0x2000 + (address - 0xA000);
+            if (ram_offset < mmu->cart.ram_size) return mmu->cart.ram_data[ram_offset];
+        }
         return 0xFF;
     }
     return 0xFF;

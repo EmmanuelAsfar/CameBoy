@@ -292,6 +292,7 @@ typedef struct {
     u32 cycles_per_frame;
     u32 current_cycles;
     bool show_lcd;
+    const char* dump_ppm_path;
 } EmulatorSimple;
 
 // Initialisation de l'émulateur simple
@@ -322,7 +323,30 @@ void emulator_simple_init(EmulatorSimple* emu) {
     emu->running = true;
     emu->cycles_per_frame = GB_FREQ / 60;  // 60 FPS
     emu->current_cycles = 0;
+    emu->dump_ppm_path = NULL;
 }
+static void write_framebuffer_to_ppm(const char* path, u32* framebuffer) {
+    FILE* f = fopen(path, "wb");
+    if (!f) {
+        printf("Erreur: impossible d'ouvrir %s pour écriture\n", path);
+        return;
+    }
+    fprintf(f, "P6\n%d %d\n255\n", GB_WIDTH, GB_HEIGHT);
+    for (int y = 0; y < GB_HEIGHT; y++) {
+        for (int x = 0; x < GB_WIDTH; x++) {
+            u32 c = framebuffer[y * GB_WIDTH + x];
+            unsigned char r = (unsigned char)((c >> 24) & 0xFF);
+            unsigned char g = (unsigned char)((c >> 16) & 0xFF);
+            unsigned char b = (unsigned char)((c >> 8) & 0xFF);
+            fwrite(&r, 1, 1, f);
+            fwrite(&g, 1, 1, f);
+            fwrite(&b, 1, 1, f);
+        }
+    }
+    fclose(f);
+    printf("Frame dump écrite: %s\n", path);
+}
+
 
 // Nettoyage de l'émulateur simple
 void emulator_simple_cleanup(EmulatorSimple* emu) {
@@ -350,8 +374,9 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
     
     while (emu->running && total_cycles < max_cycles) {
         // Log de debug réduit
+        // Early boot trace only
         if (total_cycles < 50) {
-            printf("PC: 0x%04X, Opcode: 0x%02X\n", emu->cpu.pc, emu->mmu.memory[emu->cpu.pc]);
+            printf("TRACE: PC=0x%04X OPC=0x%02X\n", emu->cpu.pc, emu->mmu.memory[emu->cpu.pc]);
         }
         
         // Exécuter une instruction CPU
@@ -360,20 +385,15 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
         total_cycles += cycles;
         
         // Log spécial pour la zone de test Blargg
-        if (emu->cpu.pc >= 0x0200 && emu->cpu.pc <= 0x0220) {
-            printf("ZONE TEST: PC=0x%04X, AF=0x%04X, BC=0x%04X, DE=0x%04X, HL=0x%04X, SP=0x%04X\n", 
-                   emu->cpu.pc, emu->cpu.af, emu->cpu.bc, emu->cpu.de, emu->cpu.hl, emu->cpu.sp);
-        }
+        // Remove legacy zone test spam; keep minimal periodic heartbeat
         
         // Log détaillé réduit
         if (total_cycles < 50) {
-            printf("Cycle %u: PC=0x%04X, AF=0x%04X\n", total_cycles, emu->cpu.pc, emu->cpu.af);
+            printf("TRACE: CYCLE=%u PC=0x%04X AF=0x%04X\n", total_cycles, emu->cpu.pc, emu->cpu.af);
         }
         
         // Log spécial pour les accès port série
-        if (emu->cpu.pc >= 0x0200 && emu->cpu.pc <= 0x0300) {
-            printf("Zone test: PC=0x%04X, Opcode=0x%02X\n", emu->cpu.pc, emu->mmu.memory[emu->cpu.pc]);
-        }
+        // Remove old per-PC zone logs
         
         // Mettre à jour les composants
         timer_tick(&emu->timer, cycles);
@@ -459,8 +479,9 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
 // Fonction principale
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        printf("Usage: %s <rom_file> [max_cycles]\n", argv[0]);
+        printf("Usage: %s <rom_file> [max_cycles] [--headless] [--dump-ppm path]\n", argv[0]);
         printf("  max_cycles: nombre maximum de cycles (défaut: 1000000)\n");
+        printf("  --headless: n'affiche pas la fenêtre LCD (tests automatisés)\n");
         return 1;
     }
     
@@ -480,15 +501,32 @@ int main(int argc, char* argv[]) {
     printf("Type de cartouche: %s\n", cart_type_name(emu.mmu.cart.type));
     printf("Taille ROM: %u KB\n", emu.mmu.cart.header.rom_size);
     
-    // Activer l'affichage LCD pour les tests Blargg
-    emulator_simple_show_lcd(&emu);
+    // Déterminer les options en ligne de commande
+    bool headless = false;
+    for (int i = 2; i < argc; i++) {
+        if (strcmp(argv[i], "--headless") == 0) {
+            headless = true;
+        } else if (strcmp(argv[i], "--dump-ppm") == 0 && i + 1 < argc) {
+            emu.dump_ppm_path = argv[i + 1];
+            i++;
+        }
+    }
+
+    if (!headless) {
+        // Activer l'affichage LCD
+        emulator_simple_show_lcd(&emu);
+    }
     
     // Laisser le CPU s'exécuter d'abord pour charger les tiles
     
     // Nombre maximum de cycles
     u32 max_cycles = 1000000; // 1M cycles par défaut
-    if (argc >= 3) {
-        max_cycles = (u32)atoi(argv[2]);
+    // Chercher un argument numérique pour max_cycles (permet l'ordre libre)
+    for (int i = 2; i < argc; i++) {
+        if (argv[i][0] >= '0' && argv[i][0] <= '9') {
+            max_cycles = (u32)atoi(argv[i]);
+            break;
+        }
     }
     
     // Si l'affichage LCD est activé, augmenter le nombre de cycles
@@ -522,6 +560,15 @@ int main(int argc, char* argv[]) {
     
     // Lancer l'émulation
     emulator_simple_run(&emu, max_cycles);
+
+    if (emu.dump_ppm_path != NULL) {
+        // En mode headless, forcer un rendu complet d'une frame avant le dump
+        for (int y = 0; y < GB_HEIGHT; y++) {
+            emu.ppu.ly = (u8)y;
+            ppu_render_line(&emu.ppu, emu.mmu.vram);
+        }
+        write_framebuffer_to_ppm(emu.dump_ppm_path, emu.ppu.framebuffer);
+    }
     
     emulator_simple_cleanup(&emu);
     return 0;
