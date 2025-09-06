@@ -46,7 +46,7 @@ typedef struct {
 // Fonctions PPU
 void ppu_init(PPU* ppu);
 void ppu_reset(PPU* ppu);
-u8 ppu_tick(PPU* ppu, u8 cycles);  // Retourne les interruptions déclenchées
+u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram);  // Retourne les interruptions déclenchées
 void ppu_write(PPU* ppu, u16 address, u8 value);
 u8 ppu_read(PPU* ppu, u16 address);
 
@@ -58,6 +58,6 @@ void ppu_render_sprites(PPU* ppu, u8* vram, u8 line);
 
 // Utilitaires
 void ppu_update_palettes(PPU* ppu);
-u8 ppu_get_pixel_color(u8 pixel_data, u8 palette);
+u32 ppu_get_pixel_color(PPU* ppu, u8 pixel);
 
 #endif // PPU_H

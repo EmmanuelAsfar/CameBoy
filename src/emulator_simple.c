@@ -31,6 +31,9 @@ void emulator_simple_init(EmulatorSimple* emu) {
     ppu_init(&emu->ppu);
     joypad_init(&emu->joypad);
     
+    // Connecter le timer au MMU
+    emu->mmu.timer = &emu->timer;
+    
     // Initialiser les graphiques (caché par défaut)
     if (!graphics_win32_init(&emu->graphics)) {
         printf("Erreur: Impossible d'initialiser les graphiques\n");
@@ -84,6 +87,12 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
         emu->current_cycles += cycles;
         total_cycles += cycles;
         
+        // Log spécial pour la zone de test Blargg
+        if (emu->cpu.pc >= 0x0200 && emu->cpu.pc <= 0x0220) {
+            printf("ZONE TEST: PC=0x%04X, AF=0x%04X, BC=0x%04X, DE=0x%04X, HL=0x%04X, SP=0x%04X\n", 
+                   emu->cpu.pc, emu->cpu.af, emu->cpu.bc, emu->cpu.de, emu->cpu.hl, emu->cpu.sp);
+        }
+        
         // Log détaillé pour les tests Blargg
         if (total_cycles < 200) { // Log seulement les 200 premiers cycles
             printf("Cycle %u: PC=0x%04X, Opcode=0x%02X, AF=0x%04X, BC=0x%04X, DE=0x%04X, HL=0x%04X, SP=0x%04X\n",
@@ -98,7 +107,8 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
         
         // Mettre à jour les composants
         timer_tick(&emu->timer, cycles);
-        u8 ppu_interrupts = ppu_tick(&emu->ppu, cycles);
+        u8 ppu_interrupts = ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
+        u8 timer_interrupts = timer_get_interrupts(&emu->timer);
         
         // Mettre à jour l'affichage LCD si nécessaire
         if (emu->show_lcd) {
@@ -112,12 +122,14 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
             }
         }
         
-        // Ajouter les interruptions PPU au registre IF
-        if (ppu_interrupts) {
+        // Ajouter les interruptions au registre IF
+        u8 all_interrupts = ppu_interrupts | timer_interrupts;
+        if (all_interrupts) {
             u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
-            mmu_write8(&emu->mmu, IF_REG, if_reg | ppu_interrupts);
+            mmu_write8(&emu->mmu, IF_REG, if_reg | all_interrupts);
             if (total_cycles < 1000) { // Log seulement les 1000 premiers cycles
-                printf("PPU interrupt déclenchée: 0x%02X\n", ppu_interrupts);
+                if (ppu_interrupts) printf("PPU interrupt déclenchée: 0x%02X\n", ppu_interrupts);
+                if (timer_interrupts) printf("Timer interrupt déclenchée: 0x%02X\n", timer_interrupts);
             }
         }
         
@@ -155,6 +167,11 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
         if (emu->show_lcd && total_cycles >= max_cycles) {
             printf("Cycles maximum atteints, mais LCD ouvert - continuer jusqu'à fermeture manuelle...\n");
             max_cycles = 0xFFFFFFFF; // Continuer indéfiniment
+        }
+        
+        // Si LCD ouvert, ne jamais s'arrêter automatiquement
+        if (emu->show_lcd) {
+            max_cycles = 0xFFFFFFFF;
         }
         
         // Arrêter si PC pointe vers une adresse invalide

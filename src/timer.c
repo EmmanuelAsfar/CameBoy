@@ -15,6 +15,7 @@ void timer_reset(Timer* timer) {
     timer->div_cycles = 0;
     timer->tima_cycles = 0;
     timer->tima_period = 0;
+    timer->interrupt_pending = false;
 }
 
 // Tick du timer
@@ -36,7 +37,7 @@ void timer_tick(Timer* timer, u8 cycles) {
             if (timer->tima == 0) {
                 // Overflow - recharger avec TMA et déclencher interrupt
                 timer->tima = timer->tma;
-                // TODO: Déclencher interrupt TIMER
+                timer->interrupt_pending = true;
             }
         }
     }
@@ -75,6 +76,15 @@ u8 timer_read(Timer* timer, u16 address) {
         case TAC_REG:  return timer->tac;
         default:       return 0xFF;
     }
+}
+
+// Récupère les interruptions timer
+u8 timer_get_interrupts(Timer* timer) {
+    if (timer->interrupt_pending) {
+        timer->interrupt_pending = false;
+        return 0x04;  // TIMER_INT
+    }
+    return 0;
 }
 
 // Calcul de la période TIMA

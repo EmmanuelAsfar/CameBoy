@@ -1,4 +1,5 @@
 #include "mmu.h"
+#include "timer.h"
 
 // Initialisation de la MMU
 void mmu_init(MMU* mmu) {
@@ -172,6 +173,10 @@ u8 mmu_read8(MMU* mmu, u16 address) {
         return mmu->oam[address - 0xFE00];
     } else if (address >= 0xFF00 && address <= 0xFF7F) {
         // IO
+        // Connecter les registres timer au timer
+        if (address >= 0xFF04 && address <= 0xFF07) {
+            return timer_read((Timer*)mmu->timer, address);
+        }
         return mmu->io[address - 0xFF00];
     } else if (address >= 0xFF80 && address <= 0xFFFE) {
         // HRAM
@@ -222,11 +227,16 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
             // Si bit 7 est activé, transmettre le caractère
             if (value & 0x80) {
                 u8 data = mmu->io[0xFF01 - 0xFF00];
-                printf("%c", data);  // Afficher tous les caractères
+                printf("SERIAL: 0x%02X ('%c')\n", data, (data >= 32 && data <= 126) ? data : '.');
                 fflush(stdout);
                 // Remettre le bit 7 à 0 après transmission
                 mmu->io[address - 0xFF00] = 0x00;
             }
+        }
+        
+        // Connecter les registres timer au timer
+        if (address >= 0xFF04 && address <= 0xFF07) {
+            timer_write((Timer*)mmu->timer, address, value);
         }
     } else if (address >= 0xFF80 && address <= 0xFFFE) {
         // HRAM

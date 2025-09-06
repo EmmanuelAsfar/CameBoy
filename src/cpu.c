@@ -600,7 +600,7 @@ void cpu_init(CPU* cpu) {
     
     // État initial selon Pan Docs
     cpu->halted = false;
-    cpu->ime = false;           // Interruptions désactivées au démarrage
+    cpu->ime = true;            // Interruptions activées pour les tests
     cpu->ei_pending = false;    // Pas de EI en attente
     cpu->halt_bug = false;      // Pas de HALT bug actif
     cpu->branch_taken = false;  // Pas de saut conditionnel pris

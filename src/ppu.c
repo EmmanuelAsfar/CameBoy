@@ -33,7 +33,7 @@ void ppu_reset(PPU* ppu) {
 }
 
 // Tick du PPU - Retourne les interruptions déclenchées
-u8 ppu_tick(PPU* ppu, u8 cycles) {
+u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
     u8 interrupts = 0;
     ppu->mode_cycles += cycles;
     ppu->line_cycles += cycles;
@@ -61,7 +61,7 @@ u8 ppu_tick(PPU* ppu, u8 cycles) {
                 ppu->mode_cycles = 0;
                 ppu->line_cycles = 0;
                 // Rendre la ligne actuelle
-                ppu_render_line(ppu, NULL);
+                ppu_render_line(ppu, vram);
             }
             break;
             
@@ -83,6 +83,7 @@ u8 ppu_tick(PPU* ppu, u8 cycles) {
         case PPU_MODE_VBLANK:
             if (ppu->line_cycles >= 456) {
                 ppu->line_cycles = 0;
+                ppu->mode_cycles = 0;
                 ppu->ly++;
                 
                 if (ppu->ly >= 154) {
@@ -210,9 +211,10 @@ void ppu_update_palettes(PPU* ppu) {
     }
 }
 
-// Rendu d'une ligne (simplifié)
+// Rendu d'une ligne (vrai rendu Game Boy)
 void ppu_render_line(PPU* ppu, u8* vram) {
-    (void)vram; // Suppress unused parameter warning
+    if (!vram) return; // Pas de VRAM disponible
+    
     if (!(ppu->lcdc & 0x80)) {
         // LCD désactivé - afficher un pattern de test
         for (int x = 0; x < GB_WIDTH; x++) {
@@ -222,32 +224,83 @@ void ppu_render_line(PPU* ppu, u8* vram) {
         return;
     }
     
-    // Rendre un pattern visible pour les tests
+    // TEST: Pattern simple et visible
     for (int x = 0; x < GB_WIDTH; x++) {
         u32 color;
-        
-        // Pattern de test : lignes alternées
-        if ((ppu->ly + x) % 32 < 16) {
-            color = 0xFFFFFFFF; // Blanc
+        // Créer un damier simple
+        if ((ppu->ly / 8 + x / 8) % 2 == 0) {
+            color = 0xFF0000FF; // Rouge
         } else {
-            color = 0x000000FF; // Noir
+            color = 0x00FF00FF; // Vert
         }
-        
-        // Ajouter un pattern basé sur la ligne
-        if (ppu->ly < 10) {
-            color = 0xFF0000FF; // Rouge pour les 10 premières lignes
-        } else if (ppu->ly < 20) {
-            color = 0x00FF00FF; // Vert pour les lignes 10-20
-        } else if (ppu->ly < 30) {
-            color = 0x0000FFFF; // Bleu pour les lignes 20-30
-        }
-        
         ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
+    }
+    return; // Skip le rendu normal pour l'instant
+    
+    // Rendu normal Game Boy
+    
+    // Rendu du background
+    if (ppu->lcdc & 0x01) { // Background enabled
+        // Calculer la ligne de tuiles
+        u8 tile_y = (ppu->ly + ppu->scy) / 8;
+        u8 pixel_y = (ppu->ly + ppu->scy) % 8;
+        
+        // Adresse de la tile map
+        u16 tile_map_addr = (ppu->lcdc & 0x08) ? 0x9C00 : 0x9800;
+        
+        for (int x = 0; x < GB_WIDTH; x++) {
+            // Calculer la colonne de tuiles
+            u8 tile_x = (x + ppu->scx) / 8;
+            u8 pixel_x = (x + ppu->scx) % 8;
+            
+            // Lire l'index de la tuile
+            u16 tile_addr = tile_map_addr + tile_y * 32 + tile_x;
+            u8 tile_index = vram[tile_addr - 0x8000];
+            
+            // Adresse des données de la tuile
+            u16 tile_data_addr;
+            if (ppu->lcdc & 0x10) {
+                // Mode 0x8000 : tuiles 0-255
+                tile_data_addr = 0x8000 + tile_index * 16;
+            } else {
+                // Mode 0x8800 : tuiles -128 à 127
+                s8 signed_tile = (s8)tile_index;
+                tile_data_addr = 0x8800 + (signed_tile + 128) * 16;
+            }
+            
+            // Lire les 2 octets de la ligne de la tuile
+            u8 line_addr = tile_data_addr + pixel_y * 2;
+            u8 byte1 = vram[line_addr - 0x8000];
+            u8 byte2 = vram[line_addr + 1 - 0x8000];
+            
+            // Extraire le pixel (bit 7-x de byte1 et byte2)
+            u8 pixel = 0;
+            if (byte1 & (0x80 >> pixel_x)) pixel |= 0x01;
+            if (byte2 & (0x80 >> pixel_x)) pixel |= 0x02;
+            
+            // Convertir en couleur selon la palette BGP
+            u32 color = ppu_get_pixel_color(ppu, pixel);
+            ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
+        }
+    } else {
+        // Background désactivé - pixels blancs
+        for (int x = 0; x < GB_WIDTH; x++) {
+            ppu->framebuffer[ppu->ly * GB_WIDTH + x] = 0xFFFFFFFF;
+        }
     }
 }
 
-// Obtenir la couleur d'un pixel
-u8 ppu_get_pixel_color(u8 pixel_data, u8 palette) {
-    u8 color_index = (pixel_data >> (palette * 2)) & 0x03;
-    return color_index;
+// Obtenir la couleur d'un pixel selon la palette BGP
+u32 ppu_get_pixel_color(PPU* ppu, u8 pixel) {
+    // Extraire la couleur de la palette BGP
+    u8 color_index = (ppu->bgp >> (pixel * 2)) & 0x03;
+    
+    // Convertir en couleur RGBA
+    switch (color_index) {
+        case 0: return 0xFFFFFFFF; // Blanc
+        case 1: return 0xAAAAAAFF; // Gris clair
+        case 2: return 0x555555FF; // Gris foncé
+        case 3: return 0x000000FF; // Noir
+        default: return 0x000000FF;
+    }
 }

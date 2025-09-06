@@ -1,0 +1,4 @@
+create_simple_animation.c: In function 'main':
+create_simple_animation.c:109:23: warning: comparison of integer expressions of different signedness: 'int' and 'long long unsigned int' [-Wsign-compare]
+  109 |     for (int i = 0; i < 32768 - sizeof(header) - sizeof(rom_code); i++) {
+      |                       ^

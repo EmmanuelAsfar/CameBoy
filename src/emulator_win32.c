@@ -58,7 +58,7 @@ void emulator_run(Emulator* emu) {
         
         // Mettre à jour les composants
         timer_tick(&emu->timer, cycles);
-        ppu_tick(&emu->ppu, cycles);
+        ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
         
         // Vérifier les interruptions
         u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
