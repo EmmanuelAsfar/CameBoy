@@ -8,3 +8,13 @@ OK: test_interrupt compiled at 06/09/2025 13:14:41,49
 OK: test_joypad compiled at 06/09/2025 13:14:41,76 
 Test build ended 06/09/2025 13:14:46,54 
 ======================================== 
+======================================== 
+Test build started 06/09/2025 13:33:29,22 
+OK: test_cpu compiled at 06/09/2025 13:33:30,13 
+OK: test_mmu compiled at 06/09/2025 13:33:30,58 
+OK: test_ppu compiled at 06/09/2025 13:33:30,89 
+OK: test_timer compiled at 06/09/2025 13:33:31,19 
+OK: test_interrupt compiled at 06/09/2025 13:33:32,14 
+OK: test_joypad compiled at 06/09/2025 13:33:32,45 
+Test build ended 06/09/2025 13:33:36,32 
+======================================== 

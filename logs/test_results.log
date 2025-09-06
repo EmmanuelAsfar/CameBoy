@@ -1,5 +1,5 @@
 ======================================== 
-CameBoy Unit Tests - 06/09/2025 13:14:41,76 
+CameBoy Unit Tests - 06/09/2025 13:33:32,45 
 ======================================== 
  
 Running test_cpu... 
@@ -12,8 +12,25 @@ Test 4: CPU Registers... PASS
 Test 5: Arithmetic ADD... PASS
 Test 6: Arithmetic SUB... PASS
 Test 7: Arithmetic ADC... PASS
-Test 8: Arithmetic SBC... Assertion failed: !get_flag(&cpu, FLAG_H), file tests\unit\test_cpu.c, line 306
-ERREUR test_cpu FAILED 
+Test 8: Arithmetic SBC... PASS
+Test 9: Logical AND... PASS
+Test 10: Logical OR... PASS
+Test 11: Logical XOR... PASS
+Test 12: Logical CP... PASS
+Test 13: Load LD r8,r8... PASS
+Test 14: Load LD r8,n8... PASS
+Test 15: Load LD r16,n16... PASS
+Test 16: Jumps JR NZ... PASS
+Test 17: Jumps JR Z... PASS
+Test 18: Jumps JR NC... PASS
+Test 19: Jumps JR C... PASS
+Test 20: Stack PUSH/POP... PASS
+Test 21: Interrupts... PASS
+
+=== RÉSULTATS ===
+Tests passés: 21/21
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_cpu PASSED 
  
 Running test_mmu... 
 === TESTS UNITAIRES MMU ===
@@ -68,5 +85,5 @@ Test 5: Joypad Buttons... Assertion failed: (result & 0x0F) == 0x0C, file tests\
 ERREUR test_joypad FAILED 
  
 ======================================== 
-Total: 1/6 tests passed 
+Total: 2/6 tests passed 
 CERTAINS TESTS ONT ECHOUE 

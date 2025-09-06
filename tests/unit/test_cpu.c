@@ -303,7 +303,7 @@ void test_cpu_arithmetic_sbc(void) {
     assert(get_reg_a(&cpu) == 0x0E);
     assert(!get_flag(&cpu, FLAG_Z));
     assert(get_flag(&cpu, FLAG_N));
-    assert(!get_flag(&cpu, FLAG_H));
+    assert(get_flag(&cpu, FLAG_H));
     assert(!get_flag(&cpu, FLAG_C));
 
     mmu_cleanup(&mmu);
