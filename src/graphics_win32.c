@@ -23,11 +23,36 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
             
-            if (gfx && gfx->hbitmap) {
-                // Afficher le framebuffer
-                SetDIBitsToDevice(hdc, 0, 0, gfx->width, gfx->height,
-                                 0, 0, 0, gfx->height,
-                                 gfx->framebuffer, &gfx->bmi, DIB_RGB_COLORS);
+            if (gfx && gfx->framebuffer) {
+                // Récupérer la taille cliente de la fenêtre
+                RECT rc;
+                GetClientRect(hwnd, &rc);
+                int client_w = rc.right - rc.left;
+                int client_h = rc.bottom - rc.top;
+
+                // Calculer une échelle entière qui respecte l'aspect ratio 160x144
+                int scale_x = client_w / gfx->width;
+                int scale_y = client_h / gfx->height;
+                int scale = scale_x < scale_y ? scale_x : scale_y;
+                if (scale <= 0) scale = 1; // au minimum 1:1
+
+                int dst_w = gfx->width * scale;
+                int dst_h = gfx->height * scale;
+
+                // Centrer l'image dans la fenêtre
+                int dst_x = (client_w - dst_w) / 2;
+                int dst_y = (client_h - dst_h) / 2;
+
+                // Afficher le framebuffer avec mise à l'échelle
+                StretchDIBits(
+                    hdc,
+                    dst_x, dst_y, dst_w, dst_h,
+                    0, 0, gfx->width, gfx->height,
+                    gfx->framebuffer,
+                    &gfx->bmi,
+                    DIB_RGB_COLORS,
+                    SRCCOPY
+                );
             }
             
             EndPaint(hwnd, &ps);
@@ -44,6 +69,7 @@ bool graphics_win32_init(GraphicsWin32* gfx) {
     
     gfx->width = 160;   // Largeur Game Boy
     gfx->height = 144;  // Hauteur Game Boy
+    gfx->scale = 4;     // Facteur d'échelle par défaut (4x)
     gfx->running = true;
     gfx->visible = false;  // Commencer caché
     
@@ -78,14 +104,25 @@ bool graphics_win32_init(GraphicsWin32* gfx) {
         return false;
     }
     
-    // Créer la fenêtre (cachée par défaut)
+    // Créer la fenêtre en respectant l'aspect ratio de la Game Boy classique (4,7 x 4,3 cm)
+    int win_w = 800;  // Largeur fixe de la fenêtre
+    // Calculer la hauteur basée sur l'aspect ratio 4,7:4,3
+    int win_h = (int)(win_w * 4.3 / 4.7);  // win_h ≈ 732 pixels
+    
+    // Calculer l'échelle pour remplir la fenêtre
+    int scale_x = win_w / gfx->width;
+    int scale_y = win_h / gfx->height;
+    gfx->scale = (scale_x < scale_y) ? scale_x : scale_y;  // Prendre le plus petit pour garder les proportions
+    
+    printf("Fenêtre: %dx%d, échelle calculée: %d\n", win_w, win_h, gfx->scale);
+    
     gfx->hwnd = CreateWindowEx(
         0,
         "CameBoy",
         "CameBoy - Game Boy LCD",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
-        gfx->width * 4, gfx->height * 4, // 4x zoom
+        win_w, win_h,
         NULL, NULL,
         GetModuleHandle(NULL),
         NULL

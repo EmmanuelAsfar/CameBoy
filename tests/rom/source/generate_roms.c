@@ -256,26 +256,34 @@ int main(void) {
         // HL=0x8000: tile data base
         *c++ = 0x21; *c++ = 0x00; *c++ = 0x80; // LD HL,8000h
         
-        // Write tile0: 16 bytes, pattern 0xAA/0x00 repeated
-        *c++ = 0x0E; *c++ = 0x08; // LD C,8 (8 lines)
+        // Write tile0: 8 lines, alternating 0xAA and 0x55 per row to make checker
+        *c++ = 0x0E; *c++ = 0x08; // LD C,8
+        *c++ = 0x3E; *c++ = 0xAA; // LD A,0xAA (current row pattern)
         uint16_t t0_loop = (uint16_t)(p + (c - &rom[p]));
-        *c++ = 0x3E; *c++ = 0xAA; // LD A,0xAA
         *c++ = 0x77;             // LD (HL),A
         *c++ = 0x23;             // INC HL
-        *c++ = 0x3E; *c++ = 0x00; // LD A,0x00
-        *c++ = 0x77;             // LD (HL),A
+        *c++ = 0x57;             // LD D,A (save pattern)
+        *c++ = 0xAF;             // XOR A (A=0)
+        *c++ = 0x77;             // LD (HL),A (second plane 0)
         *c++ = 0x23;             // INC HL
+        *c++ = 0x7A;             // LD A,D (restore pattern)
+        *c++ = 0x0F;             // RRCA (toggle 0xAA <-> 0x55)
         *c++ = 0x0D;             // DEC C
         int8_t rel_t0 = (int8_t)(t0_loop - (((p + (c - &rom[p])) + 2)));
         *c++ = 0x20; *c++ = (uint8_t)rel_t0; // JR NZ,t0_loop
         
-        // Write tile1: inverse pattern 0x55/0x00 at 0x8010
-        *c++ = 0x0E; *c++ = 0x08; // LD C,8 (8 lines)
-        uint16_t t1_loop = (uint16_t)(p + (c - &rom[p]));
+        // Write tile1: same but start with 0x55 so tiles differ by phase
+        *c++ = 0x0E; *c++ = 0x08; // LD C,8
         *c++ = 0x3E; *c++ = 0x55; // LD A,0x55
-        *c++ = 0x77; *c++ = 0x23; // LD (HL),A ; INC HL
-        *c++ = 0x3E; *c++ = 0x00; // LD A,0x00
-        *c++ = 0x77; *c++ = 0x23; // LD (HL),A ; INC HL
+        uint16_t t1_loop = (uint16_t)(p + (c - &rom[p]));
+        *c++ = 0x77;             // LD (HL),A
+        *c++ = 0x23;             // INC HL
+        *c++ = 0x57;             // LD D,A
+        *c++ = 0xAF;             // XOR A
+        *c++ = 0x77;             // LD (HL),A
+        *c++ = 0x23;             // INC HL
+        *c++ = 0x7A;             // LD A,D
+        *c++ = 0x0F;             // RRCA
         *c++ = 0x0D;             // DEC C
         int8_t rel_t1 = (int8_t)(t1_loop - (((p + (c - &rom[p])) + 2)));
         *c++ = 0x20; *c++ = (uint8_t)rel_t1; // JR NZ,t1_loop

@@ -12,3 +12,13 @@ src\emulator_simple.c: In function 'emulator_simple_run':
 src\emulator_simple.c:466:25: warning: comparison is always false due to limited range of data type [-Wtype-limits]
   466 |         if (emu->cpu.pc >= 0x10000) {
       |                         ^~
+======================================== 
+Test build started 06/09/2025 18:20:14,32 
+OK: test_cpu compiled at 06/09/2025 18:20:15,21 
+OK: test_mmu compiled at 06/09/2025 18:20:15,68 
+OK: test_ppu compiled at 06/09/2025 18:20:15,99 
+OK: test_timer compiled at 06/09/2025 18:20:16,28 
+OK: test_interrupt compiled at 06/09/2025 18:20:17,22 
+OK: test_joypad compiled at 06/09/2025 18:20:17,53 
+Test build ended 06/09/2025 18:20:18,18 
+======================================== 

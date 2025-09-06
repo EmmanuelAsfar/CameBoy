@@ -52,7 +52,7 @@ void emulator_run(Emulator* emu) {
     printf("Démarrage de l'émulation avec interface graphique...\n");
     printf("Appuyez sur Échap pour quitter\n\n");
     
-    // Afficher la fenêtre
+    // Afficher la fenêtre (l'échelle est calculée automatiquement)
     graphics_win32_show(&emu->graphics);
     
     // Exécution initiale du CPU pour permettre à la ROM d'initialiser VRAM/BG map

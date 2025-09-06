@@ -14,6 +14,7 @@ typedef struct {
     bool running;
     int width;
     int height;
+    int scale;
     bool visible;  // Pour contrôler la visibilité de la fenêtre
 } GraphicsWin32;
 
