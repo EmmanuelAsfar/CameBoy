@@ -61,6 +61,31 @@ typedef int32_t  s32;
 #define WY_REG       0xFF4A  // Window Y position
 #define WX_REG       0xFF4B  // Window X position
 
+// Registres Audio (0xFF10-0xFF3F)
+#define NR10_REG     0xFF10  // Channel 1 Sweep
+#define NR11_REG     0xFF11  // Channel 1 Sound length/Wave pattern duty
+#define NR12_REG     0xFF12  // Channel 1 Volume Envelope
+#define NR13_REG     0xFF13  // Channel 1 Frequency lo
+#define NR14_REG     0xFF14  // Channel 1 Frequency hi
+#define NR21_REG     0xFF16  // Channel 2 Sound length/Wave pattern duty
+#define NR22_REG     0xFF17  // Channel 2 Volume Envelope
+#define NR23_REG     0xFF18  // Channel 2 Frequency lo
+#define NR24_REG     0xFF19  // Channel 2 Frequency hi
+#define NR30_REG     0xFF1A  // Channel 3 Sound on/off
+#define NR31_REG     0xFF1B  // Channel 3 Sound length
+#define NR32_REG     0xFF1C  // Channel 3 Select output level
+#define NR33_REG     0xFF1D  // Channel 3 Frequency lo
+#define NR34_REG     0xFF1E  // Channel 3 Frequency hi
+#define NR41_REG     0xFF20  // Channel 4 Sound length
+#define NR42_REG     0xFF21  // Channel 4 Volume Envelope
+#define NR43_REG     0xFF22  // Channel 4 Polynomial counter
+#define NR44_REG     0xFF23  // Channel 4 Counter/Consecutive
+#define NR50_REG     0xFF24  // Channel control / ON-OFF / Volume
+#define NR51_REG     0xFF25  // Selection of Sound output terminal
+#define NR52_REG     0xFF26  // Sound on/off
+#define WAVE_START   0xFF30  // Wave pattern RAM start
+#define WAVE_END     0xFF3F  // Wave pattern RAM end
+
 // Interrupts
 #define VBLANK_INT   0x01
 #define LCD_STAT_INT 0x02

@@ -1,5 +1,6 @@
 #include "mmu.h"
 #include "timer.h"
+#include "apu.h"
 
 // Initialisation de la MMU
 void mmu_init(MMU* mmu) {
@@ -177,6 +178,11 @@ u8 mmu_read8(MMU* mmu, u16 address) {
         if (address >= 0xFF04 && address <= 0xFF07) {
             return timer_read((Timer*)mmu->timer, address);
         }
+        // Connecter les registres audio à l'APU
+        if (address >= 0xFF10 && address <= 0xFF3F) {
+            return apu_read((APU*)mmu->apu, address);
+        }
+        // Autres registres IO
         return mmu->io[address - 0xFF00];
     } else if (address >= 0xFF80 && address <= 0xFFFE) {
         // HRAM
@@ -218,12 +224,22 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
         mmu->oam[address - 0xFE00] = value;
     } else if (address >= 0xFF00 && address <= 0xFF7F) {
         // IO
-        mmu->io[address - 0xFF00] = value;
+        // Connecter les registres timer au timer
+        if (address >= 0xFF04 && address <= 0xFF07) {
+            timer_write((Timer*)mmu->timer, address, value);
+            return; // Ne pas écrire dans mmu->io
+        }
+        // Connecter les registres audio à l'APU
+        if (address >= 0xFF10 && address <= 0xFF3F) {
+            apu_write((APU*)mmu->apu, address, value);
+            return; // Ne pas écrire dans mmu->io
+        }
         
         // Support du port série pour les tests
         if (address == 0xFF01) {  // SB - Serial Data
-            // Juste stocker la valeur
+            mmu->io[address - 0xFF00] = value;
         } else if (address == 0xFF02) {  // SC - Serial Control
+            mmu->io[address - 0xFF00] = value;
             // Si bit 7 est activé, transmettre le caractère
             if (value & 0x80) {
                 u8 data = mmu->io[0xFF01 - 0xFF00];
@@ -232,11 +248,9 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
                 // Remettre le bit 7 à 0 après transmission
                 mmu->io[address - 0xFF00] = 0x00;
             }
-        }
-        
-        // Connecter les registres timer au timer
-        if (address >= 0xFF04 && address <= 0xFF07) {
-            timer_write((Timer*)mmu->timer, address, value);
+        } else {
+            // Autres registres IO
+            mmu->io[address - 0xFF00] = value;
         }
     } else if (address >= 0xFF80 && address <= 0xFFFE) {
         // HRAM

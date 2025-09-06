@@ -1,10 +1,278 @@
+#include <stdio.h>
 #include "common.h"
 #include "mmu.h"
 #include "cpu.h"
 #include "timer.h"
 #include "ppu.h"
 #include "joypad.h"
+#include "apu.h"
+#include "interrupt.h"
 #include "graphics_win32.h"
+
+// Charger des tiles de caractères ASCII depuis console.bin
+void load_console_tiles(u8* vram) {
+    FILE* f = fopen("console.bin", "rb");
+    if (!f) {
+        printf("Erreur: impossible d'ouvrir console.bin, utilisation des tiles par défaut\n");
+        load_ascii_tiles(vram);
+        return;
+    }
+    
+    // Lire 96 caractères * 16 octets = 1536 octets
+    size_t read = fread(vram + 0x200, 1, 1536, f);
+    fclose(f);
+    
+    if (read != 1536) {
+        printf("Erreur: lecture incomplète de console.bin (%zu/1536 octets)\n", read);
+        load_ascii_tiles(vram);
+        return;
+    }
+    
+    printf("Tiles ASCII chargées depuis console.bin (%zu octets)\n", read);
+}
+
+// Charger des tiles de caractères ASCII basiques
+void load_ascii_tiles(u8* vram) {
+    // Tiles ASCII simples (8x8 pixels chacune)
+    // Chaque caractère prend 16 octets (2 octets par ligne, 8 lignes)
+    
+    // Tile 0: Espace (vide)
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + i] = 0x00;
+    }
+    
+    // Tile 1: 'A' (lettre A simple)
+    u8 tile_a[16] = {
+        0x00, 0x00,  // ........
+        0x18, 0x00,  // ...##...
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x3C, 0x00,  // ..####..
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 16 + i] = tile_a[i];
+    }
+    
+    // Tile 2: 'B'
+    u8 tile_b[16] = {
+        0x00, 0x00,  // ........
+        0x38, 0x00,  // ..###...
+        0x24, 0x00,  // ..#..#..
+        0x38, 0x00,  // ..###...
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x38, 0x00,  // ..###...
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 32 + i] = tile_b[i];
+    }
+    
+    // Tile 3: 'C'
+    u8 tile_c[16] = {
+        0x00, 0x00,  // ........
+        0x1C, 0x00,  // ...###..
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x1C, 0x00,  // ...###..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 48 + i] = tile_c[i];
+    }
+    
+    // Tile 4: 'D'
+    u8 tile_d[16] = {
+        0x00, 0x00,  // ........
+        0x38, 0x00,  // ..###...
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x38, 0x00,  // ..###...
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 64 + i] = tile_d[i];
+    }
+    
+    // Tile 5: 'E'
+    u8 tile_e[16] = {
+        0x00, 0x00,  // ........
+        0x3C, 0x00,  // ..####..
+        0x20, 0x00,  // ..#.....
+        0x38, 0x00,  // ..###...
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x3C, 0x00,  // ..####..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 80 + i] = tile_e[i];
+    }
+    
+    // Tile 6: 'F'
+    u8 tile_f[16] = {
+        0x00, 0x00,  // ........
+        0x3C, 0x00,  // ..####..
+        0x20, 0x00,  // ..#.....
+        0x38, 0x00,  // ..###...
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 96 + i] = tile_f[i];
+    }
+    
+    // Tile 7: 'G'
+    u8 tile_g[16] = {
+        0x00, 0x00,  // ........
+        0x1C, 0x00,  // ...###..
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x26, 0x00,  // ..#..##.
+        0x22, 0x00,  // ..#...#.
+        0x1C, 0x00,  // ...###..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 112 + i] = tile_g[i];
+    }
+    
+    // Tile 8: 'H'
+    u8 tile_h[16] = {
+        0x00, 0x00,  // ........
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x3C, 0x00,  // ..####..
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 128 + i] = tile_h[i];
+    }
+    
+    // Tile 9: 'I'
+    u8 tile_i[16] = {
+        0x00, 0x00,  // ........
+        0x1C, 0x00,  // ...###..
+        0x08, 0x00,  // ....#...
+        0x08, 0x00,  // ....#...
+        0x08, 0x00,  // ....#...
+        0x08, 0x00,  // ....#...
+        0x1C, 0x00,  // ...###..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 144 + i] = tile_i[i];
+    }
+    
+    // Tile 10: 'L'
+    u8 tile_l[16] = {
+        0x00, 0x00,  // ........
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x3C, 0x00,  // ..####..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 160 + i] = tile_l[i];
+    }
+    
+    // Tile 11: 'O'
+    u8 tile_o[16] = {
+        0x00, 0x00,  // ........
+        0x1C, 0x00,  // ...###..
+        0x22, 0x00,  // ..#...#.
+        0x22, 0x00,  // ..#...#.
+        0x22, 0x00,  // ..#...#.
+        0x22, 0x00,  // ..#...#.
+        0x1C, 0x00,  // ...###..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 176 + i] = tile_o[i];
+    }
+    
+    // Tile 12: 'P'
+    u8 tile_p[16] = {
+        0x00, 0x00,  // ........
+        0x38, 0x00,  // ..###...
+        0x24, 0x00,  // ..#..#..
+        0x24, 0x00,  // ..#..#..
+        0x38, 0x00,  // ..###...
+        0x20, 0x00,  // ..#.....
+        0x20, 0x00,  // ..#.....
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 192 + i] = tile_p[i];
+    }
+    
+    // Tile 13: 'S'
+    u8 tile_s[16] = {
+        0x00, 0x00,  // ........
+        0x1C, 0x00,  // ...###..
+        0x20, 0x00,  // ..#.....
+        0x1C, 0x00,  // ...###..
+        0x02, 0x00,  // ......#.
+        0x02, 0x00,  // ......#.
+        0x1C, 0x00,  // ...###..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 208 + i] = tile_s[i];
+    }
+    
+    // Tile 14: 'T'
+    u8 tile_t[16] = {
+        0x00, 0x00,  // ........
+        0x3E, 0x00,  // ..#####.
+        0x08, 0x00,  // ....#...
+        0x08, 0x00,  // ....#...
+        0x08, 0x00,  // ....#...
+        0x08, 0x00,  // ....#...
+        0x08, 0x00,  // ....#...
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 224 + i] = tile_t[i];
+    }
+    
+    // Tile 15: 'U'
+    u8 tile_u[16] = {
+        0x00, 0x00,  // ........
+        0x22, 0x00,  // ..#...#.
+        0x22, 0x00,  // ..#...#.
+        0x22, 0x00,  // ..#...#.
+        0x22, 0x00,  // ..#...#.
+        0x22, 0x00,  // ..#...#.
+        0x1C, 0x00,  // ...###..
+        0x00, 0x00   // ........
+    };
+    for (int i = 0; i < 16; i++) {
+        vram[0x200 + 240 + i] = tile_u[i];
+    }
+    
+    // Remplir le reste avec des espaces
+    for (int i = 16; i < 96; i++) {
+        for (int j = 0; j < 16; j++) {
+            vram[0x200 + i * 16 + j] = 0x00;
+        }
+    }
+}
 
 // Structure principale de l'émulateur simple
 typedef struct {
@@ -13,6 +281,8 @@ typedef struct {
     Timer timer;
     PPU ppu;
     Joypad joypad;
+    APU apu;
+    InterruptManager interrupt_mgr;
     GraphicsWin32 graphics;
     
     bool running;
@@ -30,9 +300,12 @@ void emulator_simple_init(EmulatorSimple* emu) {
     timer_init(&emu->timer);
     ppu_init(&emu->ppu);
     joypad_init(&emu->joypad);
+    apu_init(&emu->apu);
+    interrupt_init(&emu->interrupt_mgr);
     
-    // Connecter le timer au MMU
+    // Connecter le timer et l'APU au MMU
     emu->mmu.timer = &emu->timer;
+    emu->mmu.apu = &emu->apu;
     
     // Initialiser les graphiques (caché par défaut)
     if (!graphics_win32_init(&emu->graphics)) {
@@ -51,6 +324,7 @@ void emulator_simple_init(EmulatorSimple* emu) {
 // Nettoyage de l'émulateur simple
 void emulator_simple_cleanup(EmulatorSimple* emu) {
     mmu_cleanup(&emu->mmu);
+    apu_cleanup(&emu->apu);
     graphics_win32_cleanup(&emu->graphics);
 }
 
@@ -72,14 +346,9 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
     u32 total_cycles = 0;
     
     while (emu->running && total_cycles < max_cycles) {
-        // Log de debug pour identifier le problème
-        if (total_cycles < 200) {
-            printf("PC: 0x%04X, Opcode: 0x%02X, AF: 0x%04X, Flags: Z=%d N=%d H=%d C=%d\n", 
-                   emu->cpu.pc, emu->mmu.memory[emu->cpu.pc], emu->cpu.af,
-                   (emu->cpu.af & FLAG_Z) ? 1 : 0,
-                   (emu->cpu.af & FLAG_N) ? 1 : 0,
-                   (emu->cpu.af & FLAG_H) ? 1 : 0,
-                   (emu->cpu.af & FLAG_C) ? 1 : 0);
+        // Log de debug réduit
+        if (total_cycles < 50) {
+            printf("PC: 0x%04X, Opcode: 0x%02X\n", emu->cpu.pc, emu->mmu.memory[emu->cpu.pc]);
         }
         
         // Exécuter une instruction CPU
@@ -93,11 +362,9 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
                    emu->cpu.pc, emu->cpu.af, emu->cpu.bc, emu->cpu.de, emu->cpu.hl, emu->cpu.sp);
         }
         
-        // Log détaillé pour les tests Blargg
-        if (total_cycles < 200) { // Log seulement les 200 premiers cycles
-            printf("Cycle %u: PC=0x%04X, Opcode=0x%02X, AF=0x%04X, BC=0x%04X, DE=0x%04X, HL=0x%04X, SP=0x%04X\n",
-                   total_cycles, emu->cpu.pc, emu->mmu.memory[emu->cpu.pc], 
-                   emu->cpu.af, emu->cpu.bc, emu->cpu.de, emu->cpu.hl, emu->cpu.sp);
+        // Log détaillé réduit
+        if (total_cycles < 50) {
+            printf("Cycle %u: PC=0x%04X, AF=0x%04X\n", total_cycles, emu->cpu.pc, emu->cpu.af);
         }
         
         // Log spécial pour les accès port série
@@ -109,6 +376,7 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
         timer_tick(&emu->timer, cycles);
         u8 ppu_interrupts = ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
         u8 timer_interrupts = timer_get_interrupts(&emu->timer);
+        apu_tick(&emu->apu, cycles);
         
         // Mettre à jour l'affichage LCD si nécessaire
         if (emu->show_lcd) {
@@ -122,31 +390,26 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
             }
         }
         
-        // Ajouter les interruptions au registre IF
-        u8 all_interrupts = ppu_interrupts | timer_interrupts;
-        if (all_interrupts) {
-            u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
-            mmu_write8(&emu->mmu, IF_REG, if_reg | all_interrupts);
-            if (total_cycles < 1000) { // Log seulement les 1000 premiers cycles
-                if (ppu_interrupts) printf("PPU interrupt déclenchée: 0x%02X\n", ppu_interrupts);
-                if (timer_interrupts) printf("Timer interrupt déclenchée: 0x%02X\n", timer_interrupts);
-            }
+        // Ajouter les interruptions au gestionnaire d'interruptions
+        if (ppu_interrupts) {
+            interrupt_request(&emu->interrupt_mgr, ppu_interrupts);
+        }
+        if (timer_interrupts) {
+            interrupt_request(&emu->interrupt_mgr, timer_interrupts);
         }
         
-        // Vérifier les interruptions
-        u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
-        u8 ie_reg = mmu_read8(&emu->mmu, IE_REG);
+        // Synchroniser les registres IE et IF avec le gestionnaire
+        interrupt_write_ie(&emu->interrupt_mgr, mmu_read8(&emu->mmu, IE_REG));
+        interrupt_write_if(&emu->interrupt_mgr, mmu_read8(&emu->mmu, IF_REG));
         
-        if (emu->cpu.ime && (if_reg & ie_reg)) {
-            // Trouver la première interruption active
-            for (int i = 0; i < 5; i++) {
-                u8 interrupt = 1 << i;
-                if ((if_reg & interrupt) && (ie_reg & interrupt)) {
-                    cpu_interrupt(&emu->cpu, &emu->mmu, interrupt);
-                    // Effacer le flag d'interruption
-                    mmu_write8(&emu->mmu, IF_REG, if_reg & ~interrupt);
-                    break;
-                }
+        // Traiter les interruptions
+        u8 handled_interrupt = interrupt_handle(&emu->interrupt_mgr, &emu->cpu, &emu->mmu);
+        if (handled_interrupt) {
+            // Synchroniser le registre IF avec le gestionnaire
+            mmu_write8(&emu->mmu, IF_REG, interrupt_read_if(&emu->interrupt_mgr));
+            if (total_cycles < 1000) { // Log seulement les 1000 premiers cycles
+                printf("Interruption traitée: %s (0x%02X)\n", 
+                       interrupt_get_name(handled_interrupt), handled_interrupt);
             }
         }
         
@@ -154,11 +417,13 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
         if (emu->current_cycles >= emu->cycles_per_frame) {
             emu->current_cycles -= emu->cycles_per_frame;
             
-            // Rendre la frame (sans affichage)
-            ppu_render_line(&emu->ppu, emu->mmu.vram);
-            
-            // Afficher le framebuffer si LCD activé
+            // Rendre la frame complète
             if (emu->show_lcd) {
+                for (int y = 0; y < GB_HEIGHT; y++) {
+                    emu->ppu.ly = y;
+                    ppu_render_line(&emu->ppu, emu->mmu.vram);
+                }
+                graphics_win32_update(&emu->graphics, emu->ppu.framebuffer);
                 graphics_win32_present(&emu->graphics);
             }
         }
@@ -215,17 +480,7 @@ int main(int argc, char* argv[]) {
     // Activer l'affichage LCD pour les tests Blargg
     emulator_simple_show_lcd(&emu);
     
-    // Rendre une frame complète pour l'affichage initial
-    if (emu.show_lcd) {
-        printf("Rendu de la frame initiale...\n");
-        for (int y = 0; y < GB_HEIGHT; y++) {
-            emu.ppu.ly = y;
-            ppu_render_line(&emu.ppu, emu.mmu.vram);
-        }
-        graphics_win32_update(&emu.graphics, emu.ppu.framebuffer);
-        graphics_win32_present(&emu.graphics);
-        printf("Frame initiale rendue\n");
-    }
+    // Laisser le CPU s'exécuter d'abord pour charger les tiles
     
     // Nombre maximum de cycles
     u32 max_cycles = 1000000; // 1M cycles par défaut
@@ -237,6 +492,29 @@ int main(int argc, char* argv[]) {
     if (emu.show_lcd) {
         max_cycles = 10000000; // 10M cycles pour voir l'affichage
         printf("Affichage LCD activé - cycles augmentés à %u\n", max_cycles);
+        
+        // Laisser le CPU s'exécuter un peu avant de commencer le rendu
+        printf("Exécution initiale du CPU pour charger les tiles...\n");
+        for (int i = 0; i < 10000; i++) {
+            u8 cycles = cpu_step(&emu.cpu, &emu.mmu);
+            timer_tick(&emu.timer, cycles);
+            ppu_tick(&emu.ppu, cycles, emu.mmu.vram);
+        }
+        printf("Chargement initial terminé\n");
+        
+        // Charger des tiles de caractères ASCII depuis console.bin
+        printf("Chargement des tiles ASCII depuis console.bin...\n");
+        load_console_tiles(emu.mmu.vram);
+        
+        // Vérifier si des tiles ont été chargées
+        printf("Vérification des tiles chargées...\n");
+        for (int i = 0; i < 16; i++) {
+            printf("Tile %d: ", i);
+            for (int j = 0; j < 16; j++) {
+                printf("%02X ", emu.mmu.vram[i * 16 + j]);
+            }
+            printf("\n");
+        }
     }
     
     // Lancer l'émulation

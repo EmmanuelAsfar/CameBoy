@@ -14,7 +14,7 @@ void ppu_reset(PPU* ppu) {
     ppu->scx = 0;
     ppu->ly = 0;
     ppu->lyc = 0;
-    ppu->bgp = 0xFC;
+    ppu->bgp = 0xE4;  // Palette Blargg: blanc, gris clair, gris foncé, noir
     ppu->obp0 = 0xFF;
     ppu->obp1 = 0xFF;
     ppu->wy = 0;
@@ -38,13 +38,7 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
     ppu->mode_cycles += cycles;
     ppu->line_cycles += cycles;
     
-    // Debug: log les changements de mode
-    static u32 debug_cycles = 0;
-    debug_cycles += cycles;
-    if (debug_cycles < 5000) { // Log plus de cycles
-        printf("PPU: mode=%d, mode_cycles=%d, line_cycles=%d, ly=%d\n", 
-               ppu->mode, ppu->mode_cycles, ppu->line_cycles, ppu->ly);
-    }
+    // Debug réduit - supprimé
     
     // Gestion des modes PPU
     switch (ppu->mode) {
@@ -56,17 +50,16 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
             break;
             
         case PPU_MODE_PIXEL_TRANSFER:
-            if (ppu->line_cycles >= 456) { // Utiliser line_cycles au lieu de mode_cycles
+            if (ppu->mode_cycles >= 172) { // PIXEL_TRANSFER dure 172 cycles
                 ppu->mode = PPU_MODE_HBLANK;
                 ppu->mode_cycles = 0;
-                ppu->line_cycles = 0;
                 // Rendre la ligne actuelle
                 ppu_render_line(ppu, vram);
             }
             break;
             
         case PPU_MODE_HBLANK:
-            if (ppu->mode_cycles >= 204) {
+            if (ppu->line_cycles >= 456) { // HBLANK dure jusqu'à 456 cycles par ligne
                 ppu->mode_cycles = 0;
                 ppu->line_cycles = 0;
                 ppu->ly++;
@@ -86,7 +79,7 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
                 ppu->mode_cycles = 0;
                 ppu->ly++;
                 
-                if (ppu->ly >= 154) {
+                if (ppu->ly >= 154) { // VBLANK dure 10 lignes (144-153)
                     ppu->ly = 0;
                     ppu->mode = PPU_MODE_OAM_SEARCH;
                 }
@@ -224,18 +217,7 @@ void ppu_render_line(PPU* ppu, u8* vram) {
         return;
     }
     
-    // TEST: Pattern simple et visible
-    for (int x = 0; x < GB_WIDTH; x++) {
-        u32 color;
-        // Créer un damier simple
-        if ((ppu->ly / 8 + x / 8) % 2 == 0) {
-            color = 0xFF0000FF; // Rouge
-        } else {
-            color = 0x00FF00FF; // Vert
-        }
-        ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
-    }
-    return; // Skip le rendu normal pour l'instant
+    // Debug réduit - supprimé
     
     // Rendu normal Game Boy
     
@@ -257,6 +239,8 @@ void ppu_render_line(PPU* ppu, u8* vram) {
             u16 tile_addr = tile_map_addr + tile_y * 32 + tile_x;
             u8 tile_index = vram[tile_addr - 0x8000];
             
+            // Debug réduit - supprimé
+            
             // Adresse des données de la tuile
             u16 tile_data_addr;
             if (ppu->lcdc & 0x10) {
@@ -272,6 +256,8 @@ void ppu_render_line(PPU* ppu, u8* vram) {
             u8 line_addr = tile_data_addr + pixel_y * 2;
             u8 byte1 = vram[line_addr - 0x8000];
             u8 byte2 = vram[line_addr + 1 - 0x8000];
+            
+            // Debug réduit - supprimé
             
             // Extraire le pixel (bit 7-x de byte1 et byte2)
             u8 pixel = 0;

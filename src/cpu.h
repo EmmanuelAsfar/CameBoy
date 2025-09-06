@@ -249,14 +249,14 @@ void inst_scf(CPU* cpu, MMU* mmu);
 void inst_ccf(CPU* cpu, MMU* mmu);
 
 // Instructions LDH (High memory access)
-void inst_ldh_imm8_a(CPU* cpu, MMU* mmu);
 void inst_ldh_a_imm8(CPU* cpu, MMU* mmu);
-void inst_ldh_c_a(CPU* cpu, MMU* mmu);
+void inst_ldh_imm8_a(CPU* cpu, MMU* mmu);
 void inst_ldh_a_c(CPU* cpu, MMU* mmu);
+void inst_ldh_c_a(CPU* cpu, MMU* mmu);
 
 // Instructions LD avec adresses 16-bit
-void inst_ld_imm16_a(CPU* cpu, MMU* mmu);
-void inst_ld_a_imm16(CPU* cpu, MMU* mmu);
+void inst_ld_a_nn(CPU* cpu, MMU* mmu);
+void inst_ld_nn_a(CPU* cpu, MMU* mmu);
 
 // Tables d'instructions
 extern const Instruction opcodes[256];

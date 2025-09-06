@@ -80,6 +80,7 @@ typedef struct {
     Cartridge cart;
     bool boot_rom_enabled;
     void* timer;  // Pointeur vers le timer (void* pour éviter la dépendance circulaire)
+    void* apu;    // Pointeur vers l'APU (void* pour éviter la dépendance circulaire)
 } MMU;
 
 // Fonctions MMU

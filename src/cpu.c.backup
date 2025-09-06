@@ -70,18 +70,9 @@ void inst_nop(CPU* cpu, MMU* mmu) {
 }
 
 void inst_halt(CPU* cpu, MMU* mmu) {
-    // HALT bug selon Pan Docs : si IME=0 et interruption en attente, PC n'incrémente pas
-    u8 ie = mmu_read8(mmu, 0xFFFF);  // Interrupt Enable
-    u8 if_reg = mmu_read8(mmu, 0xFF0F);  // Interrupt Flag
-    
-    if (!cpu->ime && (ie & if_reg) != 0) {
-        // HALT bug : PC n'incrémente pas
-        cpu->halt_bug = true;
-    } else {
-        cpu->pc += 1;
-    }
-    
+    (void)mmu;  // Paramètre non utilisé
     cpu->halted = true;
+    cpu->pc += 1;
 }
 
 void inst_stop(CPU* cpu, MMU* mmu) {
@@ -1248,13 +1239,13 @@ void inst_ld_hl_sp_e8(CPU* cpu, MMU* mmu) {
     cpu->pc += 2;
 }
 
-void inst_ld_nn_a(CPU* cpu, MMU* mmu) {
+void inst_ld_imm16_a(CPU* cpu, MMU* mmu) {
     u16 addr = mmu_read8(mmu, cpu->pc + 1) | (mmu_read8(mmu, cpu->pc + 2) << 8);
     mmu_write8(mmu, addr, get_reg_a(cpu));
     cpu->pc += 3;
 }
 
-void inst_ld_a_nn(CPU* cpu, MMU* mmu) {
+void inst_ld_a_imm16(CPU* cpu, MMU* mmu) {
     u16 addr = mmu_read8(mmu, cpu->pc + 1) | (mmu_read8(mmu, cpu->pc + 2) << 8);
     set_reg_a(cpu, mmu_read8(mmu, addr));
     cpu->pc += 3;
@@ -1467,37 +1458,8 @@ void inst_rra(CPU* cpu, MMU* mmu) {
 
 void inst_daa(CPU* cpu, MMU* mmu) {
     (void)mmu;
-    // DAA (Decimal Adjust Accumulator) - Ajustement décimal de l'accumulateur
-    u8 a = get_reg_a(cpu);
-    u8 correction = 0;
-    bool carry = false;
-    
-    // Si la moitié basse > 9 OU flag H est set
-    if ((a & 0x0F) > 9 || get_flag(cpu, FLAG_H)) {
-        correction |= 0x06;
-    }
-    
-    // Si la moitié haute > 9 OU flag C est set OU (moitié haute >= 9 et moitié basse > 9)
-    if ((a >> 4) > 9 || get_flag(cpu, FLAG_C) || 
-        ((a >> 4) >= 9 && (a & 0x0F) > 9)) {
-        correction |= 0x60;
-        carry = true;
-    }
-    
-    // Appliquer la correction selon le flag N
-    if (get_flag(cpu, FLAG_N)) {
-        a -= correction;
-    } else {
-        a += correction;
-    }
-    
-    set_reg_a(cpu, a);
-    
-    // Mettre à jour les flags
-    set_flag(cpu, FLAG_Z, a == 0);
-    set_flag(cpu, FLAG_H, false);
-    set_flag(cpu, FLAG_C, carry);
-    
+    // DAA (Decimal Adjust Accumulator) - complexe, placeholder pour l'instant
+    // TODO: Implémenter DAA selon les spécifications Pan Docs
     cpu->pc += 1;
 }
 
@@ -1506,7 +1468,6 @@ void inst_cpl(CPU* cpu, MMU* mmu) {
     u8 a = get_reg_a(cpu);
     set_reg_a(cpu, ~a);
     
-    // CPL ne modifie que N et H, pas Z et C
     set_flag(cpu, FLAG_N, true);
     set_flag(cpu, FLAG_H, true);
     
@@ -1515,7 +1476,6 @@ void inst_cpl(CPU* cpu, MMU* mmu) {
 
 void inst_scf(CPU* cpu, MMU* mmu) {
     (void)mmu;
-    // SCF ne modifie que N, H et C, pas Z
     set_flag(cpu, FLAG_N, false);
     set_flag(cpu, FLAG_H, false);
     set_flag(cpu, FLAG_C, true);
@@ -1525,7 +1485,6 @@ void inst_scf(CPU* cpu, MMU* mmu) {
 
 void inst_ccf(CPU* cpu, MMU* mmu) {
     (void)mmu;
-    // CCF ne modifie que N, H et C, pas Z
     set_flag(cpu, FLAG_N, false);
     set_flag(cpu, FLAG_H, false);
     set_flag(cpu, FLAG_C, !get_flag(cpu, FLAG_C));
