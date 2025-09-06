@@ -37,10 +37,8 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
     u8 interrupts = 0;
     ppu->mode_cycles += cycles;
     ppu->line_cycles += cycles;
-    
-    // Debug réduit - supprimé
-    
-    // Gestion des modes PPU
+
+    // Machine à états basée sur mode_cycles (80 / 172 / 204 / 456)
     switch (ppu->mode) {
         case PPU_MODE_OAM_SEARCH:
             if (ppu->mode_cycles >= 80) {
@@ -48,38 +46,33 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
                 ppu->mode_cycles = 0;
             }
             break;
-            
         case PPU_MODE_PIXEL_TRANSFER:
-            if (ppu->mode_cycles >= 172) { // PIXEL_TRANSFER dure 172 cycles
+            if (ppu->mode_cycles >= 172) {
                 ppu->mode = PPU_MODE_HBLANK;
                 ppu->mode_cycles = 0;
-                // Rendre la ligne actuelle
                 ppu_render_line(ppu, vram);
             }
             break;
-            
         case PPU_MODE_HBLANK:
-            if (ppu->line_cycles >= 456) { // HBLANK dure jusqu'à 456 cycles par ligne
+            // Terminer la ligne strictement à 456 dots (conforme aux tests)
+            if (ppu->line_cycles >= 456) {
                 ppu->mode_cycles = 0;
                 ppu->line_cycles = 0;
                 ppu->ly++;
-                
-                if (ppu->ly >= 144) {
+                if (ppu->ly == 144) {
                     ppu->mode = PPU_MODE_VBLANK;
-                    interrupts |= 0x01;  // Déclencher interrupt VBLANK
+                    interrupts |= 0x01;
                 } else {
                     ppu->mode = PPU_MODE_OAM_SEARCH;
                 }
             }
             break;
-            
         case PPU_MODE_VBLANK:
-            if (ppu->line_cycles >= 456) {
-                ppu->line_cycles = 0;
+            if (ppu->mode_cycles >= 456) {
                 ppu->mode_cycles = 0;
+                ppu->line_cycles = 0;
                 ppu->ly++;
-                
-                if (ppu->ly >= 154) { // VBLANK dure 10 lignes (144-153)
+                if (ppu->ly >= 154) {
                     ppu->ly = 0;
                     ppu->mode = PPU_MODE_OAM_SEARCH;
                 }
@@ -87,15 +80,12 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
             break;
     }
     
-    // Mise à jour du registre STAT
-    ppu->stat = (ppu->stat & 0xFC) | ppu->mode;
-    
-    // Vérifier LY = LYC
+    // Mise à jour minimale du registre STAT: bits 0-1 (mode) et bit 2 (LYC==LY)
+    ppu->stat = (ppu->stat & 0xF8) | (ppu->mode & 0x03);
     if (ppu->ly == ppu->lyc) {
-        ppu->stat |= 0x04;  // Set LYC flag
-        // TODO: Déclencher interrupt LCD STAT si activé
+        ppu->stat |= 0x04;
     } else {
-        ppu->stat &= ~0x04;  // Clear LYC flag
+        ppu->stat &= (u8)~0x04;
     }
     
     return interrupts;
@@ -109,8 +99,8 @@ void ppu_write(PPU* ppu, u16 address, u8 value) {
             break;
             
         case STAT_REG:
-            // Seuls les bits 3-6 sont écritables
-            ppu->stat = (ppu->stat & 0x87) | (value & 0x78);
+            // Bits 3-6 et 7 écrits par la CPU; bits 0-2 reflètent le mode/LYC
+            ppu->stat = (ppu->stat & 0x07) | (value & 0xF8);
             break;
             
         case SCY_REG:

@@ -1,5 +1,5 @@
 ======================================== 
-CameBoy Unit Tests - 06/09/2025 13:33:32,45 
+CameBoy Unit Tests - 06/09/2025 14:47:53,43 
 ======================================== 
  
 Running test_cpu... 
@@ -37,16 +37,25 @@ Running test_mmu...
 
 Test 1: MMU Initialisation... PASS
 Test 2: MMU Reset... PASS
-Test 3: MMU Memory Mapping... Assertion failed: mmu_read8(&mmu, 0x0000) == 0xFF, file tests\unit\test_mmu.c, line 138
-ERREUR test_mmu FAILED 
+Test 3: MMU Memory Mapping... PASS
+Test 4: MMU Cart Parsing... Avertissement: Logo Nintendo invalide
+PASS
+Test 5: MMU Read/Write 8-bit... PASS
+Test 6: MMU Read/Write 16-bit... PASS
+Test 7: MMU Echo RAM... PASS
+
+=== RÉSULTATS ===
+Tests passés: 7/7
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_mmu PASSED 
  
 Running test_ppu... 
 === TESTS UNITAIRES PPU ===
 
 Test 1: PPU Initialisation... PASS
 Test 2: PPU Reset... PASS
-Test 3: PPU Registers... Assertion failed: ppu_read(&ppu, STAT_REG) == 0x45, file tests\unit\test_ppu.c, line 144
-ERREUR test_ppu FAILED 
+Test 3: PPU Registers... PASS
+Test 4: PPU Modes... ERREUR test_ppu FAILED 
  
 Running test_timer... 
 === TESTS UNITAIRES TIMER ===
@@ -54,8 +63,15 @@ Running test_timer...
 Test 1: Timer Initialisation... PASS
 Test 2: Timer Reset... PASS
 Test 3: Timer DIV Counter... PASS
-Test 4: Timer TIMA Counter... Assertion failed: timer.tima_period == 64, file tests\unit\test_timer.c, line 147
-ERREUR test_timer FAILED 
+Test 4: Timer TIMA Counter... PASS
+Test 5: Timer Overflow... PASS
+Test 6: Timer Frequencies... PASS
+Test 7: Timer Control... PASS
+
+=== RÉSULTATS ===
+Tests passés: 7/7
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_timer PASSED 
  
 Running test_interrupt... 
 === TESTS UNITAIRES INTERRUPTIONS ===
@@ -81,9 +97,15 @@ Test 1: Joypad Initialisation... PASS
 Test 2: Joypad Reset... PASS
 Test 3: Joypad Write... PASS
 Test 4: Joypad Read... PASS
-Test 5: Joypad Buttons... Assertion failed: (result & 0x0F) == 0x0C, file tests\unit\test_joypad.c, line 172
-ERREUR test_joypad FAILED 
+Test 5: Joypad Buttons... PASS
+Test 6: Joypad Directions... PASS
+Test 7: Joypad Mixed Input... PASS
+
+=== RÉSULTATS ===
+Tests passés: 7/7
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_joypad PASSED 
  
 ======================================== 
-Total: 2/6 tests passed 
+Total: 5/6 tests passed 
 CERTAINS TESTS ONT ECHOUE 

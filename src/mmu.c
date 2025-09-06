@@ -7,11 +7,13 @@ void mmu_init(MMU* mmu) {
     memset(mmu, 0, sizeof(MMU));
     
     // Allouer la mémoire totale (64KB)
-    mmu->memory = calloc(0x10000, 1);
+    mmu->memory = malloc(0x10000);
     if (!mmu->memory) {
         printf("Erreur: Impossible d'allouer la mémoire\n");
         exit(1);
     }
+    // Initialiser à 0xFF comme état par défaut non-initialisé
+    memset(mmu->memory, 0xFF, 0x10000);
     
     // Pointeurs vers les zones mémoire
     mmu->rom = &mmu->memory[0x0000];
@@ -45,6 +47,9 @@ void mmu_cleanup(MMU* mmu) {
 
 // Reset de la MMU
 void mmu_reset(MMU* mmu) {
+    // Ré-initialiser toute la RAM à 0xFF (zones non écrites lues à 0xFF)
+    memset(mmu->memory, 0xFF, 0x10000);
+
     // Initialiser les valeurs par défaut des registres IO
     mmu->memory[0xFF00] = 0xCF;  // P1
     mmu->memory[0xFF01] = 0x00;  // SB

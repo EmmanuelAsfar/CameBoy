@@ -24,7 +24,9 @@ typedef enum {
 // Structure du joypad
 typedef struct {
     u8 p1;           // Registre P1 (0xFF00)
-    u8 buttons;      // État des boutons
+    u8 buttons;      // État combiné (1=relâché), utilisé par les tests
+    u8 buttons_btn;  // État boutons (A,B,Select,Start) - bits 0..3 (1=relâché)
+    u8 buttons_dir;  // État directions (Right,Left,Up,Down) - bits 0..3 (1=relâché)
     u8 select_line;  // Ligne de sélection active
 } Joypad;
 

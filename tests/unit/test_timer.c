@@ -140,8 +140,8 @@ void test_timer_tima_counter(void) {
 
     timer_init(&timer);
 
-    // Configurer TIMA pour incrémenter toutes les 64 cycles (TAC = 0x05)
-    timer_write(&timer, TAC_REG, 0x05); // Enable + freq 65536Hz
+    // Configurer TIMA pour incrémenter toutes les 64 cycles (TAC = 0x06)
+    timer_write(&timer, TAC_REG, 0x06); // Enable + freq 65536Hz
 
     // Vérifier la période calculée
     assert(timer.tima_period == 64);
