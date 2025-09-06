@@ -244,8 +244,8 @@ void test_ppu_hblank(void) {
     ppu.line_cycles = 456 - 80 - 172; // Cycles restants dans la ligne
     ppu.ly = 0;
 
-    // Avancer jusqu'à la fin de la ligne
-    while (ppu.line_cycles < 456) {
+    // Avancer jusqu'à la fin de la ligne (mode sort de HBLANK)
+    while (ppu.mode == PPU_MODE_HBLANK) {
         u8 interrupts = ppu_tick(&ppu, 1, vram);
         (void)interrupts;
     }
@@ -280,14 +280,19 @@ void test_ppu_vblank(void) {
     assert(ppu.ly == 144);
     assert(ppu.mode == PPU_MODE_VBLANK);
 
-    // Simuler les 10 lignes de VBLANK
+    // Simuler les 10 lignes de VBLANK (144-153)
     for (int line = 144; line < 154; line++) {
         // Chaque ligne dure 456 cycles
         for (int cycle = 0; cycle < 456; cycle++) {
             u8 interrupts = ppu_tick(&ppu, 1, vram);
             (void)interrupts;
         }
-        assert(ppu.ly == line + 1);
+        // Pour la ligne 153, on s'attend à un retour à 0 (début de frame)
+        if (line == 153) {
+            assert(ppu.ly == 0); // Retour au début de frame
+        } else {
+            assert(ppu.ly == line + 1); // Ligne suivante
+        }
     }
 
     // Après VBLANK, retour à la ligne 0
@@ -343,11 +348,11 @@ void test_ppu_palettes(void) {
     // Changer la palette BGP
     ppu_write(&ppu, BGP_REG, 0xE4); // 11100100
 
-    // Vérifier les couleurs
-    assert(ppu.bg_palette[0] == 0xFF); // Blanc (11)
-    assert(ppu.bg_palette[1] == 0xAA); // Gris clair (10)
-    assert(ppu.bg_palette[2] == 0xAA); // Gris clair (01)
-    assert(ppu.bg_palette[3] == 0x00); // Noir (00)
+    // Vérifier les couleurs BGP=0xE4 (11100100)
+    assert(ppu.bg_palette[0] == 0xFF); // Blanc (bits 1-0 = 00 → code 0)
+    assert(ppu.bg_palette[1] == 0xAA); // Gris clair (bits 3-2 = 01 → code 1)
+    assert(ppu.bg_palette[2] == 0x55); // Gris foncé (bits 5-4 = 10 → code 2)
+    assert(ppu.bg_palette[3] == 0x00); // Noir (bits 7-6 = 11 → code 3)
 
     // Test fonction get_pixel_color
     u32 color0 = ppu_get_pixel_color(&ppu, 0);
@@ -356,7 +361,7 @@ void test_ppu_palettes(void) {
     u32 color3 = ppu_get_pixel_color(&ppu, 3);
 
     assert(color0 == 0xFFFFFFFF); // Blanc
-    assert(color1 == 0xAAAAAAAA); // Gris clair
-    assert(color2 == 0xAAAAAAAA); // Gris clair
+    assert(color1 == 0xAAAAAAFF); // Gris clair  
+    assert(color2 == 0x555555FF); // Gris foncé
     assert(color3 == 0x000000FF); // Noir
 }

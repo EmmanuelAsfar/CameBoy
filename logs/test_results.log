@@ -1,5 +1,5 @@
 ======================================== 
-CameBoy Unit Tests - 06/09/2025 14:47:53,43 
+CameBoy Unit Tests - 06/09/2025 15:22:04,23 
 ======================================== 
  
 Running test_cpu... 
@@ -55,7 +55,17 @@ Running test_ppu...
 Test 1: PPU Initialisation... PASS
 Test 2: PPU Reset... PASS
 Test 3: PPU Registers... PASS
-Test 4: PPU Modes... ERREUR test_ppu FAILED 
+Test 4: PPU Modes... PASS
+Test 5: PPU Pixel Transfer... PASS
+Test 6: PPU HBlank... PASS
+Test 7: PPU VBlank... PASS
+Test 8: PPU Render Line... PASS
+Test 9: PPU Palettes... PASS
+
+=== RÉSULTATS ===
+Tests passés: 9/9
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_ppu PASSED 
  
 Running test_timer... 
 === TESTS UNITAIRES TIMER ===
@@ -107,5 +117,5 @@ Tests passés: 7/7
 SUCCES test_joypad PASSED 
  
 ======================================== 
-Total: 5/6 tests passed 
-CERTAINS TESTS ONT ECHOUE 
+Total: 6/6 tests passed 
+TOUS LES TESTS REUSSIS 

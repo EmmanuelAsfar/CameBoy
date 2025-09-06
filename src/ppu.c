@@ -6,141 +6,134 @@ void ppu_init(PPU* ppu) {
     ppu_reset(ppu);
 }
 
-// Reset du PPU
+// Reset du PPU (DMG, LCD activé, valeurs conformes Pan Docs/minimales tests)
 void ppu_reset(PPU* ppu) {
-    ppu->lcdc = 0x91;
-    ppu->stat = 0x85;
-    ppu->scy = 0;
-    ppu->scx = 0;
-    ppu->ly = 0;
-    ppu->lyc = 0;
-    ppu->bgp = 0xE4;  // Palette Blargg: blanc, gris clair, gris foncé, noir
+    ppu->lcdc = 0x91;   // LCD ON, BG ON, tiles 8000h, BG map 9800h
+    ppu->stat = 0x85;   // LYC=LY cleared plus bits RW par défaut
+    ppu->scy  = 0;
+    ppu->scx  = 0;
+    ppu->ly   = 0;
+    ppu->lyc  = 0;
+    ppu->bgp  = 0xE4;   // 11,10,01,00 => FF,AA,AA,00 (DMG)
     ppu->obp0 = 0xFF;
     ppu->obp1 = 0xFF;
-    ppu->wy = 0;
-    ppu->wx = 0;
-    
+    ppu->wy   = 0;
+    ppu->wx   = 0;
+
     ppu->mode = PPU_MODE_OAM_SEARCH;
     ppu->mode_cycles = 0;
     ppu->line_cycles = 0;
-    
-    // Initialiser le framebuffer en blanc
+
+    // Framebuffer blanc
     for (int i = 0; i < GB_WIDTH * GB_HEIGHT; i++) {
         ppu->framebuffer[i] = 0xFFFFFFFF;
     }
-    
+
     ppu_update_palettes(ppu);
 }
 
-// Tick du PPU - Retourne les interruptions déclenchées
+// Tick PPU - retourne un masque d'interruptions déclenchées (bit0 = VBLANK)
 u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
     u8 interrupts = 0;
-    ppu->mode_cycles += cycles;
+
+    // Avancer la ligne en dots (4.19MHz) au granulaire "cycles" passé
     ppu->line_cycles += cycles;
 
-    // Machine à états basée sur mode_cycles (80 / 172 / 204 / 456)
-    switch (ppu->mode) {
-        case PPU_MODE_OAM_SEARCH:
-            if (ppu->mode_cycles >= 80) {
-                ppu->mode = PPU_MODE_PIXEL_TRANSFER;
-                ppu->mode_cycles = 0;
-            }
-            break;
-        case PPU_MODE_PIXEL_TRANSFER:
-            if (ppu->mode_cycles >= 172) {
-                ppu->mode = PPU_MODE_HBLANK;
-                ppu->mode_cycles = 0;
-                ppu_render_line(ppu, vram);
-            }
-            break;
-        case PPU_MODE_HBLANK:
-            // Terminer la ligne strictement à 456 dots (conforme aux tests)
-            if (ppu->line_cycles >= 456) {
-                ppu->mode_cycles = 0;
-                ppu->line_cycles = 0;
-                ppu->ly++;
-                if (ppu->ly == 144) {
-                    ppu->mode = PPU_MODE_VBLANK;
-                    interrupts |= 0x01;
-                } else {
-                    ppu->mode = PPU_MODE_OAM_SEARCH;
+    // Cas particulier: si on est explicitement en Mode 3 (PIXEL_TRANSFER),
+    // respecter strictement le budget 172 dots indépendamment de line_cycles.
+    if (ppu->mode == PPU_MODE_PIXEL_TRANSFER && ppu->ly < 144) {
+        ppu->mode_cycles += cycles;
+        if (ppu->mode_cycles >= 172) {
+            ppu->mode = PPU_MODE_HBLANK;
+            ppu->mode_cycles = 0;
+            ppu_render_line(ppu, vram);
+        }
+    } else if (ppu->ly < 144) {
+        // Avancer selon le mode courant pour respecter les tests qui forcent le mode
+        switch (ppu->mode) {
+            case PPU_MODE_OAM_SEARCH:
+                ppu->mode_cycles += cycles;
+                if (ppu->mode_cycles >= 80) {
+                    ppu->mode = PPU_MODE_PIXEL_TRANSFER;
+                    ppu->mode_cycles = 0;
                 }
-            }
-            break;
-        case PPU_MODE_VBLANK:
-            if (ppu->mode_cycles >= 456) {
-                ppu->mode_cycles = 0;
-                ppu->line_cycles = 0;
-                ppu->ly++;
-                if (ppu->ly >= 154) {
-                    ppu->ly = 0;
-                    ppu->mode = PPU_MODE_OAM_SEARCH;
+                break;
+            case PPU_MODE_PIXEL_TRANSFER:
+                ppu->mode_cycles += cycles;
+                if (ppu->mode_cycles >= 172) {
+                    ppu->mode = PPU_MODE_HBLANK;
+                    ppu->mode_cycles = 0;
+                    ppu_render_line(ppu, vram);
                 }
+                break;
+            case PPU_MODE_HBLANK: {
+                // Durée HBLANK = 456 - (80 + 172) = 204
+                ppu->mode_cycles += cycles;
+                if (ppu->mode_cycles >= 204) {
+                    // Fin de ligne: avancer LY et mode, remettre line_cycles à 0
+                    ppu->mode_cycles = 0;
+                    ppu->ly++;
+                    ppu->line_cycles = 0; // Reset line_cycles pour la nouvelle ligne
+                    if (ppu->ly == 144) {
+                        ppu->mode = PPU_MODE_VBLANK;
+                        interrupts |= 0x01;
+                    } else {
+                        ppu->mode = PPU_MODE_OAM_SEARCH;
+                    }
+                }
+                break;
             }
-            break;
+            default:
+                // Si un mode inattendu est trouvé pendant lignes visibles, retomber sur OAM
+                ppu->mode = PPU_MODE_OAM_SEARCH;
+                ppu->mode_cycles = ppu->line_cycles % 80;
+                break;
+        }
+    } else {
+        // VBlank: lignes 144..153, 456 dots par ligne
+        ppu->mode = PPU_MODE_VBLANK;
+        if (ppu->line_cycles >= 456) {
+            ppu->line_cycles -= 456; // Soustraire 456 pour garder les cycles excédentaires
+            ppu->mode_cycles = 0;
+            ppu->ly++;
+            if (ppu->ly >= 154) {
+                ppu->ly = 0;
+                ppu->line_cycles = 0; // Reset seulement au début de frame
+                ppu->mode = PPU_MODE_OAM_SEARCH;
+            }
+        } else {
+            ppu->mode_cycles = ppu->line_cycles;
+        }
     }
-    
-    // Mise à jour minimale du registre STAT: bits 0-1 (mode) et bit 2 (LYC==LY)
+
+    // STAT (bits 0-1 = mode, bit 2 = LYC==LY)
     ppu->stat = (ppu->stat & 0xF8) | (ppu->mode & 0x03);
     if (ppu->ly == ppu->lyc) {
         ppu->stat |= 0x04;
     } else {
         ppu->stat &= (u8)~0x04;
     }
-    
+
     return interrupts;
 }
 
-// Écriture dans les registres PPU
+// Écriture registres PPU
 void ppu_write(PPU* ppu, u16 address, u8 value) {
     switch (address) {
-        case LCDC_REG:
-            ppu->lcdc = value;
-            break;
-            
-        case STAT_REG:
-            // Bits 3-6 et 7 écrits par la CPU; bits 0-2 reflètent le mode/LYC
-            ppu->stat = (ppu->stat & 0x07) | (value & 0xF8);
-            break;
-            
-        case SCY_REG:
-            ppu->scy = value;
-            break;
-            
-        case SCX_REG:
-            ppu->scx = value;
-            break;
-            
-        case LYC_REG:
-            ppu->lyc = value;
-            break;
-            
-        case BGP_REG:
-            ppu->bgp = value;
-            ppu_update_palettes(ppu);
-            break;
-            
-        case OBP0_REG:
-            ppu->obp0 = value;
-            ppu_update_palettes(ppu);
-            break;
-            
-        case OBP1_REG:
-            ppu->obp1 = value;
-            ppu_update_palettes(ppu);
-            break;
-            
-        case WY_REG:
-            ppu->wy = value;
-            break;
-            
-        case WX_REG:
-            ppu->wx = value;
-            break;
+        case LCDC_REG: ppu->lcdc = value; break;
+        case STAT_REG: ppu->stat = (ppu->stat & 0x07) | (value & 0xF8); break;
+        case SCY_REG:  ppu->scy  = value; break;
+        case SCX_REG:  ppu->scx  = value; break;
+        case LYC_REG:  ppu->lyc  = value; break;
+        case BGP_REG:  ppu->bgp  = value; ppu_update_palettes(ppu); break;
+        case OBP0_REG: ppu->obp0 = value; ppu_update_palettes(ppu); break;
+        case OBP1_REG: ppu->obp1 = value; ppu_update_palettes(ppu); break;
+        case WY_REG:   ppu->wy   = value; break;
+        case WX_REG:   ppu->wx   = value; break;
     }
 }
 
-// Lecture des registres PPU
+// Lecture registres PPU
 u8 ppu_read(PPU* ppu, u16 address) {
     switch (address) {
         case LCDC_REG: return ppu->lcdc;
@@ -158,125 +151,77 @@ u8 ppu_read(PPU* ppu, u16 address) {
     }
 }
 
-// Mise à jour des palettes
+// Mise à jour palettes (DMG)
 void ppu_update_palettes(PPU* ppu) {
-    // Palette BG
     for (int i = 0; i < 4; i++) {
-        u8 color_code = (ppu->bgp >> (i * 2)) & 0x03;
-        switch (color_code) {
-            case 0: ppu->bg_palette[i] = 0xFF; break;  // Blanc
-            case 1: ppu->bg_palette[i] = 0xAA; break;  // Gris clair
-            case 2: ppu->bg_palette[i] = 0x55; break;  // Gris foncé
-            case 3: ppu->bg_palette[i] = 0x00; break;  // Noir
-        }
-    }
-    
-    // Palette OBJ0
-    for (int i = 0; i < 4; i++) {
-        u8 color_code = (ppu->obp0 >> (i * 2)) & 0x03;
-        switch (color_code) {
-            case 0: ppu->obj_palette0[i] = 0xFF; break;  // Transparent
-            case 1: ppu->obj_palette0[i] = 0xAA; break;  // Gris clair
-            case 2: ppu->obj_palette0[i] = 0x55; break;  // Gris foncé
-            case 3: ppu->obj_palette0[i] = 0x00; break;  // Noir
-        }
-    }
-    
-    // Palette OBJ1
-    for (int i = 0; i < 4; i++) {
-        u8 color_code = (ppu->obp1 >> (i * 2)) & 0x03;
-        switch (color_code) {
-            case 0: ppu->obj_palette1[i] = 0xFF; break;  // Transparent
-            case 1: ppu->obj_palette1[i] = 0xAA; break;  // Gris clair
-            case 2: ppu->obj_palette1[i] = 0x55; break;  // Gris foncé
-            case 3: ppu->obj_palette1[i] = 0x00; break;  // Noir
-        }
+        u8 code = (ppu->bgp >> (i * 2)) & 0x03;
+        ppu->bg_palette[i] = (code == 0 ? 0xFF : code == 1 ? 0xAA : code == 2 ? 0x55 : 0x00);
+        code = (ppu->obp0 >> (i * 2)) & 0x03;
+        ppu->obj_palette0[i] = (code == 0 ? 0xFF : code == 1 ? 0xAA : code == 2 ? 0x55 : 0x00);
+        code = (ppu->obp1 >> (i * 2)) & 0x03;
+        ppu->obj_palette1[i] = (code == 0 ? 0xFF : code == 1 ? 0xAA : code == 2 ? 0x55 : 0x00);
     }
 }
 
-// Rendu d'une ligne (vrai rendu Game Boy)
+// Rendu d'une ligne: BG uniquement (DMG minimal)
 void ppu_render_line(PPU* ppu, u8* vram) {
-    if (!vram) return; // Pas de VRAM disponible
-    
-    if (!(ppu->lcdc & 0x80)) {
-        // LCD désactivé - afficher un pattern de test
-        for (int x = 0; x < GB_WIDTH; x++) {
-            u32 color = 0x808080FF; // Gris
-            ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
-        }
-        return;
-    }
-    
-    // Debug réduit - supprimé
-    
-    // Rendu normal Game Boy
-    
-    // Rendu du background
-    if (ppu->lcdc & 0x01) { // Background enabled
-        // Calculer la ligne de tuiles
-        u8 tile_y = (ppu->ly + ppu->scy) / 8;
-        u8 pixel_y = (ppu->ly + ppu->scy) % 8;
-        
-        // Adresse de la tile map
-        u16 tile_map_addr = (ppu->lcdc & 0x08) ? 0x9C00 : 0x9800;
-        
-        for (int x = 0; x < GB_WIDTH; x++) {
-            // Calculer la colonne de tuiles
-            u8 tile_x = (x + ppu->scx) / 8;
-            u8 pixel_x = (x + ppu->scx) % 8;
-            
-            // Lire l'index de la tuile
-            u16 tile_addr = tile_map_addr + tile_y * 32 + tile_x;
-            u8 tile_index = vram[tile_addr - 0x8000];
-            
-            // Debug réduit - supprimé
-            
-            // Adresse des données de la tuile
-            u16 tile_data_addr;
-            if (ppu->lcdc & 0x10) {
-                // Mode 0x8000 : tuiles 0-255
-                tile_data_addr = 0x8000 + tile_index * 16;
-            } else {
-                // Mode 0x8800 : tuiles -128 à 127
-                s8 signed_tile = (s8)tile_index;
-                tile_data_addr = 0x8800 + (signed_tile + 128) * 16;
-            }
-            
-            // Lire les 2 octets de la ligne de la tuile
-            u8 line_addr = tile_data_addr + pixel_y * 2;
-            u8 byte1 = vram[line_addr - 0x8000];
-            u8 byte2 = vram[line_addr + 1 - 0x8000];
-            
-            // Debug réduit - supprimé
-            
-            // Extraire le pixel (bit 7-x de byte1 et byte2)
-            u8 pixel = 0;
-            if (byte1 & (0x80 >> pixel_x)) pixel |= 0x01;
-            if (byte2 & (0x80 >> pixel_x)) pixel |= 0x02;
-            
-            // Convertir en couleur selon la palette BGP
-            u32 color = ppu_get_pixel_color(ppu, pixel);
-            ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
-        }
-    } else {
-        // Background désactivé - pixels blancs
+    if (!(ppu->lcdc & 0x80)) return; // LCD off
+    if (!(ppu->lcdc & 0x01)) {
+        // BG off => blanc
         for (int x = 0; x < GB_WIDTH; x++) {
             ppu->framebuffer[ppu->ly * GB_WIDTH + x] = 0xFFFFFFFF;
         }
+        return;
+    }
+
+    u8 tile_y  = (ppu->ly + ppu->scy) >> 3;
+    u8 pixel_y = (ppu->ly + ppu->scy) & 7;
+    u16 tile_map = (ppu->lcdc & 0x08) ? 0x9C00 : 0x9800;
+
+    for (int x = 0; x < GB_WIDTH; x++) {
+        u16 sx = (x + ppu->scx) & 0xFF;
+        u8 tile_x  = sx >> 3;
+        u8 pixel_x = sx & 7;
+
+        u16 map_addr = tile_map + (tile_y * 32) + tile_x;
+        u8 tile_index = vram[map_addr - 0x8000];
+
+        u16 data_addr;
+        if (ppu->lcdc & 0x10) {
+            data_addr = 0x8000 + (u16)tile_index * 16;
+        } else {
+            s8 st = (s8)tile_index;
+            data_addr = 0x8800 + (u16)(st + 128) * 16;
+        }
+
+        u16 line_addr = data_addr + (u16)pixel_y * 2;
+        u8 b1 = vram[line_addr - 0x8000];
+        u8 b2 = vram[line_addr + 1 - 0x8000];
+
+        u8 pix = 0;
+        u8 mask = (u8)(0x80 >> pixel_x);
+        if (b1 & mask) pix |= 0x01;
+        if (b2 & mask) pix |= 0x02;
+
+        u32 color = ppu_get_pixel_color(ppu, pix);
+        ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
     }
 }
 
-// Obtenir la couleur d'un pixel selon la palette BGP
+// Couleur DMG depuis BGP
 u32 ppu_get_pixel_color(PPU* ppu, u8 pixel) {
-    // Extraire la couleur de la palette BGP
-    u8 color_index = (ppu->bgp >> (pixel * 2)) & 0x03;
-    
-    // Convertir en couleur RGBA
-    switch (color_index) {
-        case 0: return 0xFFFFFFFF; // Blanc
-        case 1: return 0xAAAAAAFF; // Gris clair
-        case 2: return 0x555555FF; // Gris foncé
-        case 3: return 0x000000FF; // Noir
+    u8 idx = (ppu->bgp >> (pixel * 2)) & 0x03;
+    switch (idx) {
+        case 0: return 0xFFFFFFFF;
+        case 1: return 0xAAAAAAFF;
+        case 2: return 0x555555FF;
         default: return 0x000000FF;
     }
 }
+
+// Placeholders (API annoncée dans ppu.h)
+void ppu_render_background(PPU* ppu, u8* vram, u8 line) { (void)ppu; (void)vram; (void)line; }
+void ppu_render_window(PPU* ppu, u8* vram, u8 line)    { (void)ppu; (void)vram; (void)line; }
+void ppu_render_sprites(PPU* ppu, u8* vram, u8 line)   { (void)ppu; (void)vram; (void)line; }
+
+
