@@ -33,7 +33,7 @@ graph LR
     Joypad ---|input/events| GUI
   end
 
-  Emulator[Emulator (boucle)] --> CPU
+  Emulator[Emulator] --> CPU
   Emulator --> Timer
   Emulator --> PPU
   Emulator --> Joypad

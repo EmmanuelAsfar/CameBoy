@@ -1,4 +1,4 @@
-Retour à l’index: [docs/README.md](./README.md) · [Architecture](./architecture.md) · [Tests](./testing.md) · [Scripts](./scripts.md) · [Glossaire](./glossaire.md)
+Retour à l’index: [Index docs](./README.md) · [Architecture](./architecture.md) · [Tests](./testing.md) · [Scripts](./scripts.md) · [Glossaire](./glossaire.md)
 
 ### Utilisation de CameBoy
 
