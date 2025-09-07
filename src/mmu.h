@@ -115,7 +115,7 @@ void mmu_write8(MMU* mmu, u16 address, u8 value);
 void mmu_write16(MMU* mmu, u16 address, u16 value);
 
 // Tick DMA (appelé à chaque pas CPU): effectue une copie OAM temporisée
-void mmu_dma_tick(MMU* mmu, u8 cycles);
+void mmu_dma_tick(MMU* mmu, u16 cycles);
 
 // Fonctions MBC
 void mbc_write(MMU* mmu, u16 address, u8 value);

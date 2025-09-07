@@ -508,19 +508,23 @@ echo ========================================
 echo BUILD ROMs D'EXEMPLE
 echo ========================================
 echo.
-if exist examples\rgbds-hello-serial\build.bat (
-  call examples\rgbds-hello-serial\build.bat || echo [WARN] RGBDS example non construit (outil manquant?)
-) else (
-  echo [INFO] Exemple RGBDS non present
+
+REM Build RGBDS examples
+if exist "examples\rgbds\build_all.bat" (
+    echo [RGBDS] Building RGBDS examples...
+    call examples\rgbds\build_all.bat
+    echo.
 )
-if exist examples\gbdk-hello-printf\build.bat (
-  call examples\gbdk-hello-printf\build.bat || echo [WARN] GBDK example non construit (outil manquant?)
-) else (
-  echo [INFO] Exemple GBDK non present
+
+REM Build GBDK examples
+if exist "examples\gbdk\build_all.bat" (
+    echo [GBDK] Building GBDK examples...
+    call examples\gbdk\build_all.bat
+    echo.
 )
-if exist examples\rgbds-hello-vblank\build.bat (
-  call examples\rgbds-hello-vblank\build.bat || echo [WARN] RGBDS VBlank example non construit (outil manquant?)
-) else (
-  echo [INFO] Exemple RGBDS VBlank non present
-)
+
+echo ========================================
+echo BUILD EXEMPLES TERMINE
+echo ========================================
+
 goto end

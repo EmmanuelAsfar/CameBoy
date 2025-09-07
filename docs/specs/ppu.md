@@ -101,10 +101,34 @@ Référence: `tests/unit/test_ppu.c`
 - Palettes
   - `test_ppu_palettes`: mapping BGP/OBP0/OBP1 vers 4 niveaux de gris, vérification `ppu_get_pixel_color`
 
-Pistes futures:
-- STAT IRQ (HBlank/VBlank/OAM/LYC) validation et priorités
-- Sprites (priorités BG/OBJ, attribs X/Y, palettes OBJ, masquage par BG couleur 0)
-- Fenêtre (WX/WY) et interactions avec scrolling BG (SCX/SCY)
+Tests implémentés:
+- **Timings modes** : `test_ppu_mode_timings` - vérifie 80/172/204 cycles, 456/ligne, VBlank 144-153
+- **STAT IRQ** : `test_ppu_stat_irq_transitions` - transitions HBlank/VBlank/OAM/LYC exactes
+- **Window edge cases** : `test_ppu_window_edge_cases` - WX/WY limites, maps 9800h/9C00h, tiles 8000h/8800h
+- **Sprite priority** : `test_ppu_sprite_priority_detailed` - OBJ vs BG, transparence couleur 0, bit priorité
+- **FIFOs séparées** : `test_ppu_fifo_basic`, `test_ppu_fifo_overflow` - BG/Sprite FIFOs distinctes, 16 pixels max
+- **Pixel Fetcher** : `test_ppu_fetcher_basic` - états fetcher (GET_TILE, GET_DATA_LOW/HIGH, SLEEP, PUSH)
+- **Fine scroll SCX** : `test_ppu_fine_scroll_scx` - décalage horizontal modulo 256
+
+## Architecture Pixel Fetcher + FIFOs
+
+### Principe de fonctionnement
+Le PPU utilise un **Pixel Fetcher** qui lit les tiles par groupes de 8 pixels et les pousse dans des **FIFOs séparées** :
+- **Background FIFO** : pixels BG/Window
+- **Sprite FIFO** : pixels sprites
+- **Mélange** : selon priorités OBJ vs BG
+
+### États du Fetcher
+1. **GET_TILE** (2 cycles) : lire index tile depuis map
+2. **GET_DATA_LOW** (2 cycles) : lire octet bas de la tile
+3. **GET_DATA_HIGH** (2 cycles) : lire octet haut de la tile  
+4. **SLEEP** (2 cycles) : attendre avant push
+5. **PUSH** (1 cycle) : pousser 8 pixels dans BG FIFO
+
+### Mode 3 (Pixel Transfer)
+- **172 cycles** : fetcher + sleep + push
+- Fetcher actif pendant tout le Mode 3
+- FIFOs alimentées en continu
 
 ---
 

@@ -32,6 +32,14 @@ void test_ppu_sprites_limit10_per_line(void);
 void test_ppu_sprites_flip_xy(void);
 void test_ppu_lcdc_off_on(void);
 void test_ppu_window_wx_clamp(void);
+void test_ppu_fine_scroll_scx(void);
+void test_ppu_fifo_basic(void);
+void test_ppu_fifo_overflow(void);
+void test_ppu_mode_timings(void);
+void test_ppu_stat_irq_transitions(void);
+void test_ppu_window_edge_cases(void);
+void test_ppu_sprite_priority_detailed(void);
+void test_ppu_fetcher_basic(void);
 
 // Table des tests PPU
 typedef struct {
@@ -60,6 +68,14 @@ UnitTest ppu_tests[] = {
     {"PPU Sprites Flip XY", test_ppu_sprites_flip_xy},
     {"PPU LCDC Off/On", test_ppu_lcdc_off_on},
     {"PPU Window WX Clamp", test_ppu_window_wx_clamp},
+    {"PPU Fine Scroll SCX", test_ppu_fine_scroll_scx},
+    {"PPU FIFO Basic", test_ppu_fifo_basic},
+    {"PPU FIFO Overflow", test_ppu_fifo_overflow},
+    {"PPU Mode Timings", test_ppu_mode_timings},
+    {"PPU STAT IRQ Transitions", test_ppu_stat_irq_transitions},
+    {"PPU Window Edge Cases", test_ppu_window_edge_cases},
+    {"PPU Sprite Priority Detailed", test_ppu_sprite_priority_detailed},
+    {"PPU Fetcher Basic", test_ppu_fetcher_basic},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -617,4 +633,329 @@ void test_ppu_window_wx_clamp(void) {
     // On s'attend à voir des pixels à partir de x=0 malgré WX<7
     bool seen = false; for (int x = 0; x < 8; x++) if (ppu.framebuffer[x] != 0xFFFFFFFF) { seen = true; break; }
     assert(seen);
+}
+
+void test_ppu_fine_scroll_scx(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91; // LCD,BG ON, tiles 8000h, BG map 9800h
+    
+    // Créer une tile avec un pattern visible (pixel 0 = couleur 3)
+    vram[0x0000] = 0xFF; vram[0x0001] = 0xFF; // Tile 0: tous pixels couleur 3
+    
+    // Test SCX = 0 (pas de décalage)
+    ppu.scx = 0; ppu.ly = 0; ppu_render_line(&ppu, vram);
+    u32 color0_scx0 = ppu.framebuffer[0];
+    u32 color7_scx0 = ppu.framebuffer[7];
+    
+    // Test SCX = 3 (décalage de 3 pixels vers la droite)
+    ppu.scx = 3; ppu.ly = 0; ppu_render_line(&ppu, vram);
+    u32 color0_scx3 = ppu.framebuffer[0];
+    u32 color4_scx3 = ppu.framebuffer[4];
+    
+    // Avec SCX=0: pixel 0 devrait être couleur 3, pixel 7 aussi
+    assert(color0_scx0 == ppu_get_pixel_color(&ppu, 3));
+    assert(color7_scx0 == ppu_get_pixel_color(&ppu, 3));
+    
+    // Avec SCX=3: pixel 0 lit le pixel 3 de la tile (qui est couleur 3)
+    // pixel 4 lit le pixel 7 de la tile (qui est couleur 3)
+    assert(color0_scx3 == ppu_get_pixel_color(&ppu, 3)); // Pixel 3 de la tile
+    assert(color4_scx3 == ppu_get_pixel_color(&ppu, 3)); // Pixel 7 de la tile
+}
+
+void test_ppu_fifo_basic(void) {
+    PPU ppu; ppu_init(&ppu);
+    
+    // Test BG FIFO vide
+    assert(ppu_bg_fifo_empty(&ppu));
+    assert(!ppu_bg_fifo_full(&ppu));
+    
+    // Ajouter un pixel BG
+    PixelFIFOEntry bg_pixel = {3, 0, false, false}; // Couleur 3, palette BG, pas sprite
+    ppu_bg_fifo_push(&ppu, bg_pixel);
+    assert(!ppu_bg_fifo_empty(&ppu));
+    assert(!ppu_bg_fifo_full(&ppu));
+    assert(ppu.bg_fifo_size == 1);
+    
+    // Ajouter un pixel sprite
+    PixelFIFOEntry sprite_pixel = {2, 1, true, false}; // Couleur 2, palette OBP0, sprite
+    ppu_sprite_fifo_push(&ppu, sprite_pixel);
+    assert(ppu.sprite_fifo_size == 1);
+    
+    // Retirer les pixels (ordre FIFO)
+    PixelFIFOEntry popped;
+    assert(ppu_bg_fifo_pop(&ppu, &popped));
+    assert(popped.color_index == 3);
+    assert(popped.palette == 0);
+    assert(!popped.sprite_priority);
+    
+    assert(ppu_sprite_fifo_pop(&ppu, &popped));
+    assert(popped.color_index == 2);
+    assert(popped.palette == 1);
+    assert(popped.sprite_priority);
+    
+    // FIFOs vides après retrait
+    assert(ppu_bg_fifo_empty(&ppu));
+    assert(ppu_sprite_fifo_empty(&ppu));
+    assert(!ppu_bg_fifo_pop(&ppu, &popped)); // Pas de pixel à retirer
+    assert(!ppu_sprite_fifo_pop(&ppu, &popped)); // Pas de pixel à retirer
+}
+
+void test_ppu_fifo_overflow(void) {
+    PPU ppu; ppu_init(&ppu);
+    
+    // Remplir la BG FIFO au maximum (16 pixels)
+    PixelFIFOEntry pixel = {1, 0, false, false};
+    for (int i = 0; i < 16; i++) {
+        ppu_bg_fifo_push(&ppu, pixel);
+        assert(ppu.bg_fifo_size == i + 1);
+    }
+    
+    assert(ppu_bg_fifo_full(&ppu));
+    assert(!ppu_bg_fifo_empty(&ppu));
+    
+    // Essayer d'ajouter un pixel de plus (devrait être ignoré)
+    ppu_bg_fifo_push(&ppu, pixel);
+    assert(ppu.bg_fifo_size == 16); // Taille inchangée
+    assert(ppu_bg_fifo_full(&ppu));
+    
+    // Vider les FIFOs
+    ppu_fifos_clear(&ppu);
+    assert(ppu_bg_fifo_empty(&ppu));
+    assert(ppu_sprite_fifo_empty(&ppu));
+    assert(!ppu_bg_fifo_full(&ppu));
+    assert(ppu.bg_fifo_size == 0);
+    assert(ppu.sprite_fifo_size == 0);
+}
+
+void test_ppu_mode_timings(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91; // LCD ON, BG ON
+    ppu.stat |= 0x08; // Activer IRQ HBlank
+    
+    // Test timing d'une ligne complète (456 cycles)
+    ppu.ly = 0; ppu.mode = PPU_MODE_OAM_SEARCH; ppu.mode_cycles = 0; ppu.line_cycles = 0;
+    
+    // Mode 2 (OAM Search) : 80 cycles
+    u8 interrupts = ppu_tick(&ppu, 79, vram);
+    assert(ppu.mode == PPU_MODE_OAM_SEARCH);
+    assert(ppu.mode_cycles == 79);
+    
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_PIXEL_TRANSFER);
+    assert(ppu.mode_cycles == 0);
+    
+    // Mode 3 (Pixel Transfer) : 172 cycles
+    interrupts = ppu_tick(&ppu, 171, vram);
+    assert(ppu.mode == PPU_MODE_PIXEL_TRANSFER);
+    assert(ppu.mode_cycles == 171);
+    
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_HBLANK);
+    assert(ppu.mode_cycles == 0);
+    assert(interrupts & 0x02); // STAT IRQ HBlank
+    
+    // Mode 0 (HBlank) : 204 cycles restants
+    interrupts = ppu_tick(&ppu, 203, vram);
+    assert(ppu.mode == PPU_MODE_HBLANK);
+    assert(ppu.line_cycles == 455);
+    
+    // Fin de ligne (456 cycles total)
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.ly == 1);
+    assert(ppu.mode == PPU_MODE_OAM_SEARCH);
+    assert(ppu.line_cycles == 0);
+    assert(ppu.mode_cycles == 0);
+    
+    // Test VBlank (ligne 144)
+    ppu.ly = 143; ppu.mode = PPU_MODE_HBLANK; ppu.line_cycles = 455;
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.ly == 144);
+    assert(ppu.mode == PPU_MODE_VBLANK);
+    assert(interrupts & 0x01); // VBLANK IRQ
+    
+    // Test fin VBlank (ligne 153 -> 0)
+    ppu.ly = 153; ppu.line_cycles = 455;
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.ly == 0);
+    assert(ppu.mode == PPU_MODE_OAM_SEARCH);
+}
+
+void test_ppu_stat_irq_transitions(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91; // LCD ON, BG ON
+    
+    // Test IRQ HBlank (bit 3)
+    ppu.stat = 0x08; // HBlank IRQ activé
+    ppu.ly = 0; ppu.mode = PPU_MODE_PIXEL_TRANSFER; ppu.mode_cycles = 171;
+    u8 interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_HBLANK);
+    assert(interrupts & 0x02); // STAT IRQ déclenché
+    
+    // Test IRQ VBlank (bit 4)
+    ppu.stat = 0x10; // VBlank IRQ activé
+    ppu.ly = 143; ppu.mode = PPU_MODE_HBLANK; ppu.line_cycles = 455;
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_VBLANK);
+    assert(interrupts & 0x01); // VBLANK IRQ
+    assert(interrupts & 0x02); // STAT IRQ aussi
+    
+    // Test IRQ OAM (bit 5)
+    ppu.stat = 0x20; // OAM IRQ activé
+    ppu.ly = 0; ppu.mode = PPU_MODE_HBLANK; ppu.line_cycles = 455;
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_OAM_SEARCH);
+    assert(interrupts & 0x02); // STAT IRQ déclenché
+    
+    // Test IRQ LYC (bit 6) - transition 0->1
+    ppu.stat = 0x40; // LYC IRQ activé
+    ppu.lyc = 5; ppu.ly = 4; ppu.lyc_prev_eq = false;
+    ppu.mode = PPU_MODE_HBLANK; ppu.line_cycles = 455;
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(ppu.ly == 5);
+    assert(ppu.stat & 0x04); // LYC==LY bit set
+    assert(interrupts & 0x02); // STAT IRQ LYC déclenché
+    
+    // Test pas d'IRQ LYC si déjà égal
+    ppu.lyc_prev_eq = true; // Déjà égal
+    interrupts = ppu_tick(&ppu, 1, vram);
+    assert(!(interrupts & 0x02)); // Pas d'IRQ
+}
+
+void test_ppu_window_edge_cases(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91 | 0x20; // LCD,BG,WIN ON
+    
+    // Test WY = 0 (window dès la première ligne)
+    ppu.wy = 0; ppu.wx = 7; // WX-7 = 0
+    vram[0x1800] = 1; // Tile 1 dans window map 9800h
+    vram[16] = 0xFF; vram[17] = 0xFF; // Tile 1: couleur 3
+    ppu.ly = 0; ppu_render_line(&ppu, vram);
+    assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 3));
+    
+    // Test WY = 144 (window après l'écran)
+    ppu.wy = 144; ppu.wx = 7;
+    ppu.ly = 0; 
+    // Nettoyer le framebuffer avant le test
+    for (int i = 0; i < GB_WIDTH * GB_HEIGHT; i++) {
+        ppu.framebuffer[i] = 0xFFFFFFFF;
+    }
+    ppu_render_line(&ppu, vram);
+    assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 0)); // Background (pas de window)
+    
+    // Test WX = 0 (WX-7 = -7, window invisible)
+    ppu.wy = 0; ppu.wx = 0;
+    ppu.ly = 0; 
+    // Nettoyer le framebuffer avant le test
+    for (int i = 0; i < GB_WIDTH * GB_HEIGHT; i++) {
+        ppu.framebuffer[i] = 0xFFFFFFFF;
+    }
+    ppu_render_line(&ppu, vram);
+    assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 0)); // Background (pas de window)
+    
+    // Test WX = 166 (WX-7 = 159, window à droite)
+    ppu.wy = 0; ppu.wx = 166;
+    ppu.ly = 0; 
+    // Nettoyer le framebuffer avant le test
+    for (int i = 0; i < GB_WIDTH * GB_HEIGHT; i++) {
+        ppu.framebuffer[i] = 0xFFFFFFFF;
+    }
+    ppu_render_line(&ppu, vram);
+    assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 0)); // Background (pas de window)
+    
+    // Test window map 9C00h (bit 6 de LCDC)
+    ppu.lcdc = 0x91 | 0x20 | 0x40; // Window map 9C00h
+    ppu.wy = 0; ppu.wx = 7;
+    vram[0x1C00] = 2; // Tile 2 dans window map 9C00h
+    vram[32] = 0xFF; vram[33] = 0xFF; // Tile 2: couleur 3
+    ppu.ly = 0; ppu_render_line(&ppu, vram);
+    assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 3));
+    
+    // Test tile selection 8800h (bit 4 de LCDC = 0)
+    ppu.lcdc = 0x91 | 0x20; // Tile selection 8800h
+    ppu.wy = 0; ppu.wx = 7;
+    vram[0x1800] = 0x80; // Tile -128 (0x80) dans window map
+    vram[0] = 0xFF; vram[1] = 0xFF; // Tile -128: couleur 3
+    ppu.ly = 0; ppu_render_line(&ppu, vram);
+    assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 3));
+}
+
+void test_ppu_sprite_priority_detailed(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91 | 0x02; // LCD,BG,OBJ ON
+    
+    // Créer un BG avec couleur 1
+    vram[0x0000] = 0xFF; vram[0x0001] = 0x00; // Tile 0: couleur 1
+    vram[0x9800] = 0; // BG map: tile 0
+    
+    // Sprite 0: couleur 2, priorité normale (devant BG)
+    ppu.oam[0] = 20; // SY = 20 (Y = 4)
+    ppu.oam[1] = 12; // SX = 12 (X = 4)
+    ppu.oam[2] = 0;  // Tile 0
+    ppu.oam[3] = 0;  // Attr: priorité normale, OBP0
+    
+    // Sprite 1: couleur 3, derrière BG (bit 7 = 1)
+    ppu.oam[4] = 20; // SY = 20 (Y = 4)
+    ppu.oam[5] = 20; // SX = 20 (X = 12)
+    ppu.oam[6] = 0;  // Tile 0
+    ppu.oam[7] = 0x80; // Attr: derrière BG, OBP0
+    
+    // Créer les tiles de sprites
+    vram[0x0000] = 0xFF; vram[0x0001] = 0x00; // Tile 0: couleur 1
+    vram[0x0010] = 0xFF; vram[0x0011] = 0xFF; // Tile 0: couleur 3
+    
+    ppu.ly = 4; ppu_render_line(&ppu, vram);
+    
+    // Pixel 4: sprite 0 (couleur 2) devant BG (couleur 1)
+    assert(ppu.framebuffer[4] == ppu_get_obj_color(&ppu, 2, false));
+    
+    // Pixel 12: sprite 1 (couleur 3) derrière BG (couleur 1)
+    assert(ppu.framebuffer[12] == ppu_get_pixel_color(&ppu, 1)); // BG visible
+    
+    // Test transparence (couleur 0)
+    ppu.oam[8] = 20; // SY = 20 (Y = 4)
+    ppu.oam[9] = 28; // SX = 28 (X = 20)
+    ppu.oam[10] = 0; // Tile 0
+    ppu.oam[11] = 0; // Attr: priorité normale, OBP0
+    
+    // Tile avec couleur 0 (transparente)
+    vram[0x0020] = 0x00; vram[0x0021] = 0x00; // Tile 0: couleur 0 (transparente)
+    
+    ppu.ly = 4; ppu_render_line(&ppu, vram);
+    
+    // Pixel 20: sprite transparent, BG visible
+    assert(ppu.framebuffer[20] == ppu_get_pixel_color(&ppu, 1)); // BG visible
+}
+
+void test_ppu_fetcher_basic(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91; // LCD ON, BG ON, tiles 8000h, BG map 9800h
+    
+    // Créer une tile avec pattern visible
+    vram[0x0000] = 0xFF; vram[0x0001] = 0xFF; // Tile 0: couleur 3
+    vram[0x9800] = 0; // BG map: tile 0
+    
+    // Démarrer le fetcher pour tile (0,0), ligne 0
+    ppu_fetcher_start(&ppu, 0, 0, 0, false);
+    assert(ppu.fetcher.state == FETCHER_GET_TILE);
+    assert(ppu.fetcher.state_cycles == 0);
+    
+    // Simuler les cycles du fetcher
+    for (int cycle = 0; cycle < 10; cycle++) {
+        ppu_fetcher_tick(&ppu, vram);
+    }
+    
+    // Vérifier que des pixels ont été poussés dans la BG FIFO
+    assert(!ppu_bg_fifo_empty(&ppu));
+    assert(ppu.bg_fifo_size == 8); // 8 pixels poussés
+    
+    // Vérifier le contenu des pixels
+    PixelFIFOEntry pixel;
+    for (int i = 0; i < 8; i++) {
+        assert(ppu_bg_fifo_pop(&ppu, &pixel));
+        assert(pixel.color_index == 3); // Couleur 3
+        assert(pixel.palette == 0); // BG palette
+        assert(!pixel.sprite_priority);
+    }
+    
+    assert(ppu_bg_fifo_empty(&ppu));
 }

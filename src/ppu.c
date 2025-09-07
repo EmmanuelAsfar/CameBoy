@@ -36,6 +36,10 @@ void ppu_reset(PPU* ppu) {
     }
 
     ppu_update_palettes(ppu);
+    
+    // Initialiser les FIFOs et le fetcher
+    ppu_fifos_init(ppu);
+    ppu_fetcher_init(ppu);
 }
 
 // Tick PPU - retourne un masque d'interruptions déclenchées (bit0 = VBLANK, bit1 = STAT)
@@ -62,7 +66,7 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
                     ppu->mode = PPU_MODE_HBLANK;
                     ppu->mode_cycles = 0;
                     ppu_render_line(ppu, vram);
-                    // IRQ STAT HBlank si activée (bit3)
+                    // IRQ STAT HBlank si activée (bit3) - générée lors de la transition
                     if (ppu->stat & 0x08) interrupts |= 0x02;
                 }
                 break;
@@ -172,7 +176,7 @@ void ppu_update_palettes(PPU* ppu) {
     }
 }
 
-static inline u32 ppu_get_obj_color(PPU* ppu, u8 pixel, bool use_obp1) {
+u32 ppu_get_obj_color(PPU* ppu, u8 pixel, bool use_obp1) {
     // pixel ∈ {1,2,3}; 0 est transparent
     u8 idx = (use_obp1 ? (ppu->obp1 >> (pixel * 2)) : (ppu->obp0 >> (pixel * 2))) & 0x03;
     switch (idx) {
@@ -346,5 +350,214 @@ u32 ppu_get_pixel_color(PPU* ppu, u8 pixel) {
 void ppu_render_background(PPU* ppu, u8* vram, u8 line) { (void)ppu; (void)vram; (void)line; }
 void ppu_render_window(PPU* ppu, u8* vram, u8 line)    { (void)ppu; (void)vram; (void)line; }
 void ppu_render_sprites(PPU* ppu, u8* vram, u8 line)   { (void)ppu; (void)vram; (void)line; }
+
+// ===== FONCTIONS FIFO IMPLÉMENTATION =====
+
+// Initialiser les FIFOs
+void ppu_fifos_init(PPU* ppu) {
+    // Background FIFO
+    ppu->bg_fifo_size = 0;
+    ppu->bg_fifo_read_pos = 0;
+    ppu->bg_fifo_write_pos = 0;
+    
+    // Sprite FIFO
+    ppu->sprite_fifo_size = 0;
+    ppu->sprite_fifo_read_pos = 0;
+    ppu->sprite_fifo_write_pos = 0;
+}
+
+// Background FIFO
+void ppu_bg_fifo_push(PPU* ppu, PixelFIFOEntry pixel) {
+    if (ppu->bg_fifo_size >= 16) return; // FIFO pleine
+    
+    ppu->bg_fifo[ppu->bg_fifo_write_pos] = pixel;
+    ppu->bg_fifo_write_pos = (ppu->bg_fifo_write_pos + 1) % 16;
+    ppu->bg_fifo_size++;
+}
+
+bool ppu_bg_fifo_pop(PPU* ppu, PixelFIFOEntry* pixel) {
+    if (ppu->bg_fifo_size == 0) return false;
+    
+    *pixel = ppu->bg_fifo[ppu->bg_fifo_read_pos];
+    ppu->bg_fifo_read_pos = (ppu->bg_fifo_read_pos + 1) % 16;
+    ppu->bg_fifo_size--;
+    return true;
+}
+
+bool ppu_bg_fifo_empty(PPU* ppu) {
+    return ppu->bg_fifo_size == 0;
+}
+
+bool ppu_bg_fifo_full(PPU* ppu) {
+    return ppu->bg_fifo_size >= 16;
+}
+
+// Sprite FIFO
+void ppu_sprite_fifo_push(PPU* ppu, PixelFIFOEntry pixel) {
+    if (ppu->sprite_fifo_size >= 16) return; // FIFO pleine
+    
+    ppu->sprite_fifo[ppu->sprite_fifo_write_pos] = pixel;
+    ppu->sprite_fifo_write_pos = (ppu->sprite_fifo_write_pos + 1) % 16;
+    ppu->sprite_fifo_size++;
+}
+
+bool ppu_sprite_fifo_pop(PPU* ppu, PixelFIFOEntry* pixel) {
+    if (ppu->sprite_fifo_size == 0) return false;
+    
+    *pixel = ppu->sprite_fifo[ppu->sprite_fifo_read_pos];
+    ppu->sprite_fifo_read_pos = (ppu->sprite_fifo_read_pos + 1) % 16;
+    ppu->sprite_fifo_size--;
+    return true;
+}
+
+bool ppu_sprite_fifo_empty(PPU* ppu) {
+    return ppu->sprite_fifo_size == 0;
+}
+
+// Vider les deux FIFOs
+void ppu_fifos_clear(PPU* ppu) {
+    ppu_fifos_init(ppu);
+}
+
+// ===== FONCTIONS PIXEL FETCHER IMPLÉMENTATION =====
+
+// Initialiser le fetcher
+void ppu_fetcher_init(PPU* ppu) {
+    ppu->fetcher.state = FETCHER_GET_TILE;
+    ppu->fetcher.state_cycles = 0;
+    ppu->fetcher.tile_index = 0;
+    ppu->fetcher.tile_data_low = 0;
+    ppu->fetcher.tile_data_high = 0;
+    ppu->fetcher.tile_x = 0;
+    ppu->fetcher.tile_y = 0;
+    ppu->fetcher.pixel_y = 0;
+    ppu->fetcher.is_window = false;
+}
+
+// Démarrer le fetcher pour une tile donnée
+void ppu_fetcher_start(PPU* ppu, u8 tile_x, u8 tile_y, u8 pixel_y, bool is_window) {
+    ppu->fetcher.state = FETCHER_GET_TILE;
+    ppu->fetcher.state_cycles = 0;
+    ppu->fetcher.tile_x = tile_x;
+    ppu->fetcher.tile_y = tile_y;
+    ppu->fetcher.pixel_y = pixel_y;
+    ppu->fetcher.is_window = is_window;
+}
+
+// Faire avancer le fetcher d'un cycle
+void ppu_fetcher_tick(PPU* ppu, u8* vram) {
+    ppu->fetcher.state_cycles++;
+
+    switch (ppu->fetcher.state) {
+        case FETCHER_GET_TILE:
+            if (ppu->fetcher.state_cycles >= 2) {
+                // Lire l'index de tile depuis la map
+                u16 map_addr;
+                if (ppu->fetcher.is_window) {
+                    u16 win_map = (ppu->lcdc & 0x40) ? 0x9C00 : 0x9800;
+                    map_addr = win_map + (ppu->fetcher.tile_y * 32) + ppu->fetcher.tile_x;
+                } else {
+                    u16 bg_map = (ppu->lcdc & 0x08) ? 0x9C00 : 0x9800;
+                    map_addr = bg_map + (ppu->fetcher.tile_y * 32) + ppu->fetcher.tile_x;
+                }
+                ppu->fetcher.tile_index = vram[map_addr - 0x8000];
+                ppu->fetcher.state = FETCHER_GET_DATA_LOW;
+                ppu->fetcher.state_cycles = 0;
+            }
+            break;
+
+        case FETCHER_GET_DATA_LOW:
+            if (ppu->fetcher.state_cycles >= 2) {
+                // Lire l'octet bas de la tile
+                u16 data_addr;
+                bool tile_sel_8000 = (ppu->lcdc & 0x10) != 0;
+                if (tile_sel_8000) {
+                    data_addr = 0x8000 + (u16)ppu->fetcher.tile_index * 16;
+                } else {
+                    s8 st = (s8)ppu->fetcher.tile_index;
+                    data_addr = 0x8800 + (u16)(st + 128) * 16;
+                }
+                u16 line_addr = data_addr + (u16)ppu->fetcher.pixel_y * 2;
+                ppu->fetcher.tile_data_low = vram[line_addr - 0x8000];
+                ppu->fetcher.state = FETCHER_GET_DATA_HIGH;
+                ppu->fetcher.state_cycles = 0;
+            }
+            break;
+
+        case FETCHER_GET_DATA_HIGH:
+            if (ppu->fetcher.state_cycles >= 2) {
+                // Lire l'octet haut de la tile
+                u16 data_addr;
+                bool tile_sel_8000 = (ppu->lcdc & 0x10) != 0;
+                if (tile_sel_8000) {
+                    data_addr = 0x8000 + (u16)ppu->fetcher.tile_index * 16;
+                } else {
+                    s8 st = (s8)ppu->fetcher.tile_index;
+                    data_addr = 0x8800 + (u16)(st + 128) * 16;
+                }
+                u16 line_addr = data_addr + (u16)ppu->fetcher.pixel_y * 2;
+                ppu->fetcher.tile_data_high = vram[line_addr + 1 - 0x8000];
+                ppu->fetcher.state = FETCHER_SLEEP;
+                ppu->fetcher.state_cycles = 0;
+            }
+            break;
+
+        case FETCHER_SLEEP:
+            if (ppu->fetcher.state_cycles >= 2) {
+                ppu->fetcher.state = FETCHER_PUSH;
+                ppu->fetcher.state_cycles = 0;
+            }
+            break;
+
+        case FETCHER_PUSH:
+            if (ppu->fetcher.state_cycles >= 1) {
+                // Pousser 8 pixels dans la BG FIFO
+                for (int px = 0; px < 8; px++) {
+                    if (ppu_bg_fifo_full(ppu)) break;
+                    u8 mask = (u8)(0x80 >> px);
+                    u8 pix = 0;
+                    if (ppu->fetcher.tile_data_low & mask) pix |= 0x01;
+                    if (ppu->fetcher.tile_data_high & mask) pix |= 0x02;
+                    PixelFIFOEntry pixel = {
+                        .color_index = pix,
+                        .palette = 0,
+                        .sprite_priority = false,
+                        .sprite_transparent = false
+                    };
+                    ppu_bg_fifo_push(ppu, pixel);
+                }
+                ppu->fetcher.state = FETCHER_GET_TILE;
+                ppu->fetcher.state_cycles = 0;
+            }
+            break;
+    }
+}
+
+// Mélanger les pixels BG et Sprite selon les priorités
+u32 ppu_mix_pixels(PPU* ppu, PixelFIFOEntry* bg_pixel, PixelFIFOEntry* sprite_pixel) {
+    // Si pas de sprite, utiliser BG
+    if (!sprite_pixel) {
+        if (bg_pixel) {
+            return ppu_get_pixel_color(ppu, bg_pixel->color_index);
+        }
+        return 0xFFFFFFFF; // Blanc par défaut
+    }
+    
+    // Si sprite transparent (couleur 0), utiliser BG
+    if (sprite_pixel->sprite_transparent || sprite_pixel->color_index == 0) {
+        if (bg_pixel) {
+            return ppu_get_pixel_color(ppu, bg_pixel->color_index);
+        }
+        return 0xFFFFFFFF;
+    }
+    
+    // Si sprite priorité derrière BG et BG non-transparent
+    if (sprite_pixel->sprite_priority && bg_pixel && bg_pixel->color_index != 0) {
+        return ppu_get_pixel_color(ppu, bg_pixel->color_index);
+    }
+    
+    // Utiliser le sprite
+    return ppu_get_obj_color(ppu, sprite_pixel->color_index, sprite_pixel->palette == 1);
+}
 
 

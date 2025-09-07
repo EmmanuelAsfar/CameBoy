@@ -11,6 +11,36 @@ typedef enum {
     PPU_MODE_PIXEL_TRANSFER = 3
 } PPUMode;
 
+// Structure d'un pixel dans la FIFO
+typedef struct {
+    u8 color_index;    // Index de couleur (0-3)
+    u8 palette;        // Palette (BG, OBP0, OBP1)
+    bool sprite_priority; // Priorité sprite vs BG
+    bool sprite_transparent; // Pixel transparent (couleur 0)
+} PixelFIFOEntry;
+
+// États du Pixel Fetcher
+typedef enum {
+    FETCHER_GET_TILE = 0,    // Lire index de tile depuis map
+    FETCHER_GET_DATA_LOW = 1, // Lire octet bas de la tile
+    FETCHER_GET_DATA_HIGH = 2, // Lire octet haut de la tile
+    FETCHER_SLEEP = 3,        // Attendre avant push
+    FETCHER_PUSH = 4          // Pousser 8 pixels dans FIFO
+} FetcherState;
+
+// Structure du Pixel Fetcher
+typedef struct {
+    FetcherState state;
+    u8 state_cycles;          // Cycles dans l'état actuel
+    u8 tile_index;            // Index de tile en cours
+    u8 tile_data_low;         // Octet bas de la tile
+    u8 tile_data_high;        // Octet haut de la tile
+    u8 tile_x;                // Position X de la tile
+    u8 tile_y;                // Position Y de la tile
+    u8 pixel_y;               // Ligne dans la tile (0-7)
+    bool is_window;           // True si on fetch la window
+} PixelFetcher;
+
 // Structure du PPU
 typedef struct {
     // Registres
@@ -42,6 +72,19 @@ typedef struct {
     u8 bg_palette[4];
     u8 obj_palette0[4];
     u8 obj_palette1[4];
+    
+    // FIFOs séparées (16 pixels max chacune)
+    PixelFIFOEntry bg_fifo[16];     // FIFO Background/Window
+    PixelFIFOEntry sprite_fifo[16]; // FIFO Sprites
+    u8 bg_fifo_size;
+    u8 bg_fifo_read_pos;
+    u8 bg_fifo_write_pos;
+    u8 sprite_fifo_size;
+    u8 sprite_fifo_read_pos;
+    u8 sprite_fifo_write_pos;
+    
+    // Pixel Fetcher
+    PixelFetcher fetcher;
 } PPU;
 
 // Fonctions PPU
@@ -60,5 +103,25 @@ void ppu_render_sprites(PPU* ppu, u8* vram, u8 line);
 // Utilitaires
 void ppu_update_palettes(PPU* ppu);
 u32 ppu_get_pixel_color(PPU* ppu, u8 pixel);
+u32 ppu_get_obj_color(PPU* ppu, u8 pixel, bool use_obp1);
+
+// FIFOs séparées
+void ppu_fifos_init(PPU* ppu);
+void ppu_bg_fifo_push(PPU* ppu, PixelFIFOEntry pixel);
+bool ppu_bg_fifo_pop(PPU* ppu, PixelFIFOEntry* pixel);
+bool ppu_bg_fifo_empty(PPU* ppu);
+bool ppu_bg_fifo_full(PPU* ppu);
+void ppu_sprite_fifo_push(PPU* ppu, PixelFIFOEntry pixel);
+bool ppu_sprite_fifo_pop(PPU* ppu, PixelFIFOEntry* pixel);
+bool ppu_sprite_fifo_empty(PPU* ppu);
+void ppu_fifos_clear(PPU* ppu);
+
+// Pixel Fetcher
+void ppu_fetcher_init(PPU* ppu);
+void ppu_fetcher_tick(PPU* ppu, u8* vram);
+void ppu_fetcher_start(PPU* ppu, u8 tile_x, u8 tile_y, u8 pixel_y, bool is_window);
+
+// Mélange des FIFOs
+u32 ppu_mix_pixels(PPU* ppu, PixelFIFOEntry* bg_pixel, PixelFIFOEntry* sprite_pixel);
 
 #endif // PPU_H

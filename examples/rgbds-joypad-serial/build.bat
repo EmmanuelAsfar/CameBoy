@@ -22,31 +22,39 @@ if exist "%LOCAL_RGBDS%\rgbasm.exe" (
 
 echo [RGBDS] Tool rgbasm: "%RGBASM%"
 echo [RGBDS] Local RGBDS bin: "%LOCAL_RGBDS%"
-if exist "%LOCAL_RGBDS%\rgbasm.exe" (
-  rem ok
-) else if defined RGBDS_HOME (
-  rem ok
-) else (
-  rem If relying on PATH, skip check
+
+REM Change to script directory
+pushd "%~dp0"
+
+REM Create build directory
+if not exist "build" mkdir build
+
+REM Assemble
+echo [RGBDS] Assembling joypad...
+"%RGBASM%" -o build/joypad.o src/main.asm
+if errorlevel 1 (
+    echo Build failed (RGBDS joypad).
+    popd
+    exit /b 1
 )
 
-set "OUTDIR=%~dp0build"
-if not exist "%OUTDIR%" mkdir "%OUTDIR%"
+REM Link
+echo [RGBDS] Linking joypad...
+"%RGBLINK%" -o build/rgbds_joypad.gb build/joypad.o
+if errorlevel 1 (
+    echo Build failed (RGBDS joypad link).
+    popd
+    exit /b 1
+)
 
-echo [RGBDS] Assembling...
-"%RGBASM%" -o "%OUTDIR%\main.o" "%~dp0src\main.asm" || goto :error
+REM Fix header
+echo [RGBDS] Fixing header joypad...
+"%RGBFIX%" -v -p 0xFF build/rgbds_joypad.gb
+if errorlevel 1 (
+    echo Build failed (RGBDS joypad fix).
+    popd
+    exit /b 1
+)
 
-echo [RGBDS] Linking...
-"%RGBLINK%" -o "%OUTDIR%\rgbds_hello.gb" "%OUTDIR%\main.o" || goto :error
-
-echo [RGBDS] Fixing header...
-"%RGBFIX%" -v -p 0 -t "RGBHELLO" "%OUTDIR%\rgbds_hello.gb" || goto :error
-
-echo Success: "%OUTDIR%\rgbds_hello.gb"
-exit /b 0
-
-:error
-echo Build failed (RGBDS). >&2
-exit /b 1
-
-
+echo Success: "%CD%\build\rgbds_joypad.gb"
+popd

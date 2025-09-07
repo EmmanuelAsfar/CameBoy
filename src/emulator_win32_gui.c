@@ -45,11 +45,7 @@ static void gui_serial_callback(u8 ch) {
         char text[2] = {ch, '\0'};
         graphics_win32_gui_append_serial(&g_emulator->graphics, text, 1);
         if (g_emulator->f_serial) {
-            SYSTEMTIME st; GetLocalTime(&st);
-            fprintf(g_emulator->f_serial, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] %c\n",
-                (int)st.wYear, (int)st.wMonth, (int)st.wDay,
-                (int)st.wHour, (int)st.wMinute, (int)st.wSecond, (int)st.wMilliseconds,
-                (char)ch);
+            fprintf(g_emulator->f_serial, "%c", (char)ch);
             fflush(g_emulator->f_serial);
         }
     }
@@ -193,7 +189,7 @@ bool emulator_load_rom(Emulator* emu, const char* filename) {
         CreateDirectoryA(emu->log_dir, NULL);
         char path[260];
         snprintf(path, sizeof(path), "%s\\%s.log", emu->log_dir, emu->rom_name); emu->f_log=fopen(path,"w");
-        snprintf(path, sizeof(path), "%s\\%s_serial.txt", emu->log_dir, emu->rom_name); emu->f_serial=fopen(path,"w");
+        snprintf(path, sizeof(path), "%s\\%s_serial.log", emu->log_dir, emu->rom_name); emu->f_serial=fopen(path,"w");
         snprintf(path, sizeof(path), "%s\\%s_stdout.txt", emu->log_dir, emu->rom_name); emu->f_stdout=fopen(path,"w");
         gui_log("ROM chargee: %s\n", filename);
         gui_log("Type de cartouche: %s\n", cart_type_name(emu->mmu.cart.type));
