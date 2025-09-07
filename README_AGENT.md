@@ -93,21 +93,18 @@ build\bin\test_joypad.exe
 - `logs/test_results.log`: résultats d'exécution tests.
 - `logs/emulator.log`: sortie runtime de l’émulateur (`run`).
 
-### 5) État actuel (06/09/2025)
-- ✅ CPU: PASS (21/21 dans `test_cpu`) – EI delay ok, HALT bug rudimentaire.
-- ✅ MMU: PASS (7/7) – RAM initialisée 0xFF, IO de base ok.
-- ✅ Interrupt: PASS (8/8).
-- ❌ PPU: FAIL (modes – transitions/stat) dans `test_ppu` (Modes).
-- ❌ Timer: FAIL (Overflow – rechargement/IRQ) dans `test_timer` (Overflow).
-- ❌ Joypad: FAIL (Buttons – lecture bits bas avec A/B/START) dans `test_joypad`.
+### 5) État actuel (à jour)
+- ✅ CPU: PASS (tests + `test_cpu_flags`)
+- ✅ MMU: PASS
+- ✅ Interrupt: PASS
+- ✅ Timer: PASS
+- ✅ PPU: PASS (tests modes simples OK)
+- ✅ Joypad: PASS (lecture P1 et IRQ Joypad; `test_joypad_irq`)
 
 ### 6) Correctifs en cours/proposés
-- PPU
-  - Mettre à jour `STAT` bits 0–2 au moment des changements de mode; resynchroniser `mode_cycles/line_cycles` à chaque transition; VBlank IRQ à LY=144.
-- Timer
-  - Overflow: rechargement TIMA depuis TMA et déclenchement IRQ; ajuster timing (reload immédiat attendu par test unitaire).
-- Joypad
-  - Alignement lecture des 4 bits bas selon sélection P15/P14; comportement START/SELECT pour satisfaire l’attendu de `test_joypad`.
+- CPU: DAA exhaustif, JR/JP/CALL/RET conditionnels (cycles), HALT bug.
+- PPU: tests timing/STAT plus stricts (456 cycles/ligne, LY/LYC, IRQ STAT).
+- Joypad: scénarios HALT/STOP et réveil par IRQ Joypad.
 
 ### 7) Standards et priorités
 - C99 strict; erreurs explicites; commentaires métier en français; noms en anglais.
@@ -122,7 +119,7 @@ build\bin\test_joypad.exe
 ### 9) Notes Pan Docs (rappels piégeux)
 - EI prend effet après l’instruction suivante.
 - HALT bug: IME=0 et `[IE]&[IF]!=0` → PC n’incrémente pas, double lecture probable.
-- PPU: 456 cycles/ligne, VBlank lignes 144–153, transitions OAM(80)→XFER(172)→HBLANK.
+- PPU: 456 cycles/ligne (OAM≈80→XFER≈172→HBLANK), VBlank lignes 144–153.
 - OAM DMA: copie 160 octets (non implémenté ici).
 
 

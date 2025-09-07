@@ -1,5 +1,7 @@
 # CameBoy – Émulateur Game Boy (DMG)
 
+![Capture GUI](docs/CameBoy_GUI_exemple_1.png)
+
 Émulateur Game Boy en C99, conçu pour suivre les spécifications Pan Docs et viser la conformité aux suites de tests Blargg/Mooneye. Deux modes d’exécution sont fournis: console et GUI Win32.
 
 ### Documentation
