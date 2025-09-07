@@ -57,7 +57,8 @@ Les exécutables sont générés sous `build\bin\`.
 
 ### Références
 
-- Pan Docs (copie locale): `docs/pandocs/`
+- Pan Docs (site officiel): [gbdev.io/pandocs](https://gbdev.io/pandocs/)
+- Pan Docs (copie locale du repo): `docs/pandocs/`
 - Suites de tests: `tests/blargg/`, `tests/mooneye/`
 
 ### État & objectifs
