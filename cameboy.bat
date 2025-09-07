@@ -24,6 +24,7 @@ if "%1"=="test" goto test
 if "%1"=="testrom" goto testrom
 if "%1"=="build" goto build
 if "%1"=="run" goto run
+if "%1"=="gui" goto gui
 if "%1"=="help" goto help
 
 REM Par défaut : build + test
@@ -45,10 +46,11 @@ if errorlevel 1 (
 
 REM Compiler directement avec GCC
 echo Compilation en cours...
-set "CFLAGS=-Wall -Wextra -std=c99 -O2 -g -Isrc"
+set "CFLAGS=-Wall -Wextra -std=c99 -O2 -g -Isrc -Ires"
 set "LDFLAGS=-lgdi32 -luser32 -lkernel32"
 set "SOURCES=src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\ppu.c src\joypad.c src\interrupt.c src\apu.c src\graphics_win32.c src\emulator_win32.c"
-set "BUILD_LOG=%LOGS_DIR%\build.log"
+set "GUI_SOURCES=src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\ppu.c src\joypad.c src\interrupt.c src\apu.c src\resource_manager.c src\graphics_win32_gui.c src\emulator_win32_gui.c"
+set "BUILD_LOG=%BUILD_DIR%\build.log"
 
 echo ======================================== > "%BUILD_LOG%"
 echo Build started %DATE% %TIME% >> "%BUILD_LOG%"
@@ -56,22 +58,55 @@ echo Build started %DATE% %TIME% >> "%BUILD_LOG%"
 REM S'assurer que le dossier bin existe
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%" 2>nul
 
+REM Eviter "Acces refuse" lors de l'ecrasement si un exe tourne encore
+taskkill /F /IM cameboy.exe >nul 2>&1
+taskkill /F /IM cameboy_gui.exe >nul 2>&1
+
+echo Compilation version simple...
+echo Compilation version simple... >> "%BUILD_LOG%"
 gcc %CFLAGS% %SOURCES% -o "%EXE%" %LDFLAGS% >> "%BUILD_LOG%" 2>&1
 if errorlevel 1 (
     echo Build FAILED at %DATE% %TIME% >> "%BUILD_LOG%"
-    echo ERREUR de compilation
+    echo ERREUR de compilation version simple
     type "%BUILD_LOG%"
     exit /b 1
 )
 
+echo Compilation version GUI...
+echo Compilation version GUI... >> "%BUILD_LOG%"
+gcc %CFLAGS% src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\ppu.c src\joypad.c src\interrupt.c src\apu.c src\resource_manager.c src\graphics_win32_gui.c src\emulator_win32_gui.c -o "%BIN_DIR%\cameboy_gui.exe" %LDFLAGS% -lcomctl32 -lshlwapi >> "%BUILD_LOG%" 2>&1
+if errorlevel 1 (
+    echo Build FAILED at %DATE% %TIME% >> "%BUILD_LOG%"
+    echo ERREUR de compilation version GUI
+    type "%BUILD_LOG%"
+    exit /b 1
+)
+
+REM Copier ressources (BMP/PNG/etc.) dans le dossier build/resources
+if not exist "%BUILD_DIR%\resources" mkdir "%BUILD_DIR%\resources" 2>nul
+if exist "%PROJECT_DIR%resources" (
+    echo Copie resources vers build\resources
+    xcopy /E /I /Y "%PROJECT_DIR%resources" "%BUILD_DIR%\resources"
+    echo Fin copie resources - errorlevel=!errorlevel!
+)
+
 if exist "%EXE%" (
-    echo Build SUCCES at %DATE% %TIME% >> "%BUILD_LOG%"
+    echo Build SUCCES ^(RUN^) at %DATE% %TIME% >> "%BUILD_LOG%"
+) else (
+    echo ERREUR: Executable RUN non trouve >> "%BUILD_LOG%"
+    echo ERREUR: Executable RUN non trouve
+    exit /b 1
+)
+
+if exist "%BIN_DIR%\cameboy_gui.exe" (
+    echo Build SUCCES ^(GUI^) at %DATE% %TIME% >> "%BUILD_LOG%"
     echo ======================================== >> "%BUILD_LOG%"
     echo.
-    echo SUCCES: Executable cree - %EXE%
+    echo SUCCES: Executables crees - %EXE% et %BIN_DIR%\cameboy_gui.exe
     echo.
 ) else (
-    echo ERREUR: Executable non trouve
+    echo ERREUR: Executable GUI non trouve >> "%BUILD_LOG%"
+    echo ERREUR: Executable GUI non trouve
     exit /b 1
 )
 goto end
@@ -263,6 +298,62 @@ if errorlevel 1 (
 
 goto end
 
+:gui
+echo ========================================
+echo LANCEMENT EMULATEUR GUI
+echo ========================================
+echo.
+
+if not exist "%BIN_DIR%\cameboy_gui.exe" (
+    echo L'emulateur GUI n'est pas compile. Lancez d'abord: cameboy.bat build
+    exit /b 1
+)
+
+REM Chercher une ROM
+if "%2"=="" (
+    REM Chercher des ROMs dans tests/
+    if exist "%TEST_DIR%\rom\visual_grid.gb" (
+        set "ROM=%TEST_DIR%\rom\visual_grid.gb"
+    ) else if exist "%TEST_DIR%\blargg\cpu_instrs\individual\01-special.gb" (
+        set "ROM=%TEST_DIR%\blargg\cpu_instrs\individual\01-special.gb"
+    ) else (
+        echo Aucune ROM trouvee
+        echo Placez une ROM .gb dans %TEST_DIR%\rom\ ou specifie le chemin
+        echo Usage: cameboy.bat gui chemin\vers\rom.gb
+        exit /b 1
+    )
+) else (
+    set "ROM=%2"
+)
+
+if not exist "%ROM%" (
+    echo ROM non trouvee: %ROM%
+    exit /b 1
+)
+
+echo Lancement GUI: %ROM%
+echo.
+echo Controles clavier:
+echo   Fleches: D-pad
+echo   Z: Bouton A
+echo   X: Bouton B
+echo   Entree: Start
+echo   Maj droit: Select
+echo   Echap: Quitter
+echo.
+
+REM Lancer l'émulateur GUI
+"%BIN_DIR%\cameboy_gui.exe" "%ROM%" 2> "%LOGS_DIR%\emulator_gui.log"
+
+if errorlevel 1 (
+    echo.
+    echo Erreur lors de l'execution GUI
+    echo Voir: %LOGS_DIR%\emulator_gui.log
+    type "%LOGS_DIR%\emulator_gui.log"
+)
+
+goto end
+
 :build_test
 call :build
 if errorlevel 1 goto end
@@ -287,24 +378,28 @@ echo Usage: cameboy.bat [commande] [options]
 echo.
 echo Commandes:
 echo   (rien)      - Compile et lance les tests
-echo   build       - Compile seulement
+echo   build       - Compile seulement (versions simple et GUI)
 echo   test        - Lance les tests (besoin de build d'abord)
-echo   run [rom]   - Lance l'emulateur avec une ROM
+echo   run [rom]   - Lance l'emulateur simple avec une ROM
+echo   gui [rom]   - Lance l'emulateur GUI avec une ROM
 echo   clean       - Nettoie les fichiers generes
 echo   help        - Affiche cette aide
 echo.
 echo Exemples:
 echo   cameboy.bat                    # Build + test
-echo   cameboy.bat run test.gb        # Lance avec une ROM specifique
-echo   cameboy.bat run                # Cherche automatiquement une ROM
+echo   cameboy.bat run test.gb        # Lance version simple avec ROM
+echo   cameboy.bat gui test.gb        # Lance version GUI avec ROM
+echo   cameboy.bat gui                # Cherche automatiquement une ROM pour GUI
 echo.
 echo Fichiers de logs:
 echo   %LOGS_DIR%\build.log           - Compilation
 echo   %LOGS_DIR%\test_results.log    - Resultats tests
-echo   %LOGS_DIR%\emulator.log        - Execution emulatur
+echo   %LOGS_DIR%\emulator.log        - Execution emulateur simple
+echo   %LOGS_DIR%\emulator_gui.log    - Execution emulateur GUI
 echo.
 echo Structure:
-echo   build\bin\                    - Executables
+echo   build\bin\cameboy.exe         - Emulateur simple
+echo   build\bin\cameboy_gui.exe     - Emulateur GUI complet
 echo   logs\                         - Tous les logs
 echo.
 goto end

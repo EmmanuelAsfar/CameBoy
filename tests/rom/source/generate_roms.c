@@ -199,6 +199,71 @@ static void write_program_cpu_zc_add(uint8_t *rom) {
     write_serial_sender(rom, (uint16_t)(p + (c - &rom[p])), 0x0240, (uint8_t)strlen(pass), 0x0250, (uint8_t)strlen(fail));
 }
 
+static void write_program_simple_square(uint8_t *rom) {
+    // Program at 0x0150: create a simple 10x10 black square at center
+    uint16_t p = 0x0150;
+    uint8_t *c = &rom[p];
+
+    // Initialize LCD
+    *c++ = 0x3E; *c++ = 0x91; // LD A,0x91 (LCD on, BG on, tiles 8000h, BG map 9800h)
+    *c++ = 0xE0; *c++ = 0x40; // LDH (LCDC),A
+
+    // Set BG palette to black/white
+    *c++ = 0x3E; *c++ = 0xE4; // LD A,0xE4 (11,10,01,00 -> black, dark gray, light gray, white)
+    *c++ = 0xE0; *c++ = 0x47; // LDH (BGP),A
+
+    // Create tile data: tile 0 = white (empty), tile 1 = black (square)
+    // Tile 0: all white (0x00, 0x00 for each row)
+    *c++ = 0x21; *c++ = 0x00; *c++ = 0x80; // LD HL,8000h
+    *c++ = 0x0E; *c++ = 0x10; // LD C,16 bytes (2 tiles * 8 rows * 2 bytes)
+    *c++ = 0xAF; // XOR A (A=0)
+    uint16_t tile_loop = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0x77; // LD (HL),A
+    *c++ = 0x23; // INC HL
+    *c++ = 0x0D; // DEC C
+    int8_t rel_tile = (int8_t)(tile_loop - (((p + (c - &rom[p])) + 2)));
+    *c++ = 0x20; *c++ = (uint8_t)rel_tile; // JR NZ,tile_loop
+
+    // Clear screen (fill BG map with tile 0)
+    *c++ = 0x11; *c++ = 0x00; *c++ = 0x98; // LD DE,9800h
+    *c++ = 0x06; *c++ = 18; // LD B,18 rows
+    uint16_t clear_row = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0x0E; *c++ = 32; // LD C,32 cols
+    *c++ = 0xAF; // XOR A (tile 0)
+    uint16_t clear_col = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0x12; // LD (DE),A
+    *c++ = 0x13; // INC DE
+    *c++ = 0x0D; // DEC C
+    int8_t rel_clear_col = (int8_t)(clear_col - (((p + (c - &rom[p])) + 2)));
+    *c++ = 0x20; *c++ = (uint8_t)rel_clear_col; // JR NZ,clear_col
+    *c++ = 0x05; // DEC B
+    int8_t rel_clear_row = (int8_t)(clear_row - (((p + (c - &rom[p])) + 2)));
+    *c++ = 0x20; *c++ = (uint8_t)rel_clear_row; // JR NZ,clear_row
+
+    // Draw 10x10 black square at center (x=75, y=67)
+    *c++ = 0x11; *c++ = 0x4B; *c++ = 0x98; // LD DE,0x984B (9800 + 67*32 + 75)
+    *c++ = 0x06; *c++ = 10; // LD B,10 (height)
+    uint16_t draw_row = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0x0E; *c++ = 10; // LD C,10 (width)
+    *c++ = 0x3E; *c++ = 1; // LD A,1 (tile 1 = black)
+    uint16_t draw_col = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0x12; // LD (DE),A
+    *c++ = 0x13; // INC DE
+    *c++ = 0x0D; // DEC C
+    int8_t rel_draw_col = (int8_t)(draw_col - (((p + (c - &rom[p])) + 2)));
+    *c++ = 0x20; *c++ = (uint8_t)rel_draw_col; // JR NZ,draw_col
+    // Next row: DE += 22 (32 - 10)
+    *c++ = 0x21; *c++ = 22; *c++ = 0x00; // LD HL,22
+    *c++ = 0x19; // ADD HL,DE
+    *c++ = 0xEB; // EX DE,HL
+    *c++ = 0x05; // DEC B
+    int8_t rel_draw_row = (int8_t)(draw_row - (((p + (c - &rom[p])) + 2)));
+    *c++ = 0x20; *c++ = (uint8_t)rel_draw_row; // JR NZ,draw_row
+
+    // Infinite loop
+    *c++ = 0x18; *c++ = 0xFE; // JR $-2 (infinite loop)
+}
+
 int main(void) {
     // Generate multiple ROMs
     // 1) pass.gb
@@ -207,7 +272,7 @@ int main(void) {
         if (!rom) { fprintf(stderr, "Alloc ROM pass échouée\n"); return 1; }
         write_header(rom, "ROM PASS    ");
         write_program_pass(rom);
-        FILE *f = fopen("tests/rom/pass.gb", "wb");
+        FILE *f = fopen("pass.gb", "wb");
         if (!f) { fprintf(stderr, "Créer pass.gb échoué\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
@@ -218,7 +283,7 @@ int main(void) {
         if (!rom) { fprintf(stderr, "Alloc ROM joypad échouée\n"); return 1; }
         write_header(rom, "JOY PAD DEF ");
         write_program_joypad_default(rom);
-        FILE *f = fopen("tests/rom/joypad_default.gb", "wb");
+        FILE *f = fopen("joypad_default.gb", "wb");
         if (!f) { fprintf(stderr, "Créer joypad_default.gb échoué\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
@@ -229,7 +294,7 @@ int main(void) {
         if (!rom) { fprintf(stderr, "Alloc ROM timer échouée\n"); return 1; }
         write_header(rom, "TIMER BASIC ");
         write_program_timer_basic(rom);
-        FILE *f = fopen("tests/rom/timer_basic.gb", "wb");
+        FILE *f = fopen("timer_basic.gb", "wb");
         if (!f) { fprintf(stderr, "Créer timer_basic.gb échoué\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
@@ -240,7 +305,7 @@ int main(void) {
         if (!rom) { fprintf(stderr, "Alloc ROM cpu échouée\n"); return 1; }
         write_header(rom, "CPU ZC ADD  ");
         write_program_cpu_zc_add(rom);
-        FILE *f = fopen("tests/rom/cpu_zc_add.gb", "wb");
+        FILE *f = fopen("cpu_zc_add.gb", "wb");
         if (!f) { fprintf(stderr, "Créer cpu_zc_add.gb échoué\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
@@ -309,11 +374,22 @@ int main(void) {
         // Loop forever instead of HALT
         *c++ = 0x18; *c++ = 0xFE; // JR $-2 (infinite loop)
 
-        FILE *f = fopen("tests/rom/visual_grid.gb", "wb");
+        FILE *f = fopen("visual_grid.gb", "wb");
         if (!f) { fprintf(stderr, "Créer visual_grid.gb échoué\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
 
-    printf("ROMs générées: pass.gb, joypad_default.gb, timer_basic.gb, cpu_zc_add.gb, visual_grid.gb\n");
+    // 6) simple_square.gb - Simple 10x10 black square at center
+    {
+        uint8_t *rom = calloc(1, 32768);
+        if (!rom) { fprintf(stderr, "Alloc ROM simple échouée\n"); return 1; }
+        write_header(rom, "SIMPLE SQUARE");
+        write_program_simple_square(rom);
+        FILE *f = fopen("simple_square.gb", "wb");
+        if (!f) { fprintf(stderr, "Créer simple_square.gb échoué\n"); free(rom); return 1; }
+        fwrite(rom, 1, 32768, f); fclose(f); free(rom);
+    }
+
+    printf("ROMs générées: pass.gb, joypad_default.gb, timer_basic.gb, cpu_zc_add.gb, visual_grid.gb, simple_square.gb\n");
     return 0;
 }

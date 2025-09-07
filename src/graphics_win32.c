@@ -7,9 +7,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     
     switch (uMsg) {
         case WM_CLOSE:
-            // Ignorer la fermeture via la croix pour maintenir la fenêtre ouverte
-            // (Utiliser Échap pour quitter proprement)
-            OutputDebugStringA("WM_CLOSE ignoré (utiliser ESC)\n");
+            // Fermer proprement via la croix
+            if (gfx) gfx->running = false;
+            PostQuitMessage(0);
             return 0;
             
         case WM_KEYDOWN:

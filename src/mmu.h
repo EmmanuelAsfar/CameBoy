@@ -66,6 +66,9 @@ typedef struct {
     bool rom_banking_mode;  // true = ROM banking, false = RAM banking
 } Cartridge;
 
+// Callback pour la sortie série
+typedef void (*mmu_serial_cb_t)(u8 ch);
+
 // Structure MMU
 typedef struct {
     u8* memory;
@@ -81,6 +84,10 @@ typedef struct {
     bool boot_rom_enabled;
     void* timer;  // Pointeur vers le timer (void* pour éviter la dépendance circulaire)
     void* apu;    // Pointeur vers l'APU (void* pour éviter la dépendance circulaire)
+    void* joypad; // Pointeur vers le joypad (opaque)
+    
+    // Callback pour la sortie série
+    mmu_serial_cb_t serial_cb;
 } MMU;
 
 // Fonctions MMU
@@ -98,6 +105,11 @@ void mmu_write16(MMU* mmu, u16 address, u16 value);
 // Fonctions MBC
 void mbc_write(MMU* mmu, u16 address, u8 value);
 u8 mbc_read(MMU* mmu, u16 address);
+
+// Callback série
+void mmu_set_serial_callback(MMU* mmu, mmu_serial_cb_t callback);
+// Liaison joypad
+void mmu_set_joypad(MMU* mmu, void* joypad);
 
 // Parsing de cartouche
 bool cart_parse_header(Cartridge* cart, u8* rom_data);

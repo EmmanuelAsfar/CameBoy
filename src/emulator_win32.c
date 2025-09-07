@@ -141,11 +141,6 @@ void emulator_run(Emulator* emu) {
         
         // Gérer les événements
         graphics_win32_handle_events(&emu->graphics, &emu->running);
-        // Si la fenêtre a reçu WM_CLOSE, on ne quitte plus automatiquement
-        if (!emu->graphics.running && emu->running) {
-            // Réactiver l'état running de la fenêtre tant que l'utilisateur n'appuie pas ESC
-            emu->graphics.running = true;
-        }
         
         // Simple delay to keep window open
         static int frame_count = 0;

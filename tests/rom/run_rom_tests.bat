@@ -68,7 +68,7 @@ if errorlevel 1 (
 
 set TOTAL=0
 set PASSED=0
-set CYCLES=60000000
+set CYCLES=60000000peux
 
 for %%R in (tests\rom\*.gb) do (
   set /a TOTAL+=1

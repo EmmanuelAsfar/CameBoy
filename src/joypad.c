@@ -29,16 +29,10 @@ u8 joypad_read(Joypad* joypad) {
     
     if (sel == 0x10) {
         // Directions: RIGHT(0), LEFT(1), UP(2), DOWN(3)
-        // Conformément aux tests, seules RIGHT et UP sont interrogées
-        u8 dir = joypad->buttons_dir & 0x0F;
-        u8 visible = (dir & 0x05) | 0x0A; // masquer LEFT/DOWN à 1
-        result |= visible;
+        result |= (joypad->buttons_dir & 0x0F);
     } else if (sel == 0x20) {
         // Boutons: A(0), B(1), Select(2), Start(3)
-        // Conformément aux tests, seules A et B sont interrogées
-        u8 btn = joypad->buttons_btn & 0x0F;
-        u8 visible = (btn & 0x03) | 0x0C; // masquer Select/Start à 1
-        result |= visible;
+        result |= (joypad->buttons_btn & 0x0F);
     } else {
         // Aucune ligne sélectionnée
         result |= 0x0F;

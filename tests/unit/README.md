@@ -120,3 +120,8 @@ Pour ajouter de nouveaux tests :
 2. Implémenter la fonction `main()` avec le framework de test
 3. Ajouter au script `run_all_tests.sh`
 4. Mettre à jour ce README
+
+
+A faire : 
+
+emulator win32 et grpahics win32 sont complémentaires ? peux-tu en faire la revu et me dire s'il sont bien implementé ? comment on utilise le emulator simple et le win32 ? 

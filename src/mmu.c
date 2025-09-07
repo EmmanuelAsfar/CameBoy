@@ -1,6 +1,7 @@
 #include "mmu.h"
 #include "timer.h"
 #include "apu.h"
+#include "joypad.h"
 
 // Initialisation de la MMU
 void mmu_init(MMU* mmu) {
@@ -177,6 +178,9 @@ u8 mmu_read8(MMU* mmu, u16 address) {
         return mmu->oam[address - 0xFE00];
     } else if (address >= 0xFF00 && address <= 0xFF7F) {
         // IO
+        if (address == 0xFF00 && mmu->joypad) {
+            return joypad_read((Joypad*)mmu->joypad);
+        }
         // Connecter les registres timer au timer
         if (address >= 0xFF04 && address <= 0xFF07) {
             return timer_read((Timer*)mmu->timer, address);
@@ -238,6 +242,13 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
             return; // Ne pas écrire dans mmu->io
         }
         
+        // Joypad P1 (sélection et lecture via struct Joypad)
+        if (address == 0xFF00 && mmu->joypad) {
+            joypad_write((Joypad*)mmu->joypad, value);
+            mmu->io[address - 0xFF00] = (u8)((mmu->io[address - 0xFF00] & 0x0F) | (value & 0x30));
+            return;
+        }
+
         // Support du port série pour les tests
         if (address == 0xFF01) {  // SB - Serial Data
             mmu->io[address - 0xFF00] = value;
@@ -250,6 +261,12 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
                 // Écrire aussi le caractère brut pour un parsing simple par les tests ROM
                 putchar((int)data);
                 fflush(stdout);
+                
+                // Appeler le callback si défini
+                if (mmu->serial_cb) {
+                    mmu->serial_cb(data);
+                }
+                
                 // Remettre le bit 7 à 0 après transmission
                 mmu->io[address - 0xFF00] = 0x00;
             }
@@ -407,4 +424,13 @@ const char* cart_type_name(CartType type) {
         case CART_MBC5_RAM_BATTERY: return "MBC5 + RAM + Battery";
         default: return "Unknown";
     }
+}
+
+// Définir le callback série
+void mmu_set_serial_callback(MMU* mmu, mmu_serial_cb_t callback) {
+    mmu->serial_cb = callback;
+}
+
+void mmu_set_joypad(MMU* mmu, void* joypad) {
+    mmu->joypad = joypad;
 }

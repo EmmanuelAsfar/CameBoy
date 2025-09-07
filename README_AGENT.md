@@ -1,3 +1,40 @@
+Agent notes - CameBoy
+=====================
+
+Build & Logs
+------------
+- Main script: `cameboy.bat`
+- Build outputs: `build\bin\cameboy.exe`, `build\bin\cameboy_gui.exe`
+- Build log: `build\build.log` (always overwritten per build)
+- Unit test log: `logs\test_results.log`
+- Emulator logs: `logs\emulator.log`, `logs\emulator_gui.log`
+
+Resources (GUI)
+---------------
+- Source resources live in `resources/` at project root.
+- Build copies `resources/` to `build\resources/`.
+- GUI loads background image via `resource_manager`:
+  - `GetModuleFileNameA` → remove exe → remove `bin` → append `resources`
+  - Loads BMP with `LoadImageA` using `LR_LOADFROMFILE|LR_CREATEDIBSECTION`.
+- Expected file: `build\resources\gameboy_bg.bmp`.
+
+Running
+-------
+- `cameboy.bat build` compiles both simple and GUI versions.
+- `cameboy.bat gui <rom>` launches GUI; window stays open; close with Esc or X.
+
+GUI layout
+----------
+- Background scaled to window height (left side console area).
+- LCD drawn over background using percentages of console area:
+  - x1 = 24% width, x2 = 76% width
+  - y1 = 21% height, y2 = 68% height
+- Two right panels/logs are disabled in GUI_BG_ONLY mode; LCD always renders on top.
+
+Known caveats
+-------------
+- Do not embed resources for now; use file-based loading.
+- If Access Denied on build, script kills running `cameboy*.exe` before link.
 ## CameBoy – Guide Agent (Vue d'ensemble, commandes, état)
 
 ### 1) Projet en bref

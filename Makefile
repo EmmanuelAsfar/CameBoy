@@ -19,8 +19,13 @@ TEST_DIR = tests\unit
 SOURCES = $(SRC_DIR)\cpu.c $(SRC_DIR)\cpu_tables.c $(SRC_DIR)\cpu_tables_cb.c $(SRC_DIR)\mmu.c $(SRC_DIR)\timer.c $(SRC_DIR)\ppu.c $(SRC_DIR)\joypad.c $(SRC_DIR)\graphics_win32.c $(SRC_DIR)\emulator_simple.c
 OBJECTS = $(SOURCES:$(SRC_DIR)\%.c=$(OBJ_DIR)\%.o)
 
+# Fichiers sources GUI
+GUI_SOURCES = $(SRC_DIR)\cpu.c $(SRC_DIR)\cpu_tables.c $(SRC_DIR)\cpu_tables_cb.c $(SRC_DIR)\mmu.c $(SRC_DIR)\timer.c $(SRC_DIR)\ppu.c $(SRC_DIR)\joypad.c $(SRC_DIR)\interrupt.c $(SRC_DIR)\graphics_win32_gui.c $(SRC_DIR)\emulator_win32_gui.c
+GUI_OBJECTS = $(GUI_SOURCES:$(SRC_DIR)\%.c=$(OBJ_DIR)\%.o)
+
 # Cibles
 MAIN_TARGET = $(BIN_DIR)\cameboy.exe
+GUI_TARGET = $(BIN_DIR)\cameboy_gui.exe
 TEST_CPU = $(BIN_DIR)\test_cpu.exe
 TEST_MMU = $(BIN_DIR)\test_mmu.exe
 TEST_PPU = $(BIN_DIR)\test_ppu.exe
@@ -34,7 +39,7 @@ TEST_JOYPAD = $(BIN_DIR)\test_joypad.exe
 
 .PHONY: all clean test
 
-all: $(MAIN_TARGET)
+all: $(MAIN_TARGET) $(GUI_TARGET)
 
 $(MAIN_TARGET): $(OBJECTS)
 	@if not exist "$(BIN_DIR)" mkdir "$(BIN_DIR)"
@@ -43,6 +48,14 @@ $(MAIN_TARGET): $(OBJECTS)
 	@$(CC) $(OBJECTS) -o $@ $(LDFLAGS) 2> $(LOGS_DIR)\link.log
 	@if %errorlevel% neq 0 (echo ERREUR Link - voir $(LOGS_DIR)\link.log & exit /b 1)
 	@echo SUCCES $(MAIN_TARGET) compile
+
+$(GUI_TARGET): $(GUI_OBJECTS)
+	@if not exist "$(BIN_DIR)" mkdir "$(BIN_DIR)"
+	@if not exist "$(LOGS_DIR)" mkdir "$(LOGS_DIR)"
+	@echo Compilation de $(GUI_TARGET)...
+	@$(CC) $(GUI_OBJECTS) -o $@ $(LDFLAGS) -lcomctl32 2> $(LOGS_DIR)\link_gui.log
+	@if %errorlevel% neq 0 (echo ERREUR Link GUI - voir $(LOGS_DIR)\link_gui.log & exit /b 1)
+	@echo SUCCES $(GUI_TARGET) compile
 
 $(OBJ_DIR)\%.o: $(SRC_DIR)\%.c
 	@if not exist "$(OBJ_DIR)" mkdir "$(OBJ_DIR)"
