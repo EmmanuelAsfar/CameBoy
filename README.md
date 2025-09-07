@@ -8,14 +8,14 @@ CameBoy est un émulateur Game Boy écrit en C99, conçu pour être pédagogique
 
 ### Documentation
 
-- Index documentation: `docs/README.md`
-- Architecture: `docs/architecture.md`
-- Utilisation (build/run/GUI): `docs/usage.md`
-- Tests (unitaires, ROM, logs): `docs/testing.md`
-- Scripts (cameboy.bat, user/*.bat): `docs/scripts.md`
-- Glossaire (jargon expliqué): `docs/glossaire.md`
-- Spécifications d'implémentation: `docs/specs/README.md`
-- Contribution: `CONTRIBUTING.md`
+- [Index documentation](docs/README.md)
+- [Architecture](docs/architecture.md)
+- [Utilisation (build/run/GUI)](docs/usage.md)
+- [Tests (unitaires, ROM, logs)](docs/testing.md)
+- [Scripts (cameboy.bat, user/*.bat)](docs/scripts.md)
+- [Glossaire (jargon expliqué)](docs/glossaire.md)
+- [Spécifications d'implémentation](docs/specs/README.md)
+- [Contribution](CONTRIBUTING.md)
 
 ► Parcours conseillé: Utilisation → Architecture → Spécifications → Tests
 
@@ -44,32 +44,32 @@ type logs\test_results.log | more
 
 #### Sommaire complet
 
-- Index docs: `docs/README.md`
-- Utilisation: `docs/usage.md`
-- Architecture: `docs/architecture.md`
-- Spécifications d'implémentation: `docs/specs/README.md`
-  - Mémoire: `docs/specs/memory.md`
-  - CPU: `docs/specs/cpu.md`
-  - PPU: `docs/specs/ppu.md`
-  - Timers: `docs/specs/timers.md`
-  - Interruptions: `docs/specs/interrupts.md`
-  - Joypad: `docs/specs/joypad.md`
-  - Port Série: `docs/specs/serial.md`
-  - MBC: `docs/specs/mbc.md`
-  - DMA/OAM: `docs/specs/dma.md`
-  - Accès VRAM/OAM: `docs/specs/vram-access.md`
-  - Séquence de démarrage: `docs/specs/power-up.md`
-- Tests: `docs/testing.md`
-- Scripts: `docs/scripts.md`
-- Glossaire: `docs/glossaire.md`
-- Contribution: `CONTRIBUTING.md`
-- Pan Docs (site officiel): https://gbdev.io/pandocs/
+- [Index docs](docs/README.md)
+- [Utilisation](docs/usage.md)
+- [Architecture](docs/architecture.md)
+- [Spécifications d'implémentation](docs/specs/README.md)
+  - [Mémoire](docs/specs/memory.md)
+  - [CPU](docs/specs/cpu.md)
+  - [PPU](docs/specs/ppu.md)
+  - [Timers](docs/specs/timers.md)
+  - [Interruptions](docs/specs/interrupts.md)
+  - [Joypad](docs/specs/joypad.md)
+  - [Port Série](docs/specs/serial.md)
+  - [MBC](docs/specs/mbc.md)
+  - [DMA/OAM](docs/specs/dma.md)
+  - [Accès VRAM/OAM](docs/specs/vram-access.md)
+  - [Séquence de démarrage](docs/specs/power-up.md)
+- [Tests](docs/testing.md)
+- [Scripts](docs/scripts.md)
+- [Glossaire](docs/glossaire.md)
+- [Contribution](CONTRIBUTING.md)
+- [Pan Docs (site officiel)](https://gbdev.io/pandocs/)
 
 Les exécutables sont générés sous `build\bin\`.
 
 ### Références
 
-- Pan Docs (site officiel): https://gbdev.io/pandocs/
+- [Pan Docs (site officiel)](https://gbdev.io/pandocs/)
 - Suites de tests: `tests/blargg/`, `tests/mooneye/`
 
 ### État & objectifs
