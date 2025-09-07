@@ -1,8 +1,12 @@
 # Logs
 logs/**
+!logs/.gitkeep
 
-# Build outputs
+# Build outputs (keep resources under build/resources)
 build/**
+!build/.gitkeep
+!build/resources/
+!build/resources/**
 
 # OS/editor files
 .DS_Store
