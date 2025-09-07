@@ -19,10 +19,20 @@ L'émulation Game Boy nécessite de reproduire fidèlement le comportement maté
 - [DMA/OAM](./dma.md) - Transferts de données rapides
 - [Accès VRAM/OAM](./vram-access.md) - Restrictions d'accès
 - [Séquence de démarrage](./power-up.md) - Initialisation système
+- [APU (Audio)](./apu.md) - Génération sonore et registres
+- [Bug de corruption OAM](./oam-bug.md) - Cas limites PPU
+- [CGB (Game Boy Color)](./cgb.md) - Différences et cadrage
 
-## Référence principale
+## Pour en savoir plus (optionnel)
 
-[Pan Docs (gbdev.io/pandocs)](https://gbdev.io/pandocs/) - Documentation officielle de référence
+- Super Game Boy (SGB): commandes et transferts
+- Infrarouge (CGB): communication IR
+- Accessoires: Imprimante, Caméra, Adaptateur 4 joueurs
+- Connectique: ports externes et câblage
+- Cheats: Game Genie/Shark
+- Comparaison LR35902 vs Z80
+
+Réfs correspondantes: voir [Pan Docs](https://gbdev.io/pandocs/)
 
 ## Comment utiliser ces spécifications
 

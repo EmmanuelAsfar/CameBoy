@@ -59,10 +59,15 @@ type logs\test_results.log | more
   - [DMA/OAM](docs/specs/dma.md)
   - [Accès VRAM/OAM](docs/specs/vram-access.md)
   - [Séquence de démarrage](docs/specs/power-up.md)
+  - [APU (Audio)](docs/specs/apu.md)
+  - [Bug de corruption OAM](docs/specs/oam-bug.md)
+  - [CGB (Game Boy Color)](docs/specs/cgb.md)
+- [ROMs (format/lecture/build)](docs/roms.md)
 - [Tests](docs/testing.md)
 - [Scripts](docs/scripts.md)
 - [Glossaire](docs/glossaire.md)
 - [Contribution](CONTRIBUTING.md)
+- Pour en savoir plus (optionnel): Super Game Boy, Infrarouge, Accessoires, Connectique, Cheats, Comparaison Z80 (voir Pan Docs)
 - [Pan Docs (site officiel)](https://gbdev.io/pandocs/)
 
 Les exécutables sont générés sous `build\bin\`.

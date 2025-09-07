@@ -5,6 +5,7 @@
 - [Utilisation (build/run/GUI)](./usage.md)
 - [Architecture (vue d’ensemble)](./architecture.md)
 - [Spécifications (détaillées)](./specs/README.md)
+- [ROMs (format/lecture/build)](./roms.md)
 - [Tests et résultats](./testing.md)
 - [Scripts utiles](./scripts.md)
 - [Glossaire (jargon expliqué)](./glossaire.md)
@@ -17,6 +18,8 @@
 - Utilisation
   - [Guide d’utilisation](./usage.md)
   - [Scripts](./scripts.md)
+- Données et cartouches
+  - [ROMs (format/lecture/build)](./roms.md)
 - Qualité et validation
   - [Tests unitaires et ROM](./testing.md)
 - Références
