@@ -1,28 +1,28 @@
 # Documentation CameBoy
 
-- [Architecture](./architecture.md)
-- [Utilisation](./usage.md)
-- [Tests](./testing.md)
-- [Scripts](./scripts.md)
-- [Glossaire](./glossaire.md)
-- [Spécifications d'implémentation](./specs/README.md)
-- Références:
-  - Pan Docs (copie locale): `./pandocs/`
-  - Suites de tests: `../tests/blargg/`, `../tests/mooneye/`
-
-### Documentation CameBoy
-
-Bienvenue dans la documentation. Utilisez les liens ci-dessous pour naviguer.
-
-- Accueil du projet: ../README.md
-- Architecture: ./architecture.md
+## Parcours conseillé
+- Démarrage rapide: ../README.md
 - Utilisation (build/run/GUI): ./usage.md
-- Tests (unitaires, ROM, logs): ./testing.md
-- Scripts (cameboy.bat, user/*.bat): ./scripts.md
-- Glossaire (jargon): ./glossaire.md
+- Architecture (vue d’ensemble): ./architecture.md
+- Spécifications (détaillées): ./specs/README.md
+- Tests et résultats: ./testing.md
+- Scripts utiles: ./scripts.md
+- Glossaire (jargon expliqué): ./glossaire.md
 - Contribution: ../CONTRIBUTING.md
-- Référence Pan Docs (locale): ./pandocs/README.md
 
-Astuce GitHub: utilisez la table des matières automatique (TOC) affichée à droite sur GitHub pour sauter aux sections d’un document.
+## Sections
+- Conception et architecture
+  - Architecture: ./architecture.md
+  - Spécifications d'implémentation: ./specs/README.md
+- Utilisation
+  - Guide d’utilisation: ./usage.md
+  - Scripts: ./scripts.md
+- Qualité et validation
+  - Tests unitaires et ROM: ./testing.md
+- Références
+  - Pan Docs (copie locale): ./pandocs/
+  - Suites de tests: ../tests/blargg/, ../tests/mooneye/
+
+Astuce GitHub: utilisez la table des matières automatique (TOC) affichée à droite pour sauter aux sections d’un document.
 
 

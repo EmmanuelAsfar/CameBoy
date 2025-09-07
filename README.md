@@ -14,7 +14,10 @@ CameBoy est un émulateur Game Boy écrit en C99, conçu pour être pédagogique
 - Tests (unitaires, ROM, logs): `docs/testing.md`
 - Scripts (cameboy.bat, user/*.bat): `docs/scripts.md`
 - Glossaire (jargon expliqué): `docs/glossaire.md`
+- Spécifications d'implémentation: `docs/specs/README.md`
 - Contribution: `CONTRIBUTING.md`
+
+► Parcours conseillé: Utilisation → Architecture → Spécifications → Tests
 
 ### Structure du projet (vue rapide)
 
@@ -39,29 +42,34 @@ cameboy.bat gui rom.gb :: exécuter en GUI
 type logs\test_results.log | more
 ```
 
-#### Table des matières
+#### Sommaire complet
 
-- [Documentation](#documentation)
-  - [Index docs](docs/README.md)
-- [Architecture](docs/architecture.md)
-- [Utilisation](docs/usage.md)
-- [Tests](docs/testing.md)
-- [Scripts](docs/scripts.md)
-- [Glossaire](docs/glossaire.md)
-- [Spécifications d'implémentation](docs/specs/README.md)
-- [Pan Docs (copie locale)](docs/pandocs/)
-- [Structure du projet (vue rapide)](#structure-du-projet-vue-rapide)
-- [Prérequis](#prérequis)
-- [Démarrage rapide (Windows)](#démarrage-rapide-windows)
-- [Références](#références)
-- [État & objectifs](#état--objectifs)
+- Index docs: `docs/README.md`
+- Utilisation: `docs/usage.md`
+- Architecture: `docs/architecture.md`
+- Spécifications d'implémentation: `docs/specs/README.md`
+  - Mémoire: `docs/specs/memory.md`
+  - CPU: `docs/specs/cpu.md`
+  - PPU: `docs/specs/ppu.md`
+  - Timers: `docs/specs/timers.md`
+  - Interruptions: `docs/specs/interrupts.md`
+  - Joypad: `docs/specs/joypad.md`
+  - Port Série: `docs/specs/serial.md`
+  - MBC: `docs/specs/mbc.md`
+  - DMA/OAM: `docs/specs/dma.md`
+  - Accès VRAM/OAM: `docs/specs/vram-access.md`
+  - Séquence de démarrage: `docs/specs/power-up.md`
+- Tests: `docs/testing.md`
+- Scripts: `docs/scripts.md`
+- Glossaire: `docs/glossaire.md`
+- Contribution: `CONTRIBUTING.md`
+- Pan Docs (site officiel): https://gbdev.io/pandocs/
 
 Les exécutables sont générés sous `build\bin\`.
 
 ### Références
 
-- Pan Docs (site officiel): [gbdev.io/pandocs](https://gbdev.io/pandocs/)
-- Pan Docs (copie locale du repo): `docs/pandocs/`
+- Pan Docs (site officiel): https://gbdev.io/pandocs/
 - Suites de tests: `tests/blargg/`, `tests/mooneye/`
 
 ### État & objectifs
