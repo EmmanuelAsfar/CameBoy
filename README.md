@@ -61,3 +61,48 @@ Les exécutables sont générés sous `build\bin\`.
 ### État & objectifs
 
 Voir `README_AGENT.md` pour un état technique courant (timings PPU/Timer/Joypad) et prochaines étapes.
+
+### Aperçu visuel
+
+```mermaid
+graph LR
+  subgraph Coeur
+    CPU --- MMU
+    CPU --- Timer
+    CPU --- Interrupt
+    MMU --- PPU
+    MMU --- Joypad
+    MMU --- Interrupt
+  end
+
+  subgraph Interface
+    PPU ---|framebuffer| GUI[GUI Win32]
+    Joypad ---|événements| GUI
+  end
+
+  Emulator[Emulator] --> CPU
+  Emulator --> Timer
+  Emulator --> PPU
+  Emulator --> Joypad
+  Emulator --> Interrupt
+  Emulator -. chargement ROM .-> MMU
+```
+
+```mermaid
+flowchart TD
+  A[Chargement ROM] --> B[Init modules]
+  B --> C{Boucle}
+  C --> D[CPU step]
+  D --> E[Timer tick]
+  D --> F[PPU tick]
+  E --> G{Overflow TIMA?}
+  G -- oui --> H[IRQ Timer]
+  F --> I{LY == 144?}
+  I -- oui --> J[IRQ VBlank]
+  H --> K[Handle IRQ]
+  J --> K
+  K --> C
+  F --> L{Frame prête?}
+  L -- oui --> M[GUI update/present]
+  M --> C
+```
