@@ -2,7 +2,7 @@
 
 ![Capture GUI](docs/CameBoy_GUI_exemple_1.png)
 
-CameBoy est un émulateur Game Boy écrit en C99, conçu pour être pédagogique et précis. Le projet s’appuie sur les Pan Docs pour la fidélité matérielle, vise la compatibilité avec les suites de tests Blargg et Mooneye, et fournit deux expériences complémentaires: une version console pour le développement et l’automatisation (build/tests/logs), et une GUI Win32 simple pour visualiser le framebuffer, le port série et les logs en direct. L’architecture reste modulaire (CPU, MMU, PPU, Timer, Interrupts, Joypad, APU) afin de faciliter l’itération, la mesure des timings et l’ajout de fonctionnalités (MBC, DMA, audio…).
+CameBoy est un émulateur Game Boy écrit en C99, conçu pour être pédagogique. Le projet s’appuie sur les Pan Docs pour la fidélité matérielle, vise la compatibilité avec les suites de tests Blargg et Mooneye, et fournit deux expériences complémentaires: une version console pour le développement et l’automatisation (build/tests/logs), et une GUI Win32 simple pour visualiser le framebuffer, le port série et les logs en direct. L’architecture reste modulaire (CPU, MMU, PPU, Timer, Interrupts, Joypad, APU) afin de faciliter l’itération, la mesure des timings et l’ajout de fonctionnalités (MBC, DMA, audio…).
 
 Émulateur Game Boy en C99, conçu pour suivre les spécifications Pan Docs et viser la conformité aux suites de tests Blargg/Mooneye. Deux modes d’exécution sont fournis: console et GUI Win32.
 
