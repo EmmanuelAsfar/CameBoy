@@ -7,6 +7,7 @@
 
 #include "../../src/common.h"
 #include "../../src/mmu.h"
+#include "../../src/ppu.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -20,6 +21,8 @@ void test_mmu_cart_parsing(void);
 void test_mmu_read_write_8bit(void);
 void test_mmu_read_write_16bit(void);
 void test_mmu_echo_ram(void);
+void test_mmu_vram_oam_restrictions(void);
+void test_mmu_dma_oam_copy(void);
 
 // Table des tests MMU
 typedef struct {
@@ -35,6 +38,8 @@ UnitTest mmu_tests[] = {
     {"MMU Read/Write 8-bit", test_mmu_read_write_8bit},
     {"MMU Read/Write 16-bit", test_mmu_read_write_16bit},
     {"MMU Echo RAM", test_mmu_echo_ram},
+    {"MMU VRAM/OAM Restrictions", test_mmu_vram_oam_restrictions},
+    {"MMU DMA OAM Copy", test_mmu_dma_oam_copy},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -298,6 +303,55 @@ void test_mmu_echo_ram(void) {
     // Test avec une adresse plus élevée
     mmu_write8(&mmu, 0xC100, 0xEF);
     assert(mmu_read8(&mmu, 0xE100) == 0xEF);
+
+    mmu_cleanup(&mmu);
+}
+
+void test_mmu_vram_oam_restrictions(void) {
+    MMU mmu; PPU ppu;
+    mmu_init(&mmu);
+    ppu_init(&ppu);
+    // Lier le PPU à la MMU pour que les restrictions s'appliquent
+    mmu_set_ppu(&mmu, &ppu);
+
+    // Mode 3 (Pixel Transfer): VRAM bloquée
+    ppu.mode = PPU_MODE_PIXEL_TRANSFER;
+    mmu_write8(&mmu, 0x8000, 0x12);
+    assert(mmu_read8(&mmu, 0x8000) == 0xFF);
+
+    // Mode 2 (OAM Search): OAM bloquée
+    ppu.mode = PPU_MODE_OAM_SEARCH;
+    mmu_write8(&mmu, 0xFE00, 0x34);
+    assert(mmu_read8(&mmu, 0xFE00) == 0xFF);
+
+    // Mode 0 (HBlank): accès libres
+    ppu.mode = PPU_MODE_HBLANK;
+    mmu_write8(&mmu, 0x8000, 0x56);
+    assert(mmu_read8(&mmu, 0x8000) == 0x56);
+    mmu_write8(&mmu, 0xFE00, 0x78);
+    assert(mmu_read8(&mmu, 0xFE00) == 0x78);
+
+    mmu_cleanup(&mmu);
+}
+
+void test_mmu_dma_oam_copy(void) {
+    MMU mmu; PPU ppu;
+    mmu_init(&mmu);
+    ppu_init(&ppu);
+    mmu_set_ppu(&mmu, &ppu);
+
+    // Préparer une page source en WRAM (0xC000)
+    for (int i = 0; i < 160; i++) {
+        mmu_write8(&mmu, 0xC000 + i, (u8)i);
+    }
+
+    // Déclencher le DMA depuis 0xC000 (valeur 0xC0)
+    mmu_write8(&mmu, 0xFF46, 0xC0);
+
+    // Vérifier que OAM contient les données copiées
+    for (int i = 0; i < 160; i++) {
+        assert(mmu_read8(&mmu, 0xFE00 + i) == (u8)i);
+    }
 
     mmu_cleanup(&mmu);
 }

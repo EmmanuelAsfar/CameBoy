@@ -2,6 +2,20 @@
 #include "timer.h"
 #include "apu.h"
 #include "joypad.h"
+#include "ppu.h"
+
+static inline bool mmu_vram_access_allowed(MMU* mmu) {
+    if (!mmu->ppu) return true;
+    PPUMode mode = ((PPU*)mmu->ppu)->mode;
+    return mode != PPU_MODE_PIXEL_TRANSFER; // bloqué en mode 3
+}
+
+static inline bool mmu_oam_access_allowed(MMU* mmu) {
+    if (mmu->dma.active) return false; // OAM bloqué pendant DMA
+    if (!mmu->ppu) return true;
+    PPUMode mode = ((PPU*)mmu->ppu)->mode;
+    return !(mode == PPU_MODE_OAM_SEARCH || mode == PPU_MODE_PIXEL_TRANSFER); // bloqué en 2 et 3
+}
 
 // Initialisation de la MMU
 void mmu_init(MMU* mmu) {
@@ -24,6 +38,10 @@ void mmu_init(MMU* mmu) {
     mmu->oam = &mmu->memory[0xFE00];
     mmu->io = &mmu->memory[0xFF00];
     mmu->hram = &mmu->memory[0xFF80];
+    
+    mmu->dma.active = false;
+    mmu->dma.source_addr = 0;
+    mmu->dma.index = 0;
     
     mmu_reset(mmu);
 }
@@ -121,18 +139,9 @@ bool mmu_load_rom(MMU* mmu, const char* filename) {
         return false;
     }
     
-    // Copier la ROM dans la mémoire
-    // Pour les ROMs simples, copier toute la ROM
+    // Copier la ROM dans la mémoire (optionnel, utile pour tests simples)
     size_t copy_size = (file_size > 0x8000) ? 0x8000 : file_size;
     memcpy(mmu->rom, mmu->cart.rom_data, copy_size);
-    
-    // Pour les ROMs plus grandes, utiliser le MBC
-    if (file_size > 0x8000) {
-        // Copier les 32KB supplémentaires dans la zone MBC
-        size_t remaining = file_size - 0x8000;
-        if (remaining > 0x8000) remaining = 0x8000;  // Limiter à 64KB total
-        memcpy(mmu->rom + 0x4000, mmu->cart.rom_data + 0x8000, remaining);
-    }
     
     // Allouer la RAM de cartouche si nécessaire
     if (mmu->cart.ram_size > 0) {
@@ -162,7 +171,8 @@ u8 mmu_read8(MMU* mmu, u16 address) {
         }
         return mbc_read(mmu, address);
     } else if (address >= 0x8000 && address <= 0x9FFF) {
-        // VRAM
+        // VRAM (bloquée en Mode 3)
+        if (!mmu_vram_access_allowed(mmu)) return 0xFF;
         return mmu->vram[address - 0x8000];
     } else if (address >= 0xA000 && address <= 0xBFFF) {
         // ERAM (External RAM via MBC)
@@ -174,7 +184,8 @@ u8 mmu_read8(MMU* mmu, u16 address) {
         // Echo RAM (miroir de WRAM)
         return mmu->wram[address - 0xE000];
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // OAM
+        // OAM (bloquée en Mode 2/3 et pendant DMA)
+        if (!mmu_oam_access_allowed(mmu)) return 0xFF;
         return mmu->oam[address - 0xFE00];
     } else if (address >= 0xFF00 && address <= 0xFF7F) {
         // IO
@@ -215,7 +226,8 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
         // ROM area - route vers MBC
         mbc_write(mmu, address, value);
     } else if (address >= 0x8000 && address <= 0x9FFF) {
-        // VRAM
+        // VRAM (bloquée en Mode 3)
+        if (!mmu_vram_access_allowed(mmu)) return;
         mmu->vram[address - 0x8000] = value;
     } else if (address >= 0xA000 && address <= 0xBFFF) {
         // ERAM via MBC
@@ -227,7 +239,8 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
         // Echo RAM (miroir de WRAM)
         mmu->wram[address - 0xE000] = value;
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // OAM
+        // OAM (bloquée en Mode 2/3 et pendant DMA)
+        if (!mmu_oam_access_allowed(mmu)) return;
         mmu->oam[address - 0xFE00] = value;
     } else if (address >= 0xFF00 && address <= 0xFF7F) {
         // IO
@@ -246,6 +259,22 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
         if (address == 0xFF00 && mmu->joypad) {
             joypad_write((Joypad*)mmu->joypad, value);
             mmu->io[address - 0xFF00] = (u8)((mmu->io[address - 0xFF00] & 0x0F) | (value & 0x30));
+            return;
+        }
+
+        // OAM DMA
+        if (address == 0xFF46) {
+            mmu->io[address - 0xFF00] = value;
+            u16 src = (u16)value << 8;
+            // Copie synchrone (version simple). Option: TODO émul. timée
+            for (u16 i = 0; i < 160; i++) {
+                u8 b = mmu_read8(mmu, src + i);
+                mmu->oam[i] = b;
+            }
+            // DMA terminé immédiatement dans cette version
+            mmu->dma.active = false;
+            mmu->dma.source_addr = src;
+            mmu->dma.index = 160;
             return;
         }
 
@@ -432,6 +461,10 @@ void mmu_set_serial_callback(MMU* mmu, mmu_serial_cb_t callback) {
 
 void mmu_set_joypad(MMU* mmu, void* joypad) {
     mmu->joypad = joypad;
+}
+
+void mmu_set_ppu(MMU* mmu, void* ppu) {
+    mmu->ppu = ppu;
 }
 
 void mmu_request_joypad_irq(MMU* mmu) {

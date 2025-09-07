@@ -2,19 +2,11 @@
 
 Retour: [Index specs](./README.md) · [Architecture](../architecture.md) · [Utilisation](../usage.md)
 
-## Vue d'ensemble
+## 1) Principe de fonctionnement (Game Boy)
 
-La Game Boy utilise un système d'adressage 16-bit (0x0000-0xFFFF) pour accéder à différentes zones de mémoire. Chaque zone a un rôle spécifique et des contraintes d'accès particulières.
+La Game Boy utilise un adressage 16-bit (0x0000–0xFFFF) découpé en zones. Certaines zones sont restreintes selon l’état vidéo (PPU) et des opérations spéciales (DMA OAM).
 
-### Pourquoi cette organisation ?
-
-La Game Boy a été conçue dans les années 1980 avec des contraintes de coût et de consommation. L'organisation mémoire reflète ces contraintes :
-- **ROM** : Stockage permanent des jeux (coûteux, donc limité)
-- **RAM** : Mémoire de travail (rapide mais limitée)
-- **IO** : Communication avec les périphériques (écran, son, contrôles)
-- **Miroirs** : Économie de circuits en réutilisant la même mémoire
-
-## Carte mémoire (DMG)
+### Carte mémoire (DMG)
 
 ```mermaid
 flowchart TD
@@ -39,178 +31,127 @@ flowchart TD
     classDef bad fill:#eee,stroke:#999,stroke-width:2px,stroke-dasharray:2 2
 ```
 
-## Zones détaillées
+- Echo RAM (0xE000–0xFDFF) miroite WRAM (0xC000–0xDDFF)
+- Zone 0xFEA0–0xFEFF inutilisable (lectures=0xFF, écritures ignorées)
 
-### ROM (0x0000-0x7FFF)
-**Pourquoi deux zones ?** La Game Boy peut adresser 32KB de ROM, mais les jeux peuvent être plus gros. La zone ROM0 contient le code de démarrage, ROMX les données commutables.
+### Restrictions d’accès VRAM/OAM (timing PPU)
 
-- **ROM0 (0x0000-0x3FFF)** : Banc 0 fixe, contient le code de démarrage
-- **ROMX (0x4000-0x7FFF)** : Bancs commutables via MBC (Memory Bank Controller)
+- Mode 3 (Pixel Transfer): VRAM bloquée
+- Modes 2 (OAM Search) et 3: OAM bloquée
+- Pendant un DMA OAM: OAM bloquée
 
-**Implémentation :**
-```c
-// Dans mmu.c
-u8 mmu_read_rom(MMU* mmu, u16 addr) {
-    if (addr < 0x4000) {
-        return mmu->rom[addr];  // ROM0
-    } else {
-        u16 bank = mmu->rom_bank;
-        u16 offset = addr - 0x4000;
-        return mmu->rom[0x4000 * bank + offset];  // ROMX
-    }
-}
+```mermaid
+gantt
+  title Restrictions d'accès VRAM/OAM (par ligne)
+  dateFormat X
+  axisFormat %s
+  section Modes visibles
+  OAM Search (2): done, 0, 80
+  Pixel Transfer (3): done, 80, 172
+  HBlank (0): 204, 204
+  section VBlank
+  VBlank (1): 456, 456
 ```
 
-### VRAM (0x8000-0x9FFF)
-**Pourquoi séparé ?** La mémoire vidéo doit être accessible rapidement pendant le rendu, d'où une zone dédiée.
+### OAM DMA (0xFF46)
 
-- **0x8000-0x97FF** : Données des tuiles (tile data)
-- **0x9800-0x9BFF** : Carte d'arrière-plan 0 (tile map)
-- **0x9C00-0x9FFF** : Carte d'arrière-plan 1 (tile map)
+- Écrire `val` à `0xFF46` copie 160 octets depuis `(val << 8)` vers OAM (0xFE00–0xFE9F)
+- Vitesse matérielle: 1 octet/cycle (nous offrons une version synchrone simple)
 
-**Contraintes d'accès :** Pendant certains modes PPU, l'accès est restreint (voir section PPU).
+### Pourquoi ces règles ? (non-expert)
+- Le PPU a besoin d’un accès prioritaire à VRAM/OAM pendant le dessin de l’image; bloquer les accès CPU évite les corruptions
+- Le DMA OAM accélère la mise à jour des sprites (copie d’un bloc)
 
-### WRAM (0xC000-0xDFFF)
-**Pourquoi cette taille ?** 8KB de RAM de travail, suffisant pour les variables et la pile.
+Réfs Pan Docs: Memory Map, Accessing VRAM and OAM, OAM DMA Transfer
 
-- **0xC000-0xCFFF** : WRAM 0
-- **0xD000-0xDFFF** : WRAM 1 (CGB uniquement)
+---
 
-### Echo RAM (0xE000-0xFDFF)
-**Pourquoi un miroir ?** Économie de circuits. Au lieu d'avoir deux zones séparées, la Game Boy utilise le même circuit pour deux plages d'adresses.
+## 2) Logique d’implémentation (CameBoy)
 
-```c
-// Dans mmu.c
-u8 mmu_read_wram(MMU* mmu, u16 addr) {
-    if (addr >= 0xE000 && addr <= 0xFDFF) {
-        // Echo : miroir de WRAM
-        addr -= 0x2000;  // 0xE000 -> 0xC000
-    }
-    return mmu->wram[addr - 0xC000];
-}
+### Structure et liaisons
+- `MMU` stocke des pointeurs sur les régions (`rom`, `vram`, `eram`, `wram`, `oam`, `io`, `hram`) et sur les composants (`timer`, `apu`, `joypad`, `ppu`)
+- Ajout `mmu_set_ppu(mmu, ppu)` pour connaître le `PPU->mode`
+- État DMA: `mmu->dma { active, source_addr, index }`
+
+### Accès mémoire (règles clés)
+- `mmu_read8/write8`:
+  - ROM/ERAM: routés via `mbc_read/mbc_write` (MBC1 minimal)
+  - VRAM: lecture/écriture bloquées en Mode 3 (retour 0xFF / ignore write)
+  - OAM: lecture/écriture bloquées en Modes 2/3 et pendant DMA
+  - Echo RAM: miroir WRAM
+  - IO:
+    - Joypad `0xFF00` routé via `joypad_read/write`
+    - Timers `0xFF04–0xFF07` routés vers `timer_read/write`
+    - Audio `0xFF10–0xFF3F` routés vers `apu_read/write`
+    - OAM DMA `0xFF46`: déclenche la copie OAM (synchrone)
+  - HRAM/IE: accès directs
+
+### OAM DMA (implémentation actuelle)
+- Version simple synchrone: boucle 160 octets, `mmu->oam[i] = mmu_read8(mmu, src+i)`
+- Drapeau `dma.active` remis à `false` immédiatement après la copie
+- Option future: version timée (1 octet par tick) si nécessaire pour des ROMs Mooneye
+
+### VRAM/OAM restrictions
+- Fonctions utilitaires dans `mmu.c`:
+  - `mmu_vram_access_allowed(mmu)`: refuse en Mode 3
+  - `mmu_oam_access_allowed(mmu)`: refuse en Mode 2/3 ou DMA actif
+
+### MBC
+- MBC1 minimal suffisant pour Blargg de base (ROM banking, RAM enable/bank, mode)
+- MBC3/MBC5 à venir
+
+### Points assumés/paramétrés
+- `LY` reset à `0x90` (compat Blargg); un mode strict Pan Docs (0x00) pourra être ajouté si besoin
+- Série (SB/SC): transfert immédiat pour logs/GUI; temporisation série non implémentée (piste future)
+
+---
+
+## 3) Stratégie de test (unitaires)
+
+Tests dans `tests/unit/test_mmu.c` (liste et objectifs):
+
+- `test_mmu_init`
+  - Alloue 64KB, vérifie les pointeurs des régions
+- `test_mmu_reset`
+  - Vérifie les valeurs IO de power-up (P1, LCDC, STAT, LY, etc.)
+- `test_mmu_memory_mapping`
+  - Lecture des bornes de chaque zone et d’IE
+- `test_mmu_cart_parsing`
+  - Parse un header ROM mémoire et vérifie type/tailles
+- `test_mmu_read_write_8bit`
+  - Écritures/lectures basiques WRAM/VRAM/OAM/HRAM/IE
+- `test_mmu_read_write_16bit`
+  - Little-endian: vérifie LSB/MSB, HRAM 16-bit
+- `test_mmu_echo_ram`
+  - Miroir WRAM⇄Echo: écritures répercutées
+- `test_mmu_vram_oam_restrictions` (nouveau)
+  - Lie `PPU` à `MMU`, force Mode 3 (VRAM bloquée) et Mode 2 (OAM bloquée); vérifie 0xFF/ignorés; vérifie accès libres en HBlank
+- `test_mmu_dma_oam_copy` (nouveau)
+  - Prépare source WRAM `0xC000`, écrit `0xFF46=0xC0`, vérifie que 160 octets ont été recopiés vers OAM
+
+```mermaid
+sequenceDiagram
+  participant T as Test
+  participant MMU
+  participant PPU
+  T->>PPU: set mode = PIXEL_TRANSFER
+  T->>MMU: write 0x8000
+  MMU-->>T: read 0x8000 = 0xFF (bloqué)
+  T->>PPU: set mode = OAM_SEARCH
+  T->>MMU: write 0xFE00
+  MMU-->>T: read 0xFE00 = 0xFF (bloqué)
+  T->>PPU: set mode = HBLANK
+  T->>MMU: write 0x8000/0xFE00
+  MMU-->>T: reads = valeurs écrites
 ```
 
-### OAM (0xFE00-0xFE9F)
-**Pourquoi cette zone ?** Les sprites (objets) doivent être accessibles rapidement pendant le rendu.
+### Couverture et limites
+- Couvre mapping, power-up, echo, restrictions VRAM/OAM, DMA OAM
+- Série cadencée et MBC3/5 non couverts (pistes futures)
 
-- **160 octets** : 40 sprites × 4 octets par sprite
-- **Structure** : Y, X, tile, attributs
-
-### Zone Unusable (0xFEA0-0xFEFF)
-**Pourquoi interdite ?** Cette zone n'a pas de circuit associé. Les lectures retournent 0xFF, les écritures sont ignorées.
-
-```c
-// Dans mmu.c
-u8 mmu_read_unusable(u16 addr) {
-    return 0xFF;  // Toujours 0xFF
-}
-
-void mmu_write_unusable(u16 addr, u8 value) {
-    // Ignoré, pas d'effet
-}
-```
-
-### Registres IO (0xFF00-0xFF7F)
-**Pourquoi mappés en mémoire ?** Plus simple que des ports séparés. Chaque registre a un effet spécifique.
-
-#### Registres principaux :
-- **0xFF00 (P1)** : Joypad
-- **0xFF04-0xFF07** : Timers (DIV, TIMA, TMA, TAC)
-- **0xFF0F (IF)** : Drapeaux d'interruption
-- **0xFF40-0xFF4B** : Contrôle LCD
-- **0xFF47-0xFF49** : Palettes de couleurs
-- **0xFF50** : Boot ROM disable
-
-### HRAM (0xFF80-0xFFFE)
-**Pourquoi une zone séparée ?** Accès plus rapide que WRAM, idéal pour les variables critiques.
-
-### IE (0xFFFF)
-**Pourquoi le dernier octet ?** Le registre d'interruption doit être accessible rapidement, d'où sa position à la fin de l'espace d'adressage.
-
-## Gestion des accès
-
-### Lecture/Écriture 8-bit
-```c
-u8 mmu_read8(MMU* mmu, u16 addr) {
-    if (addr < 0x8000) {
-        return mmu_read_rom(mmu, addr);
-    } else if (addr < 0xA000) {
-        return mmu_read_vram(mmu, addr);
-    } else if (addr < 0xC000) {
-        return mmu_read_eram(mmu, addr);
-    } else if (addr < 0xFE00) {
-        return mmu_read_wram(mmu, addr);
-    } else if (addr < 0xFEA0) {
-        return mmu_read_oam(mmu, addr);
-    } else if (addr < 0xFF00) {
-        return mmu_read_unusable(addr);
-    } else if (addr < 0xFF80) {
-        return mmu_read_io(mmu, addr);
-    } else if (addr < 0xFFFF) {
-        return mmu_read_hram(mmu, addr);
-    } else {
-        return mmu->ie;  // 0xFFFF
-    }
-}
-```
-
-### Lecture/Écriture 16-bit
-**Pourquoi little-endian ?** La Game Boy utilise le format little-endian (octet de poids faible en premier).
-
-```c
-u16 mmu_read16(MMU* mmu, u16 addr) {
-    u8 low = mmu_read8(mmu, addr);
-    u8 high = mmu_read8(mmu, addr + 1);
-    return (high << 8) | low;  // Little-endian
-}
-
-void mmu_write16(MMU* mmu, u16 addr, u16 value) {
-    mmu_write8(mmu, addr, value & 0xFF);        // Octet faible
-    mmu_write8(mmu, addr + 1, (value >> 8) & 0xFF);  // Octet fort
-}
-```
-
-## Contraintes d'accès
-
-### Accès VRAM/OAM pendant le rendu
-**Pourquoi des restrictions ?** Le PPU lit ces zones pendant le rendu. Les accès simultanés peuvent causer des corruptions.
-
-```c
-// Dans mmu.c
-bool mmu_can_access_vram(PPU* ppu) {
-    return ppu->mode == PPU_MODE_HBLANK || ppu->mode == PPU_MODE_VBLANK;
-}
-
-bool mmu_can_access_oam(PPU* ppu) {
-    return ppu->mode == PPU_MODE_HBLANK || ppu->mode == PPU_MODE_VBLANK;
-}
-```
-
-### DMA OAM
-**Pourquoi un transfert spécial ?** Le DMA copie 160 octets depuis WRAM vers OAM en 160 cycles, bloquant l'accès à OAM pendant le transfert.
-
-## Initialisation (Power-up)
-
-**Pourquoi des valeurs spécifiques ?** La Game Boy n'initialise pas tout à zéro au démarrage. Certaines valeurs sont importantes pour la compatibilité.
-
-```c
-// Dans mmu.c
-void mmu_init(MMU* mmu) {
-    // WRAM initialisé à 0xFF (pas 0x00)
-    memset(mmu->wram, 0xFF, sizeof(mmu->wram));
-    
-    // Registres IO avec valeurs de power-up
-    mmu->io[0xFF00 - 0xFF00] = 0xCF;  // P1
-    mmu->io[0xFF04 - 0xFF00] = 0xAB;  // DIV
-    mmu->io[0xFF05 - 0xFF00] = 0x00;  // TIMA
-    mmu->io[0xFF06 - 0xFF00] = 0x00;  // TMA
-    mmu->io[0xFF07 - 0xFF00] = 0xF8;  // TAC
-    // ... autres registres
-}
-```
+---
 
 ## Références Pan Docs
-
 - [Memory Map](https://gbdev.io/pandocs/Memory_Map.html)
 - [I/O Ports](https://gbdev.io/pandocs/I_O_Ports.html)
 - [Accessing VRAM and OAM](https://gbdev.io/pandocs/Accessing_VRAM_and_OAM.html)

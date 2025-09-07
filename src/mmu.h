@@ -69,6 +69,13 @@ typedef struct {
 // Callback pour la sortie série
 typedef void (*mmu_serial_cb_t)(u8 ch);
 
+// État DMA OAM
+typedef struct {
+    bool active;
+    u16 source_addr;
+    u16 index; // 0..159 octets copiés
+} MmuDMA;
+
 // Structure MMU
 typedef struct {
     u8* memory;
@@ -85,9 +92,13 @@ typedef struct {
     void* timer;  // Pointeur vers le timer (void* pour éviter la dépendance circulaire)
     void* apu;    // Pointeur vers l'APU (void* pour éviter la dépendance circulaire)
     void* joypad; // Pointeur vers le joypad (opaque)
+    void* ppu;    // Pointeur vers le PPU (opaque)
     
     // Callback pour la sortie série
     mmu_serial_cb_t serial_cb;
+
+    // DMA OAM
+    MmuDMA dma;
 } MMU;
 
 // Fonctions MMU
@@ -108,8 +119,9 @@ u8 mbc_read(MMU* mmu, u16 address);
 
 // Callback série
 void mmu_set_serial_callback(MMU* mmu, mmu_serial_cb_t callback);
-// Liaison joypad
+// Liaisons périphériques
 void mmu_set_joypad(MMU* mmu, void* joypad);
+void mmu_set_ppu(MMU* mmu, void* ppu);
 // Demander une IRQ Joypad (IF bit 4)
 void mmu_request_joypad_irq(MMU* mmu);
 
