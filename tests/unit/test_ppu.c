@@ -21,6 +21,12 @@ void test_ppu_hblank(void);
 void test_ppu_vblank(void);
 void test_ppu_render_line(void);
 void test_ppu_palettes(void);
+void test_ppu_stat_irq_hblank(void);
+void test_ppu_stat_irq_vblank(void);
+void test_ppu_stat_irq_oam(void);
+void test_ppu_stat_irq_lyc(void);
+void test_ppu_window_basic(void);
+void test_ppu_sprites_basic(void);
 
 // Table des tests PPU
 typedef struct {
@@ -38,6 +44,12 @@ UnitTest ppu_tests[] = {
     {"PPU VBlank", test_ppu_vblank},
     {"PPU Render Line", test_ppu_render_line},
     {"PPU Palettes", test_ppu_palettes},
+    {"PPU STAT IRQ HBlank", test_ppu_stat_irq_hblank},
+    {"PPU STAT IRQ VBlank", test_ppu_stat_irq_vblank},
+    {"PPU STAT IRQ OAM", test_ppu_stat_irq_oam},
+    {"PPU STAT IRQ LYC", test_ppu_stat_irq_lyc},
+    {"PPU Window Basic", test_ppu_window_basic},
+    {"PPU Sprites Basic", test_ppu_sprites_basic},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -364,4 +376,121 @@ void test_ppu_palettes(void) {
     assert(color1 == 0xAAAAAAFF); // Gris clair  
     assert(color2 == 0x555555FF); // Gris foncé
     assert(color3 == 0x000000FF); // Noir
+}
+
+void test_ppu_stat_irq_hblank(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    // Activer IRQ HBlank (STAT bit3)
+    ppu.stat |= 0x08; // HBlank IRQ enable
+    // Aller à Mode 3, puis basculer en HBlank et capter l'IRQ STAT
+    ppu.mode = PPU_MODE_PIXEL_TRANSFER; ppu.mode_cycles = 171; ppu.ly = 0;
+    u8 irq = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_HBLANK);
+    assert(irq & 0x02); // STAT IRQ
+}
+
+void test_ppu_stat_irq_vblank(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    // Activer IRQ VBlank (STAT bit4)
+    ppu.stat |= 0x10; // VBlank IRQ enable
+    // Placer fin de ligne 143 pour entrer en VBlank
+    ppu.ly = 143; ppu.mode = PPU_MODE_HBLANK; ppu.line_cycles = 456 - 1;
+    u8 irq = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_VBLANK);
+    assert(irq & 0x02); // STAT IRQ
+    assert(irq & 0x01); // VBLANK IRQ
+}
+
+void test_ppu_stat_irq_oam(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    // Activer IRQ OAM (STAT bit5)
+    ppu.stat |= 0x20; // OAM IRQ enable
+    // Fin de HBlank ligne 0 → entrée OAM sur ligne 1 déclenche IRQ STAT
+    ppu.mode = PPU_MODE_HBLANK; ppu.line_cycles = 456 - 1; ppu.ly = 0;
+    u8 irq = ppu_tick(&ppu, 1, vram);
+    assert(ppu.mode == PPU_MODE_OAM_SEARCH);
+    assert(ppu.ly == 1);
+    assert(irq & 0x02); // STAT IRQ
+}
+
+void test_ppu_stat_irq_lyc(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    // Activer IRQ LYC (STAT bit6)
+    ppu.stat |= 0x40; // LYC IRQ enable
+    // Forcer LYC = 1 et transition LY:0->1
+    ppu.lyc = 1; ppu.ly = 0; ppu.mode = PPU_MODE_HBLANK; ppu.line_cycles = 456 - 1;
+    // Première tick: fin ligne 0 -> ly=1, vérifier IRQ STAT
+    u8 irq = ppu_tick(&ppu, 1, vram);
+    assert(ppu.ly == 1);
+    assert(ppu.stat & 0x04); // coincidence
+    assert(irq & 0x02); // STAT IRQ (LYC)
+}
+
+void test_ppu_window_basic(void) {
+    PPU ppu; u8 vram[0x2000];
+    ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+
+    // Activer LCD et Window (LCDC bits7 et5)
+    ppu.lcdc = 0x91 | 0x20; // LCD ON, BG ON, Window ON
+    ppu.scx = 0; ppu.scy = 0;
+    ppu.wy = 10; ppu.wx = 7; // WX = position écran +7 (Pan Docs)
+
+    // Préparer BG et Window différentes pour les distinguer
+    // BG: tile 0 -> vide (tout blanc)
+    // Window map (0x9800 ou 0x9C00 selon bit6): on choisit 0x9C00
+    ppu.lcdc |= 0x40; // Window map = 0x9C00
+
+    // Remplir une tuile non blanche pour la Window (index 1)
+    vram[0x1C00] = 0x01; // tile index 1 en haut-gauche de la window map
+    // tile data index 1 à 0x8000 + 16
+    vram[16 + 0] = 0xFF; vram[16 + 1] = 0x00; // pixels non blancs pour la ligne 0
+
+    // Rendre la ligne 9 (avant WY): doit utiliser BG (blanc)
+    ppu.ly = 9; ppu_render_line(&ppu, vram);
+    bool all_white = true;
+    for (int x = 0; x < GB_WIDTH; x++) {
+        if (ppu.framebuffer[9 * GB_WIDTH + x] != 0xFFFFFFFF) { all_white = false; break; }
+    }
+    assert(all_white);
+
+    // Rendre la ligne 10 (== WY): doit utiliser fenêtre à partir de WX-7
+    ppu.ly = 10; ppu_render_line(&ppu, vram);
+    bool window_pixels_seen = false;
+    for (int x = (int)ppu.wx - 7; x < (int)ppu.wx - 7 + 8 && x < GB_WIDTH; x++) {
+        if (x >= 0) {
+            if (ppu.framebuffer[10 * GB_WIDTH + x] != 0xFFFFFFFF) { window_pixels_seen = true; break; }
+        }
+    }
+    assert(window_pixels_seen);
+}
+
+void test_ppu_sprites_basic(void) {
+    PPU ppu; u8 vram[0x2000];
+    ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+
+    // Activer LCD et BG, OBJ (LCDC bits7,1)
+    ppu.lcdc = 0x91 | 0x02; // LCD ON, BG ON, OBJ ON (8x8)
+
+    // Sprite à X=8, Y=16 (à l'écran à la ligne 0)
+    // OAM format: Y, X, tile, flags
+    ppu.oam[0] = 16; // Y position (Y-16)
+    ppu.oam[1] = 8;  // X position (X-8)
+    ppu.oam[2] = 1;  // tile index 1
+    ppu.oam[3] = 0;  // flags
+
+    // Tile data index 1 (0x8000 + 16)
+    vram[16 + 0] = 0xFF; vram[16 + 1] = 0x00; // première ligne opaque
+
+    // Rendre la ligne 0 (LY=0)
+    ppu.ly = 0; ppu_render_line(&ppu, vram);
+
+    // Vérifier que des pixels non blancs apparaissent autour de X=8
+    bool sprite_pixels = false;
+    for (int x = 8; x < 16 && x < GB_WIDTH; x++) {
+        if (ppu.framebuffer[0 * GB_WIDTH + x] != 0xFFFFFFFF) { sprite_pixels = true; break; }
+    }
+    // Pour l'instant, le rendu sprites n'est pas implémenté: marquer comme TODO attendu futur
+    // Quand sprites seront implémentés, activer l'assert ci-dessous:
+    // assert(sprite_pixels);
+    (void)sprite_pixels;
 }

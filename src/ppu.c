@@ -23,6 +23,7 @@ void ppu_reset(PPU* ppu) {
     ppu->mode = PPU_MODE_OAM_SEARCH;
     ppu->mode_cycles = 0;
     ppu->line_cycles = 0;
+    ppu->lyc_prev_eq = false;
 
     // Framebuffer blanc
     for (int i = 0; i < GB_WIDTH * GB_HEIGHT; i++) {
@@ -32,30 +33,22 @@ void ppu_reset(PPU* ppu) {
     ppu_update_palettes(ppu);
 }
 
-// Tick PPU - retourne un masque d'interruptions déclenchées (bit0 = VBLANK)
+// Tick PPU - retourne un masque d'interruptions déclenchées (bit0 = VBLANK, bit1 = STAT)
 u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
-    u8 interrupts = 0;
+    u8 interrupts = 0; // bit0=VBL, bit1=STAT
 
     // Avancer la ligne en dots (4.19MHz) au granulaire "cycles" passé
     ppu->line_cycles += cycles;
 
-    // Cas particulier: si on est explicitement en Mode 3 (PIXEL_TRANSFER),
-    // respecter strictement le budget 172 dots indépendamment de line_cycles.
-    if (ppu->mode == PPU_MODE_PIXEL_TRANSFER && ppu->ly < 144) {
-        ppu->mode_cycles += cycles;
-        if (ppu->mode_cycles >= 172) {
-            ppu->mode = PPU_MODE_HBLANK;
-            ppu->mode_cycles = 0;
-            ppu_render_line(ppu, vram);
-        }
-    } else if (ppu->ly < 144) {
-        // Avancer selon le mode courant pour respecter les tests qui forcent le mode
+    // Lignes visibles
+    if (ppu->ly < 144) {
         switch (ppu->mode) {
             case PPU_MODE_OAM_SEARCH:
                 ppu->mode_cycles += cycles;
                 if (ppu->mode_cycles >= 80) {
                     ppu->mode = PPU_MODE_PIXEL_TRANSFER;
                     ppu->mode_cycles = 0;
+                    // IRQ STAT sur entrée OAM si activée (bit5), déjà franchie
                 }
                 break;
             case PPU_MODE_PIXEL_TRANSFER:
@@ -64,42 +57,47 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
                     ppu->mode = PPU_MODE_HBLANK;
                     ppu->mode_cycles = 0;
                     ppu_render_line(ppu, vram);
+                    // IRQ STAT HBlank si activée (bit3)
+                    if (ppu->stat & 0x08) interrupts |= 0x02;
                 }
                 break;
-            case PPU_MODE_HBLANK: {
+            case PPU_MODE_HBLANK:
                 // Durée HBLANK = 456 - (80 + 172) = 204
-                ppu->mode_cycles += cycles;
-                if (ppu->mode_cycles >= 204) {
-                    // Fin de ligne: avancer LY et mode, remettre line_cycles à 0
-                    ppu->mode_cycles = 0;
+                if (ppu->line_cycles >= 456) {
+                    // Fin de ligne: avancer LY et mode, remettre compteurs ligne
                     ppu->ly++;
-                    ppu->line_cycles = 0; // Reset line_cycles pour la nouvelle ligne
+                    ppu->line_cycles -= 456;
+                    ppu->mode_cycles = 0;
                     if (ppu->ly == 144) {
                         ppu->mode = PPU_MODE_VBLANK;
-                        interrupts |= 0x01;
+                        interrupts |= 0x01; // VBLANK IRQ
+                        // IRQ STAT VBlank si activée (bit4)
+                        if (ppu->stat & 0x10) interrupts |= 0x02;
                     } else {
                         ppu->mode = PPU_MODE_OAM_SEARCH;
+                        // IRQ STAT OAM si activée (bit5)
+                        if (ppu->stat & 0x20) interrupts |= 0x02;
                     }
                 }
                 break;
-            }
             default:
-                // Si un mode inattendu est trouvé pendant lignes visibles, retomber sur OAM
+                // Sécurité: retomber sur OAM
                 ppu->mode = PPU_MODE_OAM_SEARCH;
-                ppu->mode_cycles = ppu->line_cycles % 80;
+                ppu->mode_cycles = 0;
                 break;
         }
     } else {
         // VBlank: lignes 144..153, 456 dots par ligne
         ppu->mode = PPU_MODE_VBLANK;
         if (ppu->line_cycles >= 456) {
-            ppu->line_cycles -= 456; // Soustraire 456 pour garder les cycles excédentaires
+            ppu->line_cycles -= 456;
             ppu->mode_cycles = 0;
             ppu->ly++;
             if (ppu->ly >= 154) {
                 ppu->ly = 0;
-                ppu->line_cycles = 0; // Reset seulement au début de frame
                 ppu->mode = PPU_MODE_OAM_SEARCH;
+                // IRQ STAT OAM si activée (bit5)
+                if (ppu->stat & 0x20) interrupts |= 0x02;
             }
         } else {
             ppu->mode_cycles = ppu->line_cycles;
@@ -108,11 +106,17 @@ u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram) {
 
     // STAT (bits 0-1 = mode, bit 2 = LYC==LY)
     ppu->stat = (ppu->stat & 0xF8) | (ppu->mode & 0x03);
-    if (ppu->ly == ppu->lyc) {
+    bool lyc_eq = (ppu->ly == ppu->lyc);
+    if (lyc_eq) {
         ppu->stat |= 0x04;
     } else {
         ppu->stat &= (u8)~0x04;
     }
+    // IRQ STAT LYC sur transition 0->1 si activée (bit6)
+    if (!ppu->lyc_prev_eq && lyc_eq) {
+        if (ppu->stat & 0x40) interrupts |= 0x02;
+    }
+    ppu->lyc_prev_eq = lyc_eq;
 
     return interrupts;
 }
@@ -163,48 +167,76 @@ void ppu_update_palettes(PPU* ppu) {
     }
 }
 
-// Rendu d'une ligne: BG uniquement (DMG minimal)
+// Rendu d'une ligne: BG + fenêtre (DMG minimal)
 void ppu_render_line(PPU* ppu, u8* vram) {
     if (!(ppu->lcdc & 0x80)) return; // LCD off
-    if (!(ppu->lcdc & 0x01)) {
-        // BG off => blanc
-        for (int x = 0; x < GB_WIDTH; x++) {
-            ppu->framebuffer[ppu->ly * GB_WIDTH + x] = 0xFFFFFFFF;
-        }
-        return;
-    }
 
-    u8 tile_y  = (ppu->ly + ppu->scy) >> 3;
-    u8 pixel_y = (ppu->ly + ppu->scy) & 7;
-    u16 tile_map = (ppu->lcdc & 0x08) ? 0x9C00 : 0x9800;
+    bool bg_enable = (ppu->lcdc & 0x01) != 0;
+    bool win_enable = (ppu->lcdc & 0x20) != 0;
+
+    u16 bg_map = (ppu->lcdc & 0x08) ? 0x9C00 : 0x9800;
+    u16 win_map = (ppu->lcdc & 0x40) ? 0x9C00 : 0x9800;
+    bool tile_sel_8000 = (ppu->lcdc & 0x10) != 0;
+
+    u8 line = ppu->ly;
 
     for (int x = 0; x < GB_WIDTH; x++) {
-        u16 sx = (x + ppu->scx) & 0xFF;
-        u8 tile_x  = sx >> 3;
-        u8 pixel_x = sx & 7;
+        bool use_window = false;
+        u8 tile_y = 0, pixel_y = 0;
+        u16 map_addr = 0;
 
-        u16 map_addr = tile_map + (tile_y * 32) + tile_x;
+        if (win_enable && line >= ppu->wy) {
+            int wx_screen = (int)ppu->wx - 7; // Pan Docs: WX = window X + 7
+            if (x >= wx_screen && wx_screen < GB_WIDTH) {
+                use_window = true;
+                tile_y  = (u8)((line - ppu->wy) >> 3);
+                pixel_y = (u8)((line - ppu->wy) & 7);
+                u8 tile_x  = (u8)((x - wx_screen) >> 3);
+                u8 pixel_x = (u8)((x - wx_screen) & 7);
+                map_addr = win_map + (tile_y * 32) + tile_x;
+                u8 tile_index = vram[map_addr - 0x8000];
+                u16 data_addr;
+                if (tile_sel_8000) {
+                    data_addr = 0x8000 + (u16)tile_index * 16;
+                } else {
+                    s8 st = (s8)tile_index;
+                    data_addr = 0x8800 + (u16)(st + 128) * 16;
+                }
+                u16 line_addr = data_addr + (u16)pixel_y * 2;
+                u8 b1 = vram[line_addr - 0x8000];
+                u8 b2 = vram[line_addr + 1 - 0x8000];
+                u8 mask = (u8)(0x80 >> pixel_x);
+                u8 pix = 0; if (b1 & mask) pix |= 0x01; if (b2 & mask) pix |= 0x02;
+                ppu->framebuffer[line * GB_WIDTH + x] = ppu_get_pixel_color(ppu, pix);
+                continue;
+            }
+        }
+
+        if (!bg_enable) {
+            ppu->framebuffer[line * GB_WIDTH + x] = 0xFFFFFFFF;
+            continue;
+        }
+
+        tile_y  = (u8)((line + ppu->scy) >> 3);
+        pixel_y = (u8)((line + ppu->scy) & 7);
+        u16 sx = (u16)((x + ppu->scx) & 0xFF);
+        u8 tile_x  = (u8)(sx >> 3);
+        u8 pixel_x = (u8)(sx & 7);
+        map_addr = bg_map + (tile_y * 32) + tile_x;
         u8 tile_index = vram[map_addr - 0x8000];
-
         u16 data_addr;
-        if (ppu->lcdc & 0x10) {
+        if (tile_sel_8000) {
             data_addr = 0x8000 + (u16)tile_index * 16;
         } else {
             s8 st = (s8)tile_index;
             data_addr = 0x8800 + (u16)(st + 128) * 16;
         }
-
         u16 line_addr = data_addr + (u16)pixel_y * 2;
         u8 b1 = vram[line_addr - 0x8000];
         u8 b2 = vram[line_addr + 1 - 0x8000];
-
-        u8 pix = 0;
         u8 mask = (u8)(0x80 >> pixel_x);
-        if (b1 & mask) pix |= 0x01;
-        if (b2 & mask) pix |= 0x02;
-
-        u32 color = ppu_get_pixel_color(ppu, pix);
-        ppu->framebuffer[ppu->ly * GB_WIDTH + x] = color;
+        u8 pix = 0; if (b1 & mask) pix |= 0x01; if (b2 & mask) pix |= 0x02;
+        ppu->framebuffer[line * GB_WIDTH + x] = ppu_get_pixel_color(ppu, pix);
     }
 }
 

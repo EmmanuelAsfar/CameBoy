@@ -30,6 +30,7 @@ typedef struct {
     PPUMode mode;
     u32 mode_cycles;
     u32 line_cycles;
+    bool lyc_prev_eq; // état précédent de la coïncidence LYC==LY
     
     // Framebuffer
     u32 framebuffer[GB_WIDTH * GB_HEIGHT];
@@ -46,7 +47,7 @@ typedef struct {
 // Fonctions PPU
 void ppu_init(PPU* ppu);
 void ppu_reset(PPU* ppu);
-u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram);  // Retourne les interruptions déclenchées
+u8 ppu_tick(PPU* ppu, u8 cycles, u8* vram);  // Retourne les interruptions déclenchées (bit0=VBL, bit1=STAT)
 void ppu_write(PPU* ppu, u16 address, u8 value);
 u8 ppu_read(PPU* ppu, u16 address);
 
