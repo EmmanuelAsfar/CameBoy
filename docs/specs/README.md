@@ -1,0 +1,32 @@
+# Spécifications d'implémentation CameBoy
+
+Cette section synthétise, en français et de façon didactique, les règles à appliquer pour coder l'émulateur, avec explications « expert » et « non-expert » (déjargonisées) et schémas.
+
+## Pourquoi cette approche ?
+
+L'émulation Game Boy nécessite de reproduire fidèlement le comportement matériel. Chaque détail compte car les jeux s'appuient sur des comportements spécifiques, parfois non documentés, pour fonctionner correctement.
+
+## Structure des spécifications
+
+- [Mémoire (Memory Map)](./memory.md) - Comment organiser l'accès aux données
+- [CPU (LR35902)](./cpu.md) - Le cerveau de la Game Boy
+- [PPU (Vidéo)](./ppu.md) - Comment dessiner l'écran
+- [Timers](./timers.md) - Compteurs et minuteries
+- [Interruptions](./interrupts.md) - Gestion des événements
+- [Joypad](./joypad.md) - Contrôles utilisateur
+- [Port Série](./serial.md) - Communication externe
+- [MBC (Cartouches)](./mbc.md) - Gestion des cartouches
+- [DMA/OAM](./dma.md) - Transferts de données rapides
+- [Accès VRAM/OAM](./vram-access.md) - Restrictions d'accès
+- [Séquence de démarrage](./power-up.md) - Initialisation système
+
+## Référence principale
+
+[Pan Docs (gbdev.io/pandocs)](https://gbdev.io/pandocs/) - Documentation officielle de référence
+
+## Comment utiliser ces spécifications
+
+1. **Lisez d'abord** la section "Pourquoi ça fonctionne comme ça" pour comprendre le contexte
+2. **Consultez** les schémas pour visualiser les flux
+3. **Implémentez** étape par étape en respectant les contraintes
+4. **Testez** avec les suites Blargg/Mooneye pour valider la conformité

@@ -5,6 +5,7 @@
 - [Tests](./testing.md)
 - [Scripts](./scripts.md)
 - [Glossaire](./glossaire.md)
+- [Spécifications d'implémentation](./specs/README.md)
 - Références:
   - Pan Docs (copie locale): `./pandocs/`
   - Suites de tests: `../tests/blargg/`, `../tests/mooneye/`
