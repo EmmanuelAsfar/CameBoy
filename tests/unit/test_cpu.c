@@ -47,6 +47,9 @@ void test_cpu_jumps_jr_nc(void);
 void test_cpu_jumps_jr_c(void);
 void test_cpu_stack_push_pop(void);
 void test_cpu_interrupts(void);
+void test_cpu_ei_delay(void);
+void test_cpu_halt_bug(void);
+void test_cpu_daa_cases(void);
 
 // Table des tests CPU
 UnitTest cpu_tests[] = {
@@ -71,6 +74,9 @@ UnitTest cpu_tests[] = {
     {"Jumps JR C", test_cpu_jumps_jr_c},
     {"Stack PUSH/POP", test_cpu_stack_push_pop},
     {"Interrupts", test_cpu_interrupts},
+    {"EI Delay", test_cpu_ei_delay},
+    {"HALT bug", test_cpu_halt_bug},
+    {"DAA cases", test_cpu_daa_cases},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -631,6 +637,86 @@ void test_cpu_interrupts(void) {
     assert(cpu.sp == 0xFFFC); // SP décrémenté de 2
     assert(mmu_read16(&mmu, 0xFFFC) == 0x0100); // PC sauvegardé
     assert(cpu.pc == INT_VBLANK_ADDR); // PC point vers handler
+
+    mmu_cleanup(&mmu);
+}
+
+void test_cpu_ei_delay(void) {
+    CPU cpu; MMU mmu;
+    cpu_init(&cpu); mmu_init(&mmu);
+
+    // Place EI (0xFB) puis NOP (0x00)
+    cpu.pc = 0x0100; cpu.ime = false;
+    mmu.memory[0x0100] = 0xFB; // EI
+    mmu.memory[0x0101] = 0x00; // NOP
+
+    // Exécuter EI : IME ne doit PAS être activé immédiatement
+    cpu_step(&cpu, &mmu);
+    assert(cpu.pc == 0x0101);
+    assert(cpu.ime == false);
+
+    // Exécuter l'instruction suivante : IME doit être activé maintenant
+    cpu_step(&cpu, &mmu);
+    assert(cpu.pc == 0x0102);
+    assert(cpu.ime == true);
+
+    mmu_cleanup(&mmu);
+}
+
+void test_cpu_halt_bug(void) {
+    CPU cpu; MMU mmu;
+    cpu_init(&cpu); mmu_init(&mmu);
+
+    // HALT (0x76) avec IME=0 et IRQ en attente (IE&IF != 0)
+    cpu.pc = 0x0100; cpu.ime = false; cpu.halt_bug = false; cpu.halted = false;
+    mmu.memory[0x0100] = 0x76; // HALT
+
+    // Simuler IRQ en attente
+    mmu_write8(&mmu, IE_REG, 0x01);
+    mmu_write8(&mmu, IF_REG, 0x01);
+
+    cpu_step(&cpu, &mmu);
+
+    // PC ne s'incrémente pas, halt_bug actif, CPU non réellement halted
+    assert(cpu.pc == 0x0100);
+    assert(cpu.halt_bug == true);
+    assert(cpu.halted == false);
+
+    mmu_cleanup(&mmu);
+}
+
+void test_cpu_daa_cases(void) {
+    CPU cpu; MMU mmu;
+    cpu_init(&cpu); mmu_init(&mmu);
+
+    // Case 1: N=0, A=0x09 -> pas de correction
+    cpu.pc = 0x0100; set_reg_a(&cpu, 0x09); set_flag(&cpu, FLAG_N, false); set_flag(&cpu, FLAG_H, false); set_flag(&cpu, FLAG_C, false);
+    mmu.memory[0x0100] = 0x27; // DAA
+    cpu_step(&cpu, &mmu);
+    assert(get_reg_a(&cpu) == 0x09);
+
+    // Case 2: N=0, low nibble >9 -> +0x06 (0x0F -> 0x15)
+    cpu.pc = 0x0200; set_reg_a(&cpu, 0x0F); set_flag(&cpu, FLAG_N, false); set_flag(&cpu, FLAG_H, false); set_flag(&cpu, FLAG_C, false);
+    mmu.memory[0x0200] = 0x27;
+    cpu_step(&cpu, &mmu);
+    assert(get_reg_a(&cpu) == 0x15);
+    assert(!get_flag(&cpu, FLAG_Z));
+
+    // Case 3: N=0, A>0x99 et low >9 -> +0x60 et +0x06 (0x9A -> 0x00, C=1)
+    cpu.pc = 0x0300; set_reg_a(&cpu, 0x9A); set_flag(&cpu, FLAG_N, false); set_flag(&cpu, FLAG_H, false); set_flag(&cpu, FLAG_C, false);
+    mmu.memory[0x0300] = 0x27;
+    cpu_step(&cpu, &mmu);
+    assert(get_reg_a(&cpu) == 0x00);
+    assert(get_flag(&cpu, FLAG_Z));
+    assert(get_flag(&cpu, FLAG_C));
+
+    // Case 4: N=1, H=1 -> -0x06 (0x15 -> 0x0F), C inchangé
+    cpu.pc = 0x0400; set_reg_a(&cpu, 0x15); set_flag(&cpu, FLAG_N, true); set_flag(&cpu, FLAG_H, true); set_flag(&cpu, FLAG_C, false);
+    mmu.memory[0x0400] = 0x27;
+    cpu_step(&cpu, &mmu);
+    assert(get_reg_a(&cpu) == 0x0F);
+    assert(!get_flag(&cpu, FLAG_H));
+    assert(!get_flag(&cpu, FLAG_C));
 
     mmu_cleanup(&mmu);
 }
