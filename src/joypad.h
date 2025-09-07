@@ -28,6 +28,9 @@ typedef struct {
     u8 buttons_btn;  // État boutons (A,B,Select,Start) - bits 0..3 (1=relâché)
     u8 buttons_dir;  // État directions (Right,Left,Up,Down) - bits 0..3 (1=relâché)
     u8 select_line;  // Ligne de sélection active
+    // Callback IRQ (appelé sur transition 1->0 si la ligne est sélectionnée)
+    void (*irq_cb)(void* ctx);
+    void* irq_ctx;
 } Joypad;
 
 // Fonctions joypad
@@ -37,5 +40,12 @@ void joypad_write(Joypad* joypad, u8 value);
 u8 joypad_read(Joypad* joypad);
 void joypad_press(Joypad* joypad, JoypadButton button);
 void joypad_release(Joypad* joypad, JoypadButton button);
+// Définir le callback IRQ
+void joypad_set_irq_callback(Joypad* joypad, void (*cb)(void*), void* ctx);
+// API explicite par groupe (recommandée)
+void joypad_press_button(Joypad* joypad, JoypadButton button_mask);
+void joypad_release_button(Joypad* joypad, JoypadButton button_mask);
+void joypad_press_dir(Joypad* joypad, JoypadButton dir_mask);
+void joypad_release_dir(Joypad* joypad, JoypadButton dir_mask);
 
 #endif // JOYPAD_H

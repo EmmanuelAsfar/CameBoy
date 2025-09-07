@@ -545,6 +545,12 @@ void graphics_win32_gui_handle_events(GraphicsWin32GUI* gfx, bool* running) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    // Si la fenêtre a été détruite, arrêter la boucle
+    if (!IsWindow(gfx->hwnd)) {
+        *running = false;
+        gfx->running = false;
+    }
 }
 
 // Afficher la fenêtre
@@ -573,14 +579,23 @@ void graphics_win32_gui_bind_joypad(GraphicsWin32GUI* gfx, Joypad* joypad) {
 void graphics_win32_gui_append_serial(GraphicsWin32GUI* gfx, const char* text, int length) {
     if (!gfx || !gfx->hSerial || !text) return;
     
-    // Ajouter au buffer interne
-    int remaining = sizeof(gfx->serial_buffer) - gfx->serial_length - 1;
-    if (remaining > 0) {
-        int copy_len = (length < remaining) ? length : remaining;
-        memcpy(gfx->serial_buffer + gfx->serial_length, text, copy_len);
-        gfx->serial_length += copy_len;
-        gfx->serial_buffer[gfx->serial_length] = '\0';
+    // Ajouter au buffer interne avec normalisation des fins de ligne (\n -> \r\n)
+    int remaining = (int)sizeof(gfx->serial_buffer) - gfx->serial_length - 1;
+    for (int i = 0; i < length && remaining > 0; i++) {
+        char c = text[i];
+        if (c == '\n') {
+            // Insérer \r si précédent n'est pas déjà \r
+            if (gfx->serial_length == 0 || gfx->serial_buffer[gfx->serial_length - 1] != '\r') {
+                if (remaining <= 0) break;
+                gfx->serial_buffer[gfx->serial_length++] = '\r';
+                remaining--;
+            }
+        }
+        if (remaining <= 0) break;
+        gfx->serial_buffer[gfx->serial_length++] = c;
+        remaining--;
     }
+    gfx->serial_buffer[gfx->serial_length] = '\0';
     
     // Mettre à jour l'affichage
     SetWindowTextA(gfx->hSerial, gfx->serial_buffer);
@@ -594,14 +609,22 @@ void graphics_win32_gui_append_serial(GraphicsWin32GUI* gfx, const char* text, i
 void graphics_win32_gui_append_logs(GraphicsWin32GUI* gfx, const char* text, int length) {
     if (!gfx || !gfx->hLogs || !text) return;
     
-    // Ajouter au buffer interne
-    int remaining = sizeof(gfx->logs_buffer) - gfx->logs_length - 1;
-    if (remaining > 0) {
-        int copy_len = (length < remaining) ? length : remaining;
-        memcpy(gfx->logs_buffer + gfx->logs_length, text, copy_len);
-        gfx->logs_length += copy_len;
-        gfx->logs_buffer[gfx->logs_length] = '\0';
+    // Ajouter au buffer interne avec normalisation des fins de ligne (\n -> \r\n)
+    int remaining = (int)sizeof(gfx->logs_buffer) - gfx->logs_length - 1;
+    for (int i = 0; i < length && remaining > 0; i++) {
+        char c = text[i];
+        if (c == '\n') {
+            if (gfx->logs_length == 0 || gfx->logs_buffer[gfx->logs_length - 1] != '\r') {
+                if (remaining <= 0) break;
+                gfx->logs_buffer[gfx->logs_length++] = '\r';
+                remaining--;
+            }
+        }
+        if (remaining <= 0) break;
+        gfx->logs_buffer[gfx->logs_length++] = c;
+        remaining--;
     }
+    gfx->logs_buffer[gfx->logs_length] = '\0';
     
     // Mettre à jour l'affichage
     SetWindowTextA(gfx->hLogs, gfx->logs_buffer);

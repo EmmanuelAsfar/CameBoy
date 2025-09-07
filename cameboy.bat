@@ -133,7 +133,7 @@ REM S'assurer que le dossier bin existe
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%" 2>nul
 
 echo Compilation test_cpu...
-gcc %CFLAGS% tests\unit\test_cpu.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c -o "%BIN_DIR%\test_cpu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
+gcc %CFLAGS% tests\unit\test_cpu.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_cpu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
 if errorlevel 1 (
     echo ERREUR compilation test_cpu
     echo FAIL: test_cpu compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
@@ -142,7 +142,7 @@ if errorlevel 1 (
 )
 
 echo Compilation test_mmu...
-gcc %CFLAGS% tests\unit\test_mmu.c src\mmu.c src\timer.c src\apu.c -o "%BIN_DIR%\test_mmu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
+gcc %CFLAGS% tests\unit\test_mmu.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_mmu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
 if errorlevel 1 (
     echo ERREUR compilation test_mmu
     echo FAIL: test_mmu compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
@@ -169,7 +169,7 @@ if errorlevel 1 (
 )
 
 echo Compilation test_interrupt...
-gcc %CFLAGS% tests\unit\test_interrupt.c src\interrupt.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c -o "%BIN_DIR%\test_interrupt.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
+gcc %CFLAGS% tests\unit\test_interrupt.c src\interrupt.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_interrupt.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
 if errorlevel 1 (
     echo ERREUR compilation test_interrupt
     echo FAIL: test_interrupt compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"

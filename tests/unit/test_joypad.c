@@ -157,22 +157,23 @@ void test_joypad_buttons(void) {
     joypad_write(&joypad, 0x20);
 
     // Appuyer sur A
-    joypad_press(&joypad, JOYPAD_A);
+    joypad_press_button(&joypad, JOYPAD_A);
     u8 result = joypad_read(&joypad);
     assert((result & 0x0F) == 0x0E); // A appuyé (bit 0 = 0)
 
     // Appuyer sur B
-    joypad_press(&joypad, JOYPAD_B);
+    joypad_press_button(&joypad, JOYPAD_B);
     result = joypad_read(&joypad);
     assert((result & 0x0F) == 0x0C); // A et B appuyés
 
-    // Appuyer sur START
-    joypad_press(&joypad, JOYPAD_START);
+    // Appuyer sur START (bit 3 == 0 attendu)
+    joypad_press_button(&joypad, JOYPAD_START);
     result = joypad_read(&joypad);
-    assert((result & 0x0F) == 0x0C); // START n'est pas dans les bits 0-3
+    assert((result & 0x0F) == 0x04); // A+B+START pressés -> 0b0100 (active-low)
 
-    // Relâcher A
-    joypad_release(&joypad, JOYPAD_A);
+    // Relâcher A puis START pour ne garder que B appuyé
+    joypad_release_button(&joypad, JOYPAD_A);
+    joypad_release_button(&joypad, JOYPAD_START);
     result = joypad_read(&joypad);
     assert((result & 0x0F) == 0x0D); // Seulement B appuyé
 }
@@ -186,22 +187,23 @@ void test_joypad_directions(void) {
     joypad_write(&joypad, 0x10);
 
     // Appuyer sur RIGHT
-    joypad_press(&joypad, JOYPAD_RIGHT);
+    joypad_press_dir(&joypad, JOYPAD_RIGHT);
     u8 result = joypad_read(&joypad);
     assert((result & 0x0F) == 0x0E); // RIGHT appuyé (bit 0 = 0)
 
     // Appuyer sur UP
-    joypad_press(&joypad, JOYPAD_UP);
+    joypad_press_dir(&joypad, JOYPAD_UP);
     result = joypad_read(&joypad);
     assert((result & 0x0F) == 0x0A); // RIGHT et UP appuyés
 
-    // Appuyer sur DOWN
-    joypad_press(&joypad, JOYPAD_DOWN);
+    // Appuyer sur DOWN (bit 3 == 0 attendu)
+    joypad_press_dir(&joypad, JOYPAD_DOWN);
     result = joypad_read(&joypad);
-    assert((result & 0x0F) == 0x0A); // DOWN n'est pas dans les bits 0-3
+    assert((result & 0x0F) == 0x02); // RIGHT+UP+DOWN pressés -> 0b0010 (active-low)
 
-    // Relâcher RIGHT
-    joypad_release(&joypad, JOYPAD_RIGHT);
+    // Relâcher RIGHT puis DOWN pour ne garder que UP appuyé
+    joypad_release_dir(&joypad, JOYPAD_RIGHT);
+    joypad_release_dir(&joypad, JOYPAD_DOWN);
     result = joypad_read(&joypad);
     assert((result & 0x0F) == 0x0B); // Seulement UP appuyé
 }
@@ -212,14 +214,14 @@ void test_joypad_mixed_input(void) {
     joypad_init(&joypad);
 
     // Appuyer sur plusieurs boutons
-    joypad_press(&joypad, JOYPAD_A);
-    joypad_press(&joypad, JOYPAD_RIGHT);
-    joypad_press(&joypad, JOYPAD_START); // Ne sera pas lu dans les bits 0-3
+    joypad_press_button(&joypad, JOYPAD_A);
+    joypad_press_dir(&joypad, JOYPAD_RIGHT);
+    joypad_press_button(&joypad, JOYPAD_START); // pas visible dans directions
 
-    // Tester avec sélection boutons
+    // Tester avec sélection boutons (A et START doivent être visibles)
     joypad_write(&joypad, 0x20);
     u8 result = joypad_read(&joypad);
-    assert((result & 0x0F) == 0x0E); // Seulement A visible
+    assert((result & 0x0F) == 0x06); // A+START pressés -> 0b0110 (active-low)
 
     // Tester avec sélection directions
     joypad_write(&joypad, 0x10);
@@ -232,7 +234,7 @@ void test_joypad_mixed_input(void) {
     assert((result & 0x0F) == 0x0F); // Aucun bouton visible
 
     // Vérifier que START n'interfère pas
-    joypad_press(&joypad, JOYPAD_START);
+    joypad_press_button(&joypad, JOYPAD_START);
     result = joypad_read(&joypad);
     assert((result & 0x0F) == 0x0F); // Toujours aucun
 }

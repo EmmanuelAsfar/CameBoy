@@ -13,6 +13,7 @@
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>
+#include <time.h>
 
 // Structure de l'émulateur
 typedef struct {
@@ -27,6 +28,12 @@ typedef struct {
     HANDLE stdoutRead;
     HANDLE stdoutWrite;
     HANDLE stdoutThread;
+    char rom_name[128];
+    char rom_path[260];
+    char log_dir[260];
+    FILE* f_log;
+    FILE* f_serial;
+    FILE* f_stdout;
 } Emulator;
 
 // Pointeur global vers l'émulateur pour le callback série
@@ -37,6 +44,14 @@ static void gui_serial_callback(u8 ch) {
     if (g_emulator) {
         char text[2] = {ch, '\0'};
         graphics_win32_gui_append_serial(&g_emulator->graphics, text, 1);
+        if (g_emulator->f_serial) {
+            SYSTEMTIME st; GetLocalTime(&st);
+            fprintf(g_emulator->f_serial, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] %c\n",
+                (int)st.wYear, (int)st.wMonth, (int)st.wDay,
+                (int)st.wHour, (int)st.wMinute, (int)st.wSecond, (int)st.wMilliseconds,
+                (char)ch);
+            fflush(g_emulator->f_serial);
+        }
     }
 }
 
@@ -52,6 +67,14 @@ static void gui_log(const char* format, ...) {
     
     if (len > 0) {
         graphics_win32_gui_append_logs(&g_emulator->graphics, buffer, len);
+        if (g_emulator->f_log) {
+            SYSTEMTIME st; GetLocalTime(&st);
+            fprintf(g_emulator->f_log, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] %.*s",
+                (int)st.wYear, (int)st.wMonth, (int)st.wDay,
+                (int)st.wHour, (int)st.wMinute, (int)st.wSecond, (int)st.wMilliseconds,
+                len, buffer);
+            fflush(g_emulator->f_log);
+        }
     }
 }
 
@@ -69,6 +92,15 @@ static DWORD WINAPI stdout_reader_thread(LPVOID param) {
             continue;
         }
         graphics_win32_gui_append_logs(&g_emulator->graphics, buffer, (int)readBytes);
+        if (g_emulator->f_stdout) {
+            SYSTEMTIME st; GetLocalTime(&st);
+            fprintf(g_emulator->f_stdout, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] ",
+                (int)st.wYear, (int)st.wMonth, (int)st.wDay,
+                (int)st.wHour, (int)st.wMinute, (int)st.wSecond, (int)st.wMilliseconds);
+            fwrite(buffer, 1, readBytes, g_emulator->f_stdout);
+            if (buffer[readBytes-1] != '\n') fputc('\n', g_emulator->f_stdout);
+            fflush(g_emulator->f_stdout);
+        }
     }
     return 0;
 }
@@ -100,6 +132,8 @@ bool emulator_init(Emulator* emu) {
     graphics_win32_gui_bind_joypad(&emu->graphics, &emu->joypad);
     // Lier le joypad à la MMU pour P1
     mmu_set_joypad(&emu->mmu, &emu->joypad);
+    // Brancher callback IRQ joypad -> MMU IF bit 4
+    joypad_set_irq_callback(&emu->joypad, (void(*)(void*))mmu_request_joypad_irq, &emu->mmu);
     
     // Définir le callback série
     mmu_set_serial_callback(&emu->mmu, gui_serial_callback);
@@ -137,11 +171,34 @@ void emulator_cleanup(Emulator* emu) {
     }
     if (emu->stdoutRead) CloseHandle(emu->stdoutRead);
     // emu->stdoutWrite est possiblement possédé par la CRT après _open_osfhandle
+    if (emu->f_log) { fclose(emu->f_log); emu->f_log = NULL; }
+    if (emu->f_serial) { fclose(emu->f_serial); emu->f_serial = NULL; }
+    if (emu->f_stdout) { fclose(emu->f_stdout); emu->f_stdout = NULL; }
 }
 
 // Fonction pour charger une ROM
 bool emulator_load_rom(Emulator* emu, const char* filename) {
-    return mmu_load_rom(&emu->mmu, filename);
+    bool ok = mmu_load_rom(&emu->mmu, filename);
+    if (ok) {
+        // Prepare logs directory and files under logs/rom/<romname>
+        // Extract base name
+        const char* base = filename;
+        for (const char* p = filename; *p; ++p) if (*p=='/'||*p=='\\') base = p+1;
+        char name[128]={0}; size_t n=0; while(base[n] && base[n]!='.' && n<sizeof(name)-1){name[n]=base[n];n++;}
+        for (size_t i=0;i<n;i++){char c=name[i]; if(!((c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'||c=='-')) name[i]='_';}
+        strncpy(emu->rom_name, name, sizeof(emu->rom_name)-1);
+        CreateDirectoryA("logs", NULL);
+        CreateDirectoryA("logs\\rom", NULL);
+        snprintf(emu->log_dir, sizeof(emu->log_dir), "logs\\rom\\%s", emu->rom_name);
+        CreateDirectoryA(emu->log_dir, NULL);
+        char path[260];
+        snprintf(path, sizeof(path), "%s\\%s.log", emu->log_dir, emu->rom_name); emu->f_log=fopen(path,"w");
+        snprintf(path, sizeof(path), "%s\\%s_serial.txt", emu->log_dir, emu->rom_name); emu->f_serial=fopen(path,"w");
+        snprintf(path, sizeof(path), "%s\\%s_stdout.txt", emu->log_dir, emu->rom_name); emu->f_stdout=fopen(path,"w");
+        gui_log("ROM chargee: %s\n", filename);
+        gui_log("Type de cartouche: %s\n", cart_type_name(emu->mmu.cart.type));
+    }
+    return ok;
 }
 
 // Fonction pour exécuter l'émulateur
@@ -164,6 +221,9 @@ void emulator_run(Emulator* emu) {
     }
     graphics_win32_gui_update(&emu->graphics, (u32*)emu->ppu.framebuffer);
     graphics_win32_gui_present(&emu->graphics);
+    
+    gui_log("Chargement initial termine\n");
+    printf("Chargement initial termine\n");
     
     gui_log("Demarrage de la boucle principale...\n");
     
@@ -191,10 +251,26 @@ void emulator_run(Emulator* emu) {
             }
             graphics_win32_gui_update(&emu->graphics, (u32*)emu->ppu.framebuffer);
             graphics_win32_gui_present(&emu->graphics);
+
+            static unsigned int frame_count = 0;
+            frame_count++;
+            if ((frame_count % 60) == 0) {
+                char buf[128];
+                int n = snprintf(buf, sizeof(buf), "Frame %u: running=%d, graphics_running=%d\n", 
+                                 frame_count, emu->running ? 1 : 0, emu->graphics.running ? 1 : 0);
+                if (n > 0) {
+                    gui_log("%.*s", n, buf);
+                    printf("%s", buf);
+                }
+            }
         }
         
         // Gérer les événements
         graphics_win32_gui_handle_events(&emu->graphics, &emu->running);
+        if (!emu->running || !emu->graphics.running || !IsWindow(emu->graphics.hwnd)) {
+            emu->running = false;
+            break;
+        }
         
         // Petite pause pour éviter de surcharger le système
         Sleep(1);

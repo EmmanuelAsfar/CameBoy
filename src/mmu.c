@@ -257,16 +257,15 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
             // Si bit 7 est activé, transmettre le caractère
             if (value & 0x80) {
                 u8 data = mmu->io[0xFF01 - 0xFF00];
-                printf("SERIAL: 0x%02X ('%c')\n", data, (data >= 32 && data <= 126) ? data : '.');
-                // Écrire aussi le caractère brut pour un parsing simple par les tests ROM
-                putchar((int)data);
-                fflush(stdout);
-                
-                // Appeler le callback si défini
+                // Si un callback est défini (GUI), ne pas écrire sur stdout
                 if (mmu->serial_cb) {
                     mmu->serial_cb(data);
+                } else {
+                    // Mode RUN: conserver la sortie console existante
+                    printf("SERIAL: 0x%02X ('%c')\n", data, (data >= 32 && data <= 126) ? data : '.');
+                    putchar((int)data);
+                    fflush(stdout);
                 }
-                
                 // Remettre le bit 7 à 0 après transmission
                 mmu->io[address - 0xFF00] = 0x00;
             }
@@ -433,4 +432,11 @@ void mmu_set_serial_callback(MMU* mmu, mmu_serial_cb_t callback) {
 
 void mmu_set_joypad(MMU* mmu, void* joypad) {
     mmu->joypad = joypad;
+}
+
+void mmu_request_joypad_irq(MMU* mmu) {
+    // Set IF bit 4
+    u8 if_reg = mmu->memory[IF_REG];
+    if_reg |= 0x10;
+    mmu->memory[IF_REG] = if_reg;
 }

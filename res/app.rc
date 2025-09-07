@@ -1,3 +1,0 @@
-#include "resource.h"
-
-IDB_GAMEBOY_BG BITMAP "..\\resources\\gameboy_bg.bmp"

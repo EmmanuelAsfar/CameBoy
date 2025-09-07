@@ -43,7 +43,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 int dst_x = (client_w - dst_w) / 2;
                 int dst_y = (client_h - dst_h) / 2;
 
-                // Afficher le framebuffer avec mise à l'échelle
+                // Afficher le framebuffer avec mise à l'échelle (nearest-neighbor)
+                SetStretchBltMode(hdc, COLORONCOLOR);
                 StretchDIBits(
                     hdc,
                     dst_x, dst_y, dst_w, dst_h,

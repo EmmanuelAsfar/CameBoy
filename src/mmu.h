@@ -110,6 +110,8 @@ u8 mbc_read(MMU* mmu, u16 address);
 void mmu_set_serial_callback(MMU* mmu, mmu_serial_cb_t callback);
 // Liaison joypad
 void mmu_set_joypad(MMU* mmu, void* joypad);
+// Demander une IRQ Joypad (IF bit 4)
+void mmu_request_joypad_irq(MMU* mmu);
 
 // Parsing de cartouche
 bool cart_parse_header(Cartridge* cart, u8* rom_data);

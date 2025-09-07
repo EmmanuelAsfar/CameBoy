@@ -13,6 +13,8 @@ void joypad_reset(Joypad* joypad) {
     joypad->buttons_btn = 0x0F;  // 1=relâché pour A,B,Select,Start
     joypad->buttons_dir = 0x0F;  // 1=relâché pour Right,Left,Up,Down
     joypad->select_line = 0;
+    joypad->irq_cb = NULL;
+    joypad->irq_ctx = NULL;
 }
 
 // Écriture dans le registre P1
@@ -41,18 +43,48 @@ u8 joypad_read(Joypad* joypad) {
     return result;
 }
 
+void joypad_set_irq_callback(Joypad* joypad, void (*cb)(void*), void* ctx) {
+    joypad->irq_cb = cb;
+    joypad->irq_ctx = ctx;
+}
+
 // Appui sur un bouton
 void joypad_press(Joypad* joypad, JoypadButton button) {
-    // Mettre à jour les deux groupes de manière indépendante
-    joypad->buttons_btn &= (u8)~(button & 0x0F);
-    joypad->buttons_dir &= (u8)~(button & 0x0F);
-    joypad->buttons &= (u8)~button;
+    // Maintenir compat avec code existant: appliquer sur les deux groupes
+    joypad_press_button(joypad, (JoypadButton)(button & 0x0F));
+    joypad_press_dir(joypad, (JoypadButton)(button & 0x0F));
 }
 
 // Relâchement d'un bouton
 void joypad_release(Joypad* joypad, JoypadButton button) {
-    // Relâcher dans les deux groupes
-    joypad->buttons_btn |= (button & 0x0F);
-    joypad->buttons_dir |= (button & 0x0F);
-    joypad->buttons |= button;
+    joypad_release_button(joypad, (JoypadButton)(button & 0x0F));
+    joypad_release_dir(joypad, (JoypadButton)(button & 0x0F));
+}
+
+void joypad_press_button(Joypad* joypad, JoypadButton mask) {
+    u8 old = joypad->buttons_btn;
+    joypad->buttons_btn &= (u8)~(mask & 0x0F);
+    if (joypad->irq_cb && (joypad->select_line & 0x30) == 0x20) {
+        u8 changed = (u8)(old ^ joypad->buttons_btn);
+        u8 pressed = (u8)(changed & (u8)~joypad->buttons_btn);
+        if (pressed) joypad->irq_cb(joypad->irq_ctx);
+    }
+}
+
+void joypad_release_button(Joypad* joypad, JoypadButton mask) {
+    joypad->buttons_btn |= (mask & 0x0F);
+}
+
+void joypad_press_dir(Joypad* joypad, JoypadButton mask) {
+    u8 old = joypad->buttons_dir;
+    joypad->buttons_dir &= (u8)~(mask & 0x0F);
+    if (joypad->irq_cb && (joypad->select_line & 0x30) == 0x10) {
+        u8 changed = (u8)(old ^ joypad->buttons_dir);
+        u8 pressed = (u8)(changed & (u8)~joypad->buttons_dir);
+        if (pressed) joypad->irq_cb(joypad->irq_ctx);
+    }
+}
+
+void joypad_release_dir(Joypad* joypad, JoypadButton mask) {
+    joypad->buttons_dir |= (mask & 0x0F);
 }
