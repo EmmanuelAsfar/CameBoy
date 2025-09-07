@@ -74,6 +74,7 @@ typedef struct {
     bool active;
     u16 source_addr;
     u16 index; // 0..159 octets copiés
+    u16 cycles_accum; // accumulateur de cycles pour copies temporisées (1 octet / 4 cycles)
 } MmuDMA;
 
 // Structure MMU
@@ -112,6 +113,9 @@ u8 mmu_read8(MMU* mmu, u16 address);
 u16 mmu_read16(MMU* mmu, u16 address);
 void mmu_write8(MMU* mmu, u16 address, u8 value);
 void mmu_write16(MMU* mmu, u16 address, u16 value);
+
+// Tick DMA (appelé à chaque pas CPU): effectue une copie OAM temporisée
+void mmu_dma_tick(MMU* mmu, u8 cycles);
 
 // Fonctions MBC
 void mbc_write(MMU* mmu, u16 address, u8 value);

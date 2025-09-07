@@ -42,6 +42,13 @@ cameboy.bat gui rom.gb :: exécuter en GUI
 type logs\test_results.log | more
 ```
 
+Prérequis:
+- `gcc` (MinGW/TDM-GCC) dans le PATH
+- Outils ROM (sans toucher au PATH):
+  - Placez RGBDS dans `tools\rgbds\bin` (avec `rgbasm.exe`, `rgblink.exe`, `rgbfix.exe`)
+  - Placez GBDK-2020 dans `tools\gbdk\bin` (avec `lcc.exe`)
+- Les scripts d’exemple détectent ces chemins repo-locaux automatiquement
+
 #### Sommaire complet
 
 - [Index docs](docs/README.md)
@@ -63,6 +70,8 @@ type logs\test_results.log | more
   - [Bug de corruption OAM](docs/specs/oam-bug.md)
   - [CGB (Game Boy Color)](docs/specs/cgb.md)
 - [ROMs (format/lecture/build)](docs/roms.md)
+  - [Conception de ROM](docs/roms.md#conception-dune-rom-guidelines)
+- [Toolchains (RGBDS, GBDK-2020)](docs/tools.md)
 - [Tests](docs/testing.md)
 - [Scripts](docs/scripts.md)
 - [Glossaire](docs/glossaire.md)
@@ -71,6 +80,23 @@ type logs\test_results.log | more
 - [Pan Docs (site officiel)](https://gbdev.io/pandocs/)
 
 Les exécutables sont générés sous `build\bin\`.
+
+### Exemples de ROM (homebrew)
+
+- Construire les exemples si toolchains installés:
+
+```cmd
+cameboy.bat examples
+```
+
+- Exécuter un exemple après build:
+
+```cmd
+build\bin\cameboy.exe examples\rgbds-hello-serial\build\rgbds_hello.gb
+build\bin\cameboy_gui.exe examples\gbdk-hello-printf\build\gbdk_hello.gb
+```
+
+Voir `tools/README.md` pour l'installation de RGBDS et GBDK-2020.
 
 ### Références
 

@@ -27,6 +27,11 @@ void test_ppu_stat_irq_oam(void);
 void test_ppu_stat_irq_lyc(void);
 void test_ppu_window_basic(void);
 void test_ppu_sprites_basic(void);
+void test_ppu_sprites_priority_vs_bg(void);
+void test_ppu_sprites_limit10_per_line(void);
+void test_ppu_sprites_flip_xy(void);
+void test_ppu_lcdc_off_on(void);
+void test_ppu_window_wx_clamp(void);
 
 // Table des tests PPU
 typedef struct {
@@ -50,6 +55,11 @@ UnitTest ppu_tests[] = {
     {"PPU STAT IRQ LYC", test_ppu_stat_irq_lyc},
     {"PPU Window Basic", test_ppu_window_basic},
     {"PPU Sprites Basic", test_ppu_sprites_basic},
+    {"PPU Sprites Priority vs BG", test_ppu_sprites_priority_vs_bg},
+    {"PPU Sprites Limit 10", test_ppu_sprites_limit10_per_line},
+    {"PPU Sprites Flip XY", test_ppu_sprites_flip_xy},
+    {"PPU LCDC Off/On", test_ppu_lcdc_off_on},
+    {"PPU Window WX Clamp", test_ppu_window_wx_clamp},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -471,26 +481,140 @@ void test_ppu_sprites_basic(void) {
     // Activer LCD et BG, OBJ (LCDC bits7,1)
     ppu.lcdc = 0x91 | 0x02; // LCD ON, BG ON, OBJ ON (8x8)
 
-    // Sprite à X=8, Y=16 (à l'écran à la ligne 0)
-    // OAM format: Y, X, tile, flags
-    ppu.oam[0] = 16; // Y position (Y-16)
-    ppu.oam[1] = 8;  // X position (X-8)
+    // Sprite à X=8, Y=16 (affiché à l'écran à x=0..7, ligne 0)
+    ppu.oam[0] = 16; // Y
+    ppu.oam[1] = 8;  // X
     ppu.oam[2] = 1;  // tile index 1
     ppu.oam[3] = 0;  // flags
 
     // Tile data index 1 (0x8000 + 16)
-    vram[16 + 0] = 0xFF; vram[16 + 1] = 0x00; // première ligne opaque
+    vram[16 + 0] = 0xFF; vram[16 + 1] = 0x00; // ligne 0 opaque
 
     // Rendre la ligne 0 (LY=0)
     ppu.ly = 0; ppu_render_line(&ppu, vram);
 
-    // Vérifier que des pixels non blancs apparaissent autour de X=8
+    // Des pixels non blancs autour de X=0..7 (X-8)
     bool sprite_pixels = false;
-    for (int x = 8; x < 16 && x < GB_WIDTH; x++) {
+    for (int x = 0; x < 8 && x < GB_WIDTH; x++) {
         if (ppu.framebuffer[0 * GB_WIDTH + x] != 0xFFFFFFFF) { sprite_pixels = true; break; }
     }
-    // Pour l'instant, le rendu sprites n'est pas implémenté: marquer comme TODO attendu futur
-    // Quand sprites seront implémentés, activer l'assert ci-dessous:
-    // assert(sprite_pixels);
-    (void)sprite_pixels;
+    assert(sprite_pixels);
+}
+
+void test_ppu_sprites_priority_vs_bg(void) {
+    PPU ppu; u8 vram[0x2000];
+    ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+
+    // BG: tile 0 blanc; tile 1 noir
+    ppu.lcdc = 0x91 | 0x02; // BG ON, OBJ ON
+    ppu.ly = 0;
+    // BG map 0x9800: mettre tile 1 à x=0..7 (pour croiser le sprite)
+    vram[0x1800] = 1; // tile index 1 en (x=0..7, y=0)
+    // tile data 1: pixels noirs
+    vram[16 + 0] = 0xFF; vram[16 + 1] = 0xFF;
+
+    // Sprite au même endroit, couleur non transparente
+    ppu.oam[0] = 16; // Y
+    ppu.oam[1] = 8;  // X (affiché à 0..7)
+    ppu.oam[2] = 0;  // tile 0 (noir)
+    ppu.oam[3] = 0x80; // derrière BG
+    // tile 0 noir
+    vram[0x0000] = 0xFF; vram[0x0001] = 0xFF;
+
+    ppu_render_line(&ppu, vram);
+
+    // Pixels 0..7 doivent rester BG (noirs) car sprite derrière et BG index != 0
+    for (int x = 0; x < 8; x++) {
+        assert(ppu.framebuffer[x] == 0x000000FF);
+    }
+
+    // Mettre BG transparent (index 0) sur cette zone pour laisser passer le sprite
+    vram[0x1800] = 0; // tile 0 (blanc)
+    ppu_render_line(&ppu, vram);
+    bool sprite_seen = false;
+    for (int x = 0; x < 8; x++) {
+        if (ppu.framebuffer[x] == 0x000000FF) { sprite_seen = true; break; }
+    }
+    assert(sprite_seen);
+}
+
+void test_ppu_sprites_limit10_per_line(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x80 | 0x02; // LCD ON, BG OFF pour éviter interférence
+    ppu.ly = 0;
+    // Tuile 0 opaque pour sprites
+    vram[0] = 0xFF; vram[1] = 0xFF;
+    // Placer 12 sprites alignés sur la ligne 0
+    for (int i = 0; i < 12; i++) {
+        ppu.oam[i*4+0] = 16;            // Y
+        ppu.oam[i*4+1] = (u8)(8 + i*8); // X (affiché à 0,8,16,...)
+        ppu.oam[i*4+2] = 0;             // tile 0 (opaque)
+        ppu.oam[i*4+3] = 0;             // flags
+    }
+    ppu_render_line(&ppu, vram);
+    // Vérifier qu'au plus 10 groupes de 8 pixels ont été écrits
+    int written_groups = 0;
+    for (int i = 0; i < 12; i++) {
+        int sx = (8 + i*8) - 8; // position écran
+        if (sx < 0 || sx >= GB_WIDTH) continue;
+        if (ppu.framebuffer[sx] != 0xFFFFFFFF) written_groups++;
+    }
+    assert(written_groups <= 10);
+}
+
+void test_ppu_sprites_flip_xy(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91 | 0x02; ppu.ly = 0;
+    // Tile 1: motif 1000 0001 (b1=1000 0001, b2=0)
+    vram[16+0] = 0x81; vram[16+1] = 0x00;
+
+    // Sprite non flip à X=8 (affiché 0..7)
+    ppu.oam[0]=16; ppu.oam[1]=8; ppu.oam[2]=1; ppu.oam[3]=0;
+    ppu_render_line(&ppu, vram);
+    u32 left = ppu.framebuffer[0];
+    u32 right = ppu.framebuffer[7];
+
+    // Sprite flip X à X=24 (affiché 16..23)
+    ppu.oam[4]=16; ppu.oam[5]=24; ppu.oam[6]=1; ppu.oam[7]=0x20; // X flip
+    ppu_render_line(&ppu, vram);
+    u32 left_flipped = ppu.framebuffer[16];
+    u32 right_flipped = ppu.framebuffer[23];
+
+    assert(left != 0xFFFFFFFF && right != 0xFFFFFFFF);
+    assert(left_flipped != 0xFFFFFFFF && right_flipped != 0xFFFFFFFF);
+    // Le flip doit inverser la distribution gauche/droite
+    assert(left == right_flipped);
+    assert(right == left_flipped);
+}
+
+void test_ppu_lcdc_off_on(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    // LCD OFF
+    ppu.lcdc &= (u8)~0x80;
+    // Rendu d'une ligne ne doit rien faire (reste blanc)
+    ppu.ly = 0; ppu_render_line(&ppu, vram);
+    for (int x = 0; x < GB_WIDTH; x++) {
+        assert(ppu.framebuffer[x] == 0xFFFFFFFF);
+    }
+    // STAT doit refléter mode 0 et LYC cleared
+    assert((ppu.stat & 0x03) == PPU_MODE_OAM_SEARCH || (ppu.stat & 0x03) == 0);
+
+    // LCD ON
+    ppu.lcdc |= 0x80;
+    // Écrire une tile non blanche pour vérifier rendu
+    vram[0x0000] = 0xFF; vram[0x0001] = 0x00;
+    ppu.ly = 0; ppu_render_line(&ppu, vram);
+    bool any = false; for (int x = 0; x < 8; x++) if (ppu.framebuffer[x] != 0xFFFFFFFF) { any = true; break; }
+    assert(any);
+}
+
+void test_ppu_window_wx_clamp(void) {
+    PPU ppu; u8 vram[0x2000]; ppu_init(&ppu); memset(vram, 0, sizeof(vram));
+    ppu.lcdc = 0x91 | 0x20 | 0x40; // LCD,BG,WIN, window map 9C00
+    ppu.wy = 0; ppu.wx = 0; // WX-7 = -7 -> clamp visuel au bord gauche
+    vram[0x1C00] = 1; vram[16] = 0xFF; vram[17] = 0x00;
+    ppu.ly = 0; ppu_render_line(&ppu, vram);
+    // On s'attend à voir des pixels à partir de x=0 malgré WX<7
+    bool seen = false; for (int x = 0; x < 8; x++) if (ppu.framebuffer[x] != 0xFFFFFFFF) { seen = true; break; }
+    assert(seen);
 }

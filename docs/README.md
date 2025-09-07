@@ -6,6 +6,8 @@
 - [Architecture (vue d’ensemble)](./architecture.md)
 - [Spécifications (détaillées)](./specs/README.md)
 - [ROMs (format/lecture/build)](./roms.md)
+  - [Conception d'une ROM](./roms.md#conception-dune-rom-guidelines)
+  - [Toolchains RGBDS / GBDK-2020](./tools.md)
 - [Tests et résultats](./testing.md)
 - [Scripts utiles](./scripts.md)
 - [Glossaire (jargon expliqué)](./glossaire.md)
@@ -20,6 +22,7 @@
   - [Scripts](./scripts.md)
 - Données et cartouches
   - [ROMs (format/lecture/build)](./roms.md)
+  - [Toolchains (RGBDS, GBDK-2020)](./tools.md)
 - Qualité et validation
   - [Tests unitaires et ROM](./testing.md)
 - Références

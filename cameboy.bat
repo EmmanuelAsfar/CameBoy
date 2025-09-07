@@ -26,9 +26,10 @@ if "%1"=="build" goto build
 if "%1"=="run" goto run
 if "%1"=="gui" goto gui
 if "%1"=="help" goto help
+if "%1"=="examples" goto examples
 
-REM Par défaut : build + test
-goto build_test
+REM Par défaut : build seulement (pas de GUI/ROM ni tests automatiques)
+goto build
 
 :build
 echo ========================================
@@ -142,7 +143,7 @@ if errorlevel 1 (
 )
 
 echo Compilation test_mmu...
-gcc %CFLAGS% tests\unit\test_mmu.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_mmu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
+gcc %CFLAGS% tests\unit\test_mmu.c src\mmu.c src\timer.c src\apu.c src\joypad.c src\ppu.c -o "%BIN_DIR%\test_mmu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
 if errorlevel 1 (
     echo ERREUR compilation test_mmu
     echo FAIL: test_mmu compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
@@ -312,17 +313,8 @@ if not exist "%EXE%" (
 
 REM Chercher une ROM
 if "%2"=="" (
-    REM Chercher des ROMs dans tests/
-    if exist "%TEST_DIR%\test_rom.gb" (
-        set "ROM=%TEST_DIR%\test_rom.gb"
-    ) else if exist "%TEST_DIR%\blargg\cpu_instrs\individual\01-special.gb" (
-        set "ROM=%TEST_DIR%\blargg\cpu_instrs\individual\01-special.gb"
-    ) else (
-        echo Aucune ROM trouvee
-        echo Placez une ROM .gb dans %TEST_DIR% ou specifie le chemin
-        echo Usage: cameboy.bat run chemin\vers\rom.gb
-        exit /b 1
-    )
+    call :select_rom
+    if errorlevel 1 exit /b 1
 ) else (
     set "ROM=%2"
 )
@@ -360,17 +352,8 @@ if not exist "%BIN_DIR%\cameboy_gui.exe" (
 
 REM Chercher une ROM
 if "%2"=="" (
-    REM Chercher des ROMs dans tests/
-    if exist "%TEST_DIR%\rom\visual_grid.gb" (
-        set "ROM=%TEST_DIR%\rom\visual_grid.gb"
-    ) else if exist "%TEST_DIR%\blargg\cpu_instrs\individual\01-special.gb" (
-        set "ROM=%TEST_DIR%\blargg\cpu_instrs\individual\01-special.gb"
-    ) else (
-        echo Aucune ROM trouvee
-        echo Placez une ROM .gb dans %TEST_DIR%\rom\ ou specifie le chemin
-        echo Usage: cameboy.bat gui chemin\vers\rom.gb
-        exit /b 1
-    )
+    call :select_rom
+    if errorlevel 1 exit /b 1
 ) else (
     set "ROM=%2"
 )
@@ -433,6 +416,7 @@ echo   run [rom]   - Lance l'emulateur simple avec une ROM
 echo   gui [rom]   - Lance l'emulateur GUI avec une ROM
 echo   clean       - Nettoie les fichiers generes
 echo   help        - Affiche cette aide
+echo   examples    - Compile les ROMs d'exemple (RGBDS/GBDK)
 echo.
 echo Exemples:
 echo   cameboy.bat                    # Build + test
@@ -453,6 +437,90 @@ echo   logs\                         - Tous les logs
 echo.
 goto end
 
+:select_rom
+echo ========================================
+echo SELECTION DE ROM
+echo ========================================
+echo.
+
+REM Scanner tous les fichiers .gb dans le projet
+set "ROM_COUNT=0"
+
+echo Recherche des ROMs .gb...
+for /r "%PROJECT_DIR%" %%f in (*.gb) do (
+    set /a ROM_COUNT+=1
+    REM Calculer le chemin relatif
+    set "FULL_PATH=%%f"
+    set "REL_PATH=!FULL_PATH:%PROJECT_DIR%=!"
+    echo [!ROM_COUNT!] !REL_PATH!
+)
+
+if %ROM_COUNT%==0 (
+    echo Aucune ROM .gb trouvee dans le projet
+    echo Placez des ROMs .gb dans le projet ou specifiez le chemin
+    echo Usage: cameboy.bat run chemin\vers\rom.gb
+    exit /b 1
+)
+
+echo.
+echo Selectionnez une ROM (1-%ROM_COUNT%) ou 0 pour annuler:
+set /p "CHOICE=Votre choix: "
+
+if "%CHOICE%"=="0" (
+    echo Annule
+    exit /b 1
+)
+
+REM Valider le choix
+if %CHOICE% LSS 1 (
+    echo Choix invalide
+    exit /b 1
+)
+if %CHOICE% GTR %ROM_COUNT% (
+    echo Choix invalide
+    exit /b 1
+)
+
+REM Extraire la ROM selectionnee en rescannant
+set "CURRENT_INDEX=0"
+for /r "%PROJECT_DIR%" %%f in (*.gb) do (
+    set /a CURRENT_INDEX+=1
+    if !CURRENT_INDEX!==%CHOICE% (
+        set "ROM=%%f"
+        goto :rom_found
+    )
+)
+
+:rom_found
+REM Afficher le chemin relatif
+set "REL_ROM=!ROM:%PROJECT_DIR%=!"
+echo ROM selectionnee: !REL_ROM!
+echo.
+exit /b 0
+
 :end
 echo.
 echo ========================================
+exit /b
+
+:examples
+echo ========================================
+echo BUILD ROMs D'EXEMPLE
+echo ========================================
+echo.
+if exist examples\rgbds-hello-serial\build.bat (
+  call examples\rgbds-hello-serial\build.bat || echo [WARN] RGBDS example non construit (outil manquant?)
+) else (
+  echo [INFO] Exemple RGBDS non present
+)
+if exist examples\gbdk-hello-printf\build.bat (
+  call examples\gbdk-hello-printf\build.bat || echo [WARN] GBDK example non construit (outil manquant?)
+) else (
+  echo [INFO] Exemple GBDK non present
+)
+if exist examples\rgbds-hello-vblank\build.bat (
+  call examples\rgbds-hello-vblank\build.bat || echo [WARN] RGBDS VBlank example non construit (outil manquant?)
+) else (
+  echo [INFO] Exemple RGBDS VBlank non present
+)
+goto end

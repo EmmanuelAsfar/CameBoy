@@ -32,7 +32,8 @@ typedef struct {
     // État selon Pan Docs
     bool halted;
     bool ime;  // Interrupt Master Enable
-    bool ei_pending;  // EI prend effet après l'instruction suivante
+    bool ei_pending;  // EI en attente d'activation
+    bool ei_delay;    // Délai: true immédiatement après EI, appliqué après l'instruction suivante
     bool halt_bug;  // HALT bug : PC n'incrémente pas dans certaines conditions
     bool branch_taken; // Indique si la dernière condition a été prise (pour cycles)
 } CPU;

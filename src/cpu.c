@@ -106,7 +106,9 @@ void inst_illegal(CPU* cpu, MMU* mmu) {
 
 void inst_ei(CPU* cpu, MMU* mmu) {
     (void)mmu;  // Paramètre non utilisé
-    cpu->ei_pending = true;  // IME activé après l'instruction suivante
+    // EI met en place un délai d'une instruction avant d'activer IME
+    cpu->ei_pending = true;
+    cpu->ei_delay = true;
     cpu->pc += 1;
 }
 
@@ -600,8 +602,14 @@ u8 cpu_step(CPU* cpu, MMU* mmu) {
 
     // Gestion du délai EI (prend effet après l'instruction suivante)
     if (cpu->ei_pending) {
-        cpu->ei_pending = false;
-        cpu->ime = true;
+        if (cpu->ei_delay) {
+            // Première instruction après EI: consommer le délai sans activer IME
+            cpu->ei_delay = false;
+        } else {
+            // Deuxième étape: activer IME et terminer l'attente
+            cpu->ei_pending = false;
+            cpu->ime = true;
+        }
     }
     
     // Retourner les cycles (avec cycles conditionnels si applicable)
@@ -625,6 +633,7 @@ void cpu_init(CPU* cpu) {
     cpu->halted = false;
     cpu->ime = false;           // IME désactivé au démarrage (conforme tests/Pan Docs)
     cpu->ei_pending = false;    // Pas de EI en attente
+    cpu->ei_delay = false;      // Pas de délai EI actif
     cpu->halt_bug = false;      // Pas de HALT bug actif
     cpu->branch_taken = false;  // Pas de saut conditionnel pris
 }

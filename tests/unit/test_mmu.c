@@ -23,6 +23,7 @@ void test_mmu_read_write_16bit(void);
 void test_mmu_echo_ram(void);
 void test_mmu_vram_oam_restrictions(void);
 void test_mmu_dma_oam_copy(void);
+void test_mmu_dma_timed_and_buslock(void);
 
 // Table des tests MMU
 typedef struct {
@@ -40,6 +41,7 @@ UnitTest mmu_tests[] = {
     {"MMU Echo RAM", test_mmu_echo_ram},
     {"MMU VRAM/OAM Restrictions", test_mmu_vram_oam_restrictions},
     {"MMU DMA OAM Copy", test_mmu_dma_oam_copy},
+    {"MMU DMA Timed & BusLock", test_mmu_dma_timed_and_buslock},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -348,9 +350,52 @@ void test_mmu_dma_oam_copy(void) {
     // Déclencher le DMA depuis 0xC000 (valeur 0xC0)
     mmu_write8(&mmu, 0xFF46, 0xC0);
 
+    // Attendre la fin du DMA temporisé (160 octets à 4 cycles chacun = 640 cycles)
+    mmu_dma_tick(&mmu, (u16)640);
+    assert(!mmu.dma.active);
+
     // Vérifier que OAM contient les données copiées
     for (int i = 0; i < 160; i++) {
-        assert(mmu_read8(&mmu, 0xFE00 + i) == (u8)i);
+        assert(mmu.oam[i] == (u8)i);
+    }
+
+    mmu_cleanup(&mmu);
+}
+
+void test_mmu_dma_timed_and_buslock(void) {
+    MMU mmu; PPU ppu; mmu_init(&mmu); ppu_init(&ppu); mmu_set_ppu(&mmu, &ppu);
+
+    // Préparer WRAM source 0xC000
+    for (int i = 0; i < 160; i++) mmu_write8(&mmu, 0xC000 + i, (u8)(i ^ 0x5A));
+
+    // Lancer DMA
+    mmu_write8(&mmu, 0xFF46, 0xC0);
+
+    // Vérifier qu'au début, OAM encore vide et DMA actif
+    assert(mmu.dma.active);
+    assert(mmu.dma.index == 0);
+
+    // Simuler 4 cycles: 1 octet copié
+    mmu_dma_tick(&mmu, 4);
+    assert(mmu.dma.index == 1);
+    assert(mmu.oam[0] == (u8)(0 ^ 0x5A));
+
+    // Pendant DMA, lecture WRAM via CPU doit renvoyer 0xFF (bus lock)
+    u8 w = mmu_read8(&mmu, 0xC000);
+    assert(w == 0xFF);
+    // HRAM reste accessible
+    mmu_write8(&mmu, 0xFF80, 0x12);
+    assert(mmu_read8(&mmu, 0xFF80) == 0x12);
+
+    // OAM inaccessible côté CPU pendant DMA
+    mmu_write8(&mmu, 0xFE00, 0x77);
+    assert(mmu_read8(&mmu, 0xFE00) == 0xFF);
+
+    // Terminer le DMA
+    for (int i = 0; i < 159; i++) mmu_dma_tick(&mmu, 4);
+    assert(!mmu.dma.active);
+    for (int i = 0; i < 160; i++) {
+        assert(mmu.oam[i] == (u8)(i ^ 0x5A));
     }
 
     mmu_cleanup(&mmu);

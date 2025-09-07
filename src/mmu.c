@@ -42,6 +42,7 @@ void mmu_init(MMU* mmu) {
     mmu->dma.active = false;
     mmu->dma.source_addr = 0;
     mmu->dma.index = 0;
+    mmu->dma.cycles_accum = 0;
     
     mmu_reset(mmu);
 }
@@ -164,6 +165,15 @@ bool mmu_load_rom(MMU* mmu, const char* filename) {
 
 // Lecture d'un octet
 u8 mmu_read8(MMU* mmu, u16 address) {
+    // Pendant un DMA actif, seul l'accès HRAM (FF80-FFFE) est autorisé au CPU
+    if (mmu->dma.active) {
+        if (!((address >= 0xFF80 && address <= 0xFFFE) || (address == 0xFF00) || (address == 0xFF04) || (address == 0xFF05) || (address == 0xFF06) || (address == 0xFF07))) {
+            // Bloquer les autres bus (renvoie 0xFF comme hardware généralement)
+            // Exceptions: certains IO critiques peuvent rester lisibles, mais on reste simple ici
+            // Sauf si PPU/Timer/APU lisent via MMU interne (non CPU). Ce chemin modélise accès CPU
+            return 0xFF;
+        }
+    }
     if (address <= 0x7FFF) {
         // ROM (via MBC mapping). Fallback to raw memory if no ROM loaded (unit tests)
         if (mmu->cart.rom_data == NULL || mmu->cart.rom_size == 0) {
@@ -222,6 +232,12 @@ u16 mmu_read16(MMU* mmu, u16 address) {
 
 // Écriture d'un octet
 void mmu_write8(MMU* mmu, u16 address, u8 value) {
+    // Pendant un DMA actif, le CPU ne peut écrire que HRAM (FF80-FFFE) et quelques IO; sinon ignore
+    if (mmu->dma.active) {
+        if (!(address >= 0xFF80 && address <= 0xFFFE) && address != 0xFF46 && !(address >= 0xFF04 && address <= 0xFF07)) {
+            return;
+        }
+    }
     if (address <= 0x7FFF) {
         // ROM area - route vers MBC
         mbc_write(mmu, address, value);
@@ -266,15 +282,11 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
         if (address == 0xFF46) {
             mmu->io[address - 0xFF00] = value;
             u16 src = (u16)value << 8;
-            // Copie synchrone (version simple). Option: TODO émul. timée
-            for (u16 i = 0; i < 160; i++) {
-                u8 b = mmu_read8(mmu, src + i);
-                mmu->oam[i] = b;
-            }
-            // DMA terminé immédiatement dans cette version
-            mmu->dma.active = false;
+            // Démarrer un DMA temporisé (1 octet toutes les 4 cycles CPU, total 160 octets)
+            mmu->dma.active = true;
             mmu->dma.source_addr = src;
-            mmu->dma.index = 160;
+            mmu->dma.index = 0;
+            mmu->dma.cycles_accum = 0;
             return;
         }
 
@@ -472,4 +484,44 @@ void mmu_request_joypad_irq(MMU* mmu) {
     u8 if_reg = mmu->memory[IF_REG];
     if_reg |= 0x10;
     mmu->memory[IF_REG] = if_reg;
+}
+
+// Tick DMA OAM: copie 1 octet toutes les 4 cycles jusqu'à 160 octets
+void mmu_dma_tick(MMU* mmu, u16 cycles) {
+    if (!mmu->dma.active) return;
+    mmu->dma.cycles_accum += cycles;
+    while (mmu->dma.active && mmu->dma.cycles_accum >= 4) {
+        mmu->dma.cycles_accum -= 4;
+        if (mmu->dma.index < 160) {
+            // Lire la source en ignorant les verrous CPU (DMA matériel accède au bus directement)
+            u16 addr = (u16)(mmu->dma.source_addr + mmu->dma.index);
+            u8 b;
+            if (addr <= 0x7FFF) {
+                b = mbc_read(mmu, addr);
+            } else if (addr >= 0x8000 && addr <= 0x9FFF) {
+                b = mmu->vram[addr - 0x8000];
+            } else if (addr >= 0xA000 && addr <= 0xBFFF) {
+                b = mbc_read(mmu, addr);
+            } else if (addr >= 0xC000 && addr <= 0xDFFF) {
+                b = mmu->wram[addr - 0xC000];
+            } else if (addr >= 0xE000 && addr <= 0xFDFF) {
+                b = mmu->wram[addr - 0xE000];
+            } else if (addr >= 0xFE00 && addr <= 0xFE9F) {
+                b = mmu->oam[addr - 0xFE00];
+            } else if (addr >= 0xFF80 && addr <= 0xFFFE) {
+                b = mmu->hram[addr - 0xFF80];
+            } else if (addr >= 0xFF00 && addr <= 0xFF7F) {
+                b = mmu->io[addr - 0xFF00];
+            } else if (addr == 0xFFFF) {
+                b = mmu->memory[0xFFFF];
+            } else {
+                b = 0xFF;
+            }
+            mmu->oam[mmu->dma.index] = b;
+            mmu->dma.index++;
+        }
+        if (mmu->dma.index >= 160) {
+            mmu->dma.active = false;
+        }
+    }
 }

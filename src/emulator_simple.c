@@ -398,6 +398,8 @@ void emulator_simple_run(EmulatorSimple* emu, u32 max_cycles) {
         // Mettre à jour les composants
         timer_tick(&emu->timer, cycles);
         u8 ppu_interrupts = ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
+        // DMA OAM temporisé
+        mmu_dma_tick(&emu->mmu, cycles);
         u8 timer_interrupts = timer_get_interrupts(&emu->timer);
         apu_tick(&emu->apu, cycles);
         

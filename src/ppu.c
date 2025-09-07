@@ -30,6 +30,11 @@ void ppu_reset(PPU* ppu) {
         ppu->framebuffer[i] = 0xFFFFFFFF;
     }
 
+    // Réinitialiser OAM (éviter des sprites résiduels entre tests)
+    for (int i = 0; i < 160; i++) {
+        ppu->oam[i] = 0x00;
+    }
+
     ppu_update_palettes(ppu);
 }
 
@@ -167,9 +172,28 @@ void ppu_update_palettes(PPU* ppu) {
     }
 }
 
-// Rendu d'une ligne: BG + fenêtre (DMG minimal)
+static inline u32 ppu_get_obj_color(PPU* ppu, u8 pixel, bool use_obp1) {
+    // pixel ∈ {1,2,3}; 0 est transparent
+    u8 idx = (use_obp1 ? (ppu->obp1 >> (pixel * 2)) : (ppu->obp0 >> (pixel * 2))) & 0x03;
+    switch (idx) {
+        case 0: return 0xFFFFFFFF;
+        case 1: return 0xAAAAAAFF;
+        case 2: return 0x555555FF;
+        default: return 0x000000FF;
+    }
+}
+
+// Rendu d'une ligne: BG + fenêtre + sprites (DMG minimal)
 void ppu_render_line(PPU* ppu, u8* vram) {
-    if (!(ppu->lcdc & 0x80)) return; // LCD off
+    if (!(ppu->lcdc & 0x80)) {
+        // LCD OFF: forcer état neutre conforme Pan Docs
+        ppu->ly = 0;
+        ppu->mode = PPU_MODE_HBLANK;
+        // Mettre à jour STAT: mode=0, coincidence clear
+        ppu->stat = (ppu->stat & 0xF8) | (ppu->mode & 0x03);
+        ppu->stat &= (u8)~0x04;
+        return;
+    }
 
     bool bg_enable = (ppu->lcdc & 0x01) != 0;
     bool win_enable = (ppu->lcdc & 0x20) != 0;
@@ -180,15 +204,16 @@ void ppu_render_line(PPU* ppu, u8* vram) {
 
     u8 line = ppu->ly;
 
+    // Buffer des indices BG/Window pour la priorité sprites (0..3)
+    u8 bg_index_line[GB_WIDTH];
+
     for (int x = 0; x < GB_WIDTH; x++) {
-        bool use_window = false;
         u8 tile_y = 0, pixel_y = 0;
         u16 map_addr = 0;
 
         if (win_enable && line >= ppu->wy) {
             int wx_screen = (int)ppu->wx - 7; // Pan Docs: WX = window X + 7
             if (x >= wx_screen && wx_screen < GB_WIDTH) {
-                use_window = true;
                 tile_y  = (u8)((line - ppu->wy) >> 3);
                 pixel_y = (u8)((line - ppu->wy) & 7);
                 u8 tile_x  = (u8)((x - wx_screen) >> 3);
@@ -207,12 +232,14 @@ void ppu_render_line(PPU* ppu, u8* vram) {
                 u8 b2 = vram[line_addr + 1 - 0x8000];
                 u8 mask = (u8)(0x80 >> pixel_x);
                 u8 pix = 0; if (b1 & mask) pix |= 0x01; if (b2 & mask) pix |= 0x02;
+                bg_index_line[x] = pix;
                 ppu->framebuffer[line * GB_WIDTH + x] = ppu_get_pixel_color(ppu, pix);
                 continue;
             }
         }
 
         if (!bg_enable) {
+            bg_index_line[x] = 0;
             ppu->framebuffer[line * GB_WIDTH + x] = 0xFFFFFFFF;
             continue;
         }
@@ -236,7 +263,71 @@ void ppu_render_line(PPU* ppu, u8* vram) {
         u8 b2 = vram[line_addr + 1 - 0x8000];
         u8 mask = (u8)(0x80 >> pixel_x);
         u8 pix = 0; if (b1 & mask) pix |= 0x01; if (b2 & mask) pix |= 0x02;
+        bg_index_line[x] = pix;
         ppu->framebuffer[line * GB_WIDTH + x] = ppu_get_pixel_color(ppu, pix);
+    }
+
+    // Sprites (OBJ)
+    if (ppu->lcdc & 0x02) {
+        bool obj_8x16 = (ppu->lcdc & 0x04) != 0;
+        // Collecter jusqu'à 10 sprites sur cette ligne
+        u8 sprite_indices[10];
+        int sprite_count = 0;
+        for (int i = 0; i < 40 && sprite_count < 10; i++) {
+            u8 sy = ppu->oam[i * 4 + 0];
+            u8 sx = ppu->oam[i * 4 + 1];
+            int obj_y = (int)sy - 16;
+            int obj_x = (int)sx - 8;
+            int height = obj_8x16 ? 16 : 8;
+            if (ppu->ly >= obj_y && ppu->ly < obj_y + height) {
+                sprite_indices[sprite_count++] = (u8)i;
+            }
+        }
+
+        bool sprite_written[GB_WIDTH];
+        for (int x = 0; x < GB_WIDTH; x++) sprite_written[x] = false;
+
+        for (int si = 0; si < sprite_count; si++) {
+            int i = sprite_indices[si];
+            u8 sy = ppu->oam[i * 4 + 0];
+            u8 sx = ppu->oam[i * 4 + 1];
+            u8 tile = ppu->oam[i * 4 + 2];
+            u8 attr = ppu->oam[i * 4 + 3];
+
+            int obj_y = (int)sy - 16;
+            int obj_x = (int)sx - 8;
+            int height = obj_8x16 ? 16 : 8;
+
+            int line_in_sprite = (int)ppu->ly - obj_y;
+            bool yflip = (attr & 0x40) != 0;
+            bool xflip = (attr & 0x20) != 0;
+            bool use_obp1 = (attr & 0x10) != 0;
+            bool behind_bg = (attr & 0x80) != 0;
+
+            if (yflip) line_in_sprite = (height - 1) - line_in_sprite;
+
+            u8 tile_index = tile;
+            if (obj_8x16) {
+                tile_index &= 0xFE; // Bit0 ignoré, paire de tuiles
+                if (line_in_sprite >= 8) tile_index += 1;
+            }
+
+            u16 data_addr = 0x8000 + (u16)tile_index * 16 + (u16)(line_in_sprite & 7) * 2;
+            u8 b1 = vram[data_addr - 0x8000];
+            u8 b2 = vram[data_addr + 1 - 0x8000];
+
+            for (int px = 0; px < 8; px++) {
+                int screen_x = obj_x + (xflip ? (7 - px) : px);
+                if (screen_x < 0 || screen_x >= GB_WIDTH) continue;
+                if (sprite_written[screen_x]) continue;
+                u8 mask = (u8)(0x80 >> px);
+                u8 pix = 0; if (b1 & mask) pix |= 0x01; if (b2 & mask) pix |= 0x02;
+                if (pix == 0) continue; // transparent
+                if (behind_bg && bg_index_line[screen_x] != 0) continue; // derrière BG/window non-0
+                ppu->framebuffer[line * GB_WIDTH + screen_x] = ppu_get_obj_color(ppu, pix, use_obp1);
+                sprite_written[screen_x] = true;
+            }
+        }
     }
 }
 

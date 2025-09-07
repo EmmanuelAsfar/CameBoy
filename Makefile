@@ -104,7 +104,7 @@ $(TEST_CPU): $(TEST_DIR)\test_cpu.c $(OBJ_DIR)\cpu.o $(OBJ_DIR)\cpu_tables.o $(O
 	@echo Compilation test_cpu...
 	@$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) 2>> $(LOGS_DIR)\test_build.log
 
-$(TEST_MMU): $(TEST_DIR)\test_mmu.c $(OBJ_DIR)\mmu.o $(OBJ_DIR)\timer.o $(OBJ_DIR)\apu.o
+$(TEST_MMU): $(TEST_DIR)\test_mmu.c $(OBJ_DIR)\mmu.o $(OBJ_DIR)\timer.o $(OBJ_DIR)\apu.o $(OBJ_DIR)\ppu.o $(OBJ_DIR)\joypad.o
 	@if not exist "$(BIN_DIR)" mkdir "$(BIN_DIR)"
 	@echo Compilation test_mmu...
 	@$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) 2>> $(LOGS_DIR)\test_build.log
