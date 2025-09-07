@@ -1,47 +1,56 @@
-# CameBoy - Game Boy Emulator
+# CameBoy – Émulateur Game Boy (DMG)
 
-Un émulateur Game Boy écrit en C, développé avec Cursor et ChatGPT.
+Émulateur Game Boy en C99, conçu pour suivre les spécifications Pan Docs et viser la conformité aux suites de tests Blargg/Mooneye. Deux modes d’exécution sont fournis: console et GUI Win32.
 
-## Structure du projet
+### Documentation
 
-```
-src/
-├── cpu.h/.c          # CPU LR35902 (fetch-decode-execute)
-├── mmu.h/.c          # Bus mémoire et mapping
-├── mbc.h/.c          # Memory Bank Controllers
-├── ppu.h/.c          # Picture Processing Unit
-├── timer.h/.c        # Timers et DIV
-├── joypad.h/.c       # Contrôleur
-├── dma.h/.c          # OAM DMA
-├── cart.h/.c         # Gestion des cartouches
-└── emulator.c        # Boucle principale
+- Index documentation: `docs/README.md`
+- Architecture: `docs/architecture.md`
+- Utilisation (build/run/GUI): `docs/usage.md`
+- Tests (unitaires, ROM, logs): `docs/testing.md`
+- Scripts (cameboy.bat, user/*.bat): `docs/scripts.md`
+- Glossaire (jargon expliqué): `docs/glossaire.md`
+- Contribution: `CONTRIBUTING.md`
 
-docs/
-├── pandocs/          # Documentation Pan Docs
-└── opcodes.json      # Tables d'opcodes
+### Structure du projet (vue rapide)
 
-tests/
-├── blargg/           # Tests CPU Blargg
-└── mooneye/          # Tests Mooneye
-
-Makefile
+```text
+src/                    # CPU, MMU, PPU, Timer, Joypad, Interrupt, APU, GUI
+tests/                  # unit, blargg, mooneye, rom
+build/                  # artefacts (généré)
+logs/                   # logs (généré)
+resources/              # assets GUI (copiés en build/resources)
 ```
 
-## Ressources utilisées
+### Prérequis
 
-- **Pan Docs** : Spécifications officielles Game Boy
-- **Blargg Tests** : Tests de conformité CPU
-- **Mooneye Tests** : Tests de timing et interrupts
-- **Pastraiser** : Tables d'opcodes LR35902
+- Windows avec `gcc` (MinGW/TDM-GCC) dans le PATH. Linux/macOS possibles via `make`.
 
-## Compilation
+### Démarrage rapide (Windows)
 
-```bash
-make
+```cmd
+cameboy.bat            :: build + tests
+cameboy.bat run rom.gb :: exécuter en console
+cameboy.bat gui rom.gb :: exécuter en GUI
+type logs\test_results.log | more
 ```
 
-## Tests
+#### Table des matières
 
-```bash
-make test
-```
+- [Documentation](#documentation)
+- [Structure du projet (vue rapide)](#structure-du-projet-vue-rapide)
+- [Prérequis](#prérequis)
+- [Démarrage rapide (Windows)](#démarrage-rapide-windows)
+- [Références](#références)
+- [État & objectifs](#état--objectifs)
+
+Les exécutables sont générés sous `build\bin\`.
+
+### Références
+
+- Pan Docs (copie locale): `docs/pandocs/`
+- Suites de tests: `tests/blargg/`, `tests/mooneye/`
+
+### État & objectifs
+
+Voir `README_AGENT.md` pour un état technique courant (timings PPU/Timer/Joypad) et prochaines étapes.

@@ -186,6 +186,23 @@ if errorlevel 1 (
     echo OK: test_joypad compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
 )
 
+echo Compilation test_joypad_irq...
+gcc %CFLAGS% tests\unit\test_joypad_irq.c src\joypad.c -o "%BIN_DIR%\test_joypad_irq.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
+if errorlevel 1 (
+    echo ERREUR compilation test_joypad_irq
+    echo FAIL: test_joypad_irq compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
+) else (
+    echo OK: test_joypad_irq compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
+)
+
+echo Compilation test_cpu_flags...
+gcc %CFLAGS% tests\unit\test_cpu_flags.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_cpu_flags.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
+if errorlevel 1 (
+    echo ERREUR compilation test_cpu_flags
+    echo FAIL: test_cpu_flags compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
+) else (
+    echo OK: test_cpu_flags compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
+)
 echo ======================================== > "%LOGS_DIR%\test_results.log"
 echo CameBoy Unit Tests - %DATE% %TIME% >> "%LOGS_DIR%\test_results.log"
 echo ======================================== >> "%LOGS_DIR%\test_results.log"
@@ -211,6 +228,38 @@ for %%t in (cpu mmu ppu timer interrupt joypad) do (
         set /a total+=1
         echo. >> "%LOGS_DIR%\test_results.log"
     )
+)
+
+if exist "%BIN_DIR%\test_joypad_irq.exe" (
+    echo Running test_joypad_irq...
+    echo Running test_joypad_irq... >> "%LOGS_DIR%\test_results.log"
+    "%BIN_DIR%\test_joypad_irq.exe" >> "%LOGS_DIR%\test_results.log" 2>&1
+    if !errorlevel! equ 0 (
+        echo SUCCES test_joypad_irq PASSED
+        echo SUCCES test_joypad_irq PASSED >> "%LOGS_DIR%\test_results.log"
+        set /a passed+=1
+    ) else (
+        echo ERREUR test_joypad_irq FAILED
+        echo ERREUR test_joypad_irq FAILED >> "%LOGS_DIR%\test_results.log"
+    )
+    set /a total+=1
+    echo. >> "%LOGS_DIR%\test_results.log"
+)
+
+if exist "%BIN_DIR%\test_cpu_flags.exe" (
+    echo Running test_cpu_flags...
+    echo Running test_cpu_flags... >> "%LOGS_DIR%\test_results.log"
+    "%BIN_DIR%\test_cpu_flags.exe" >> "%LOGS_DIR%\test_results.log" 2>&1
+    if !errorlevel! equ 0 (
+        echo SUCCES test_cpu_flags PASSED
+        echo SUCCES test_cpu_flags PASSED >> "%LOGS_DIR%\test_results.log"
+        set /a passed+=1
+    ) else (
+        echo ERREUR test_cpu_flags FAILED
+        echo ERREUR test_cpu_flags FAILED >> "%LOGS_DIR%\test_results.log"
+    )
+    set /a total+=1
+    echo. >> "%LOGS_DIR%\test_results.log"
 )
 
 echo ======================================== >> "%LOGS_DIR%\test_results.log"
