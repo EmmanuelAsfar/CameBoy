@@ -45,15 +45,32 @@ int main(void) {
 
     // Tiles 0 and 1: checker rows differ
     *c++ = 0x21; *c++ = 0x00; *c++ = 0x80; // HL=8000
-    // tile0
-    *c++ = 0x0E; *c++ = 0x08; // C=8 rows
-    *c++ = 0x3E; *c++ = 0xAA; uint16_t t0 = (uint16_t)(p + (c - &rom[p]));
-    *c++ = 0x77; *c++ = 0x23; *c++ = 0xAF; *c++ = 0x77; *c++ = 0x23; *c++ = 0x0F; *c++ = 0x0D; // RRCA (0xAA<->0x55)
-    rel = (int8_t)(t0 - (((p + (c - &rom[p])) + 2))); *c++ = 0x20; *c++ = (uint8_t)rel;
-    // tile1
-    *c++ = 0x0E; *c++ = 0x08; *c++ = 0x3E; *c++ = 0x55; uint16_t t1 = (uint16_t)(p + (c - &rom[p]));
-    *c++ = 0x77; *c++ = 0x23; *c++ = 0xAF; *c++ = 0x77; *c++ = 0x23; *c++ = 0x0F; *c++ = 0x0D;
-    rel = (int8_t)(t1 - (((p + (c - &rom[p])) + 2))); *c++ = 0x20; *c++ = (uint8_t)rel;
+    // tile0: 8 lignes. A = motif bas (0xAA) qui alterne 0xAA/0x55 à chaque ligne, plan haut = 0x00
+    // Utiliser E=0 pour écrire le plan haut sans détruire A
+    *c++ = 0x0E; *c++ = 0x08;           // LD C,8   (lignes)
+    *c++ = 0x1E; *c++ = 0x00;           // LD E,00h (plan1=0)
+    *c++ = 0x3E; *c++ = 0xAA;           // LD A,0AAh (motif initial)
+    uint16_t t0 = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0x77;                         // LD (HL),A    ; plan0
+    *c++ = 0x23;                         // INC HL
+    *c++ = 0x73;                         // LD (HL),E    ; plan1=0
+    *c++ = 0x23;                         // INC HL
+    *c++ = 0x0F;                         // RRCA         ; alterner motif 0xAA<->0x55
+    *c++ = 0x0D;                         // DEC C
+    rel = (int8_t)(t0 - (((p + (c - &rom[p])) + 2))); *c++ = 0x20; *c++ = (uint8_t)rel; // JR NZ,t0
+
+    // tile1: même chose mais motif de départ = 0x55
+    *c++ = 0x0E; *c++ = 0x08;           // LD C,8
+    *c++ = 0x1E; *c++ = 0x00;           // LD E,00h
+    *c++ = 0x3E; *c++ = 0x55;           // LD A,055h
+    uint16_t t1 = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0x77;                         // LD (HL),A
+    *c++ = 0x23;                         // INC HL
+    *c++ = 0x73;                         // LD (HL),E
+    *c++ = 0x23;                         // INC HL
+    *c++ = 0x0F;                         // RRCA
+    *c++ = 0x0D;                         // DEC C
+    rel = (int8_t)(t1 - (((p + (c - &rom[p])) + 2))); *c++ = 0x20; *c++ = (uint8_t)rel; // JR NZ,t1
 
     // Fill BG map alternate 0/1 for 32x18
     *c++ = 0x11; *c++ = 0x00; *c++ = 0x98; // DE=9800

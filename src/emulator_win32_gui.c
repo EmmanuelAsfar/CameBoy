@@ -204,10 +204,29 @@ void emulator_run(Emulator* emu) {
     // Afficher la fenêtre
     graphics_win32_gui_show(&emu->graphics);
     
-    // Phase de rechauffement CPU pour initialiser la ROM
+    // Phase de rechauffement CPU pour initialiser la ROM (alignée sur la version run)
     gui_log("Phase de rechauffement CPU...\n");
-    for (int i = 0; i < 100000; i++) {
-        cpu_step(&emu->cpu, &emu->mmu);
+    const u32 warmup_cycles_target = 300000; // ~0.07s @ 4.19MHz
+    u32 warmup_cycles = 0;
+    while (warmup_cycles < warmup_cycles_target) {
+        u8 cycles = cpu_step(&emu->cpu, &emu->mmu);
+        warmup_cycles += cycles;
+        timer_tick(&emu->timer, cycles);
+        ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
+        
+        // Gérer interruptions pendant warmup (même logique que version run)
+        u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
+        u8 ie_reg = mmu_read8(&emu->mmu, IE_REG);
+        if (emu->cpu.ime && (if_reg & ie_reg)) {
+            for (int i = 0; i < 5; i++) {
+                u8 interrupt = (u8)(1 << i);
+                if ((if_reg & interrupt) && (ie_reg & interrupt)) {
+                    cpu_interrupt(&emu->cpu, &emu->mmu, interrupt);
+                    mmu_write8(&emu->mmu, IF_REG, (u8)(if_reg & (u8)~interrupt));
+                    break;
+                }
+            }
+        }
     }
     
     // Forcer un rendu initial
@@ -233,6 +252,20 @@ void emulator_run(Emulator* emu) {
         
         // Mettre à jour le PPU
         ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
+
+        // Gérer les interruptions (aligné sur version run)
+        u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
+        u8 ie_reg = mmu_read8(&emu->mmu, IE_REG);
+        if (emu->cpu.ime && (if_reg & ie_reg)) {
+            for (int i = 0; i < 5; i++) {
+                u8 interrupt = (u8)(1 << i);
+                if ((if_reg & interrupt) && (ie_reg & interrupt)) {
+                    cpu_interrupt(&emu->cpu, &emu->mmu, interrupt);
+                    mmu_write8(&emu->mmu, IF_REG, (u8)(if_reg & (u8)~interrupt));
+                    break;
+                }
+            }
+        }
         
         // Vérifier si on doit rendre une frame complète (comme la version run)
         static u32 frame_cycles = 0;

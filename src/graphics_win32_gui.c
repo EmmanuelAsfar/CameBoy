@@ -237,7 +237,8 @@ LRESULT CALLBACK WindowProcGUI(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
                 
                 // 3. Dessiner l'écran LCD (toujours par-dessus le fond)
                 if (gfx->framebuffer) {
-                    SetStretchBltMode(hdc, STRETCH_HALFTONE);
+                    // Rendu net (nearest-neighbor) pour conserver les pixels GB
+                    SetStretchBltMode(hdc, COLORONCOLOR);
                     
                     // Rendu direct du framebuffer pour remplir exactement le rectangle LCD (sans préserver l'aspect ratio)
                     StretchDIBits(
@@ -501,22 +502,35 @@ void graphics_win32_gui_cleanup(GraphicsWin32GUI* gfx) {
 // Mettre à jour le framebuffer
 void graphics_win32_gui_update(GraphicsWin32GUI* gfx, u32* ppu_framebuffer) {
     if (!gfx || !ppu_framebuffer) return;
-    
-    // Copier les données du framebuffer PPU (u32 RGBA: RRGGBBAA) vers notre framebuffer RGB
+
+    // Palette DMG teintée "Game Boy" (vert caca d'oie -> gris foncé)
+    // Niveaux du plus clair (index 0) au plus foncé (index 3)
+    static const u8 DMG_TINT[4][3] = {
+        { 0xE0, 0xF8, 0xD0 }, // #E0F8D0 (clair)
+        { 0xA8, 0xD0, 0x80 }, // #A8D080 (moyen clair)
+        { 0x56, 0x8F, 0x5C }, // #568F5C (olive foncé)
+        { 0x2E, 0x2E, 0x2E }, // #2E2E2E (gris foncé, cristaux)
+    };
+
+    // Copier + teinter depuis le framebuffer PPU (u32 RGBA: RRGGBBAA) vers RGB 24bpp (BGR en mémoire)
     for (int y = 0; y < gfx->height; y++) {
         for (int x = 0; x < gfx->width; x++) {
             int src_idx = y * gfx->width + x;
             int dst_idx = (y * gfx->width + x) * 3;
-            
-            // Convertir de u32 RGBA (RRGGBBAA) vers RGB
+
             u32 pixel = ppu_framebuffer[src_idx];
-            u8 r = (pixel >> 24) & 0xFF; // R
-            u8 g = (pixel >> 16) & 0xFF; // G
-            u8 b = (pixel >> 8)  & 0xFF; // B
-                        
-            gfx->framebuffer[dst_idx + 0] = b; // B
-            gfx->framebuffer[dst_idx + 1] = g; // G
-            gfx->framebuffer[dst_idx + 2] = r; // R
+            u8 r = (u8)((pixel >> 24) & 0xFF);
+            // Les 4 niveaux DMG que nous émettons sont en niveaux de gris (R=G=B). Déterminer l'index.
+            // Seuils robustes pour {0xFF, 0xAA, 0x55, 0x00}
+            int level = (r > 0xCC) ? 0 : (r > 0x88) ? 1 : (r > 0x33) ? 2 : 3;
+
+            u8 tr = DMG_TINT[level][0];
+            u8 tg = DMG_TINT[level][1];
+            u8 tb = DMG_TINT[level][2];
+
+            gfx->framebuffer[dst_idx + 0] = tb; // B
+            gfx->framebuffer[dst_idx + 1] = tg; // G
+            gfx->framebuffer[dst_idx + 2] = tr; // R
         }
     }
 }

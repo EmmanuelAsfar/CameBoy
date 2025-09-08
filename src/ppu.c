@@ -1,4 +1,4 @@
-#include "ppu.h"
+﻿#include "ppu.h"
 
 // Initialisation du PPU
 void ppu_init(PPU* ppu) {
@@ -256,8 +256,10 @@ void ppu_render_line(PPU* ppu, u8* vram) {
             continue;
         }
 
-        tile_y  = (u8)((line + ppu->scy) >> 3);
-        pixel_y = (u8)((line + ppu->scy) & 7);
+        // Wrap vertical scroll to 8-bit before extracting tile line/index (mod 256, then /8 and %8)
+        u8 ybg = (u8)(line + ppu->scy);
+        tile_y  = (u8)(ybg >> 3);
+        pixel_y = (u8)(ybg & 7);
         u16 sx = (u16)((x + ppu->scx) & 0xFF);
         u8 tile_x  = (u8)(sx >> 3);
         u8 pixel_x = (u8)(sx & 7);
