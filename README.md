@@ -17,6 +17,8 @@ CameBoy est un émulateur Game Boy écrit en C99, conçu pour être pédagogique
 - [Spécifications d'implémentation](docs/specs/README.md)
 - [Contribution](CONTRIBUTING.md)
 
+**Note agents IA:** merci de lire attentivement `AGENT_POLICY.md` et `STATUS.md` avant toute contribution.
+
 ► Parcours conseillé: Utilisation → Architecture → Spécifications → Tests
 
 ### Structure du projet (vue rapide)
@@ -154,4 +156,4 @@ flowchart TD
 
 ### Note pour les agents IA
 
-**Pour les agents IA, merci de lire attentivement ces deux fichiers: `AGENT_POLICY.md` et `AGENT_TASKS.md` !**
+**Pour les agents IA, merci de lire attentivement ces deux fichiers: `AGENT_POLICY.md` et `STATUS.md` !**

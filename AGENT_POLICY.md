@@ -54,7 +54,7 @@ Update Policy
 
 Policy-to-Tasks Rule
 --------------------
-After completing work (code, tests, or docs), always update `AGENT_TASKS.md` to reflect the current state (what works, what fails, and next actions). This keeps the project’s live status accurate for future agents and contributors.
+After completing work (code, tests, or docs), always update `STATUS.md` to reflect the current state (what works, what fails, and next actions). This keeps the project’s live status accurate for everyone.
 
 Build & Logs
 ------------
