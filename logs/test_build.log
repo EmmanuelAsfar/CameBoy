@@ -546,3 +546,15 @@ OK: test_ppu compiled at 08/09/2025 13:01:57,31
 OK: test_timer compiled at 08/09/2025 13:01:57,31 
 Test build ended 08/09/2025 13:02:13,89 
 ======================================== 
+======================================== 
+Test build started 08/09/2025 13:06:41,57 
+OK: test_cpu compiled at 08/09/2025 13:06:41,59 
+OK: test_cpu_flags compiled at 08/09/2025 13:06:41,59 
+OK: test_interrupt compiled at 08/09/2025 13:06:41,59 
+OK: test_joypad compiled at 08/09/2025 13:06:41,59 
+OK: test_joypad_irq compiled at 08/09/2025 13:06:41,59 
+OK: test_mmu compiled at 08/09/2025 13:06:41,59 
+OK: test_ppu compiled at 08/09/2025 13:06:41,59 
+OK: test_timer compiled at 08/09/2025 13:06:41,59 
+Test build ended 08/09/2025 13:07:00,91 
+======================================== 

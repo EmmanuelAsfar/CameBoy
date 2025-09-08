@@ -1,6 +1,6 @@
 # Résultats des Tests Unitaires - CameBoy 
  
-**Date:** 08/09/2025 13:02:08,96 
+**Date:** 08/09/2025 13:06:54,49 
 **Status:** ❌ CERTAINS TESTS ONT ECHOUE 
  
 ## 📊 Synthèse Globale 
@@ -15,14 +15,14 @@
  
 | Rubrique | Tests | Réussis | Échecs | Status | 
 |----------|-------|---------|--------|--------| 
-| **test_cpu** | test_cpu_SUBTESTSTEST_NAME | 0 | ✅ | 
-| **test_cpu_flags** | test_cpu_flags_SUBTESTSTEST_NAME | 0 | ✅ | 
-| **test_interrupt** | test_interrupt_SUBTESTSTEST_NAME | 0 | ✅ | 
-| **test_joypad** | test_joypad_SUBTESTSTEST_NAME | 0 | ✅ | 
-| **test_joypad_irq** | test_joypad_irq_SUBTESTSTEST_NAME | 0 | ✅ | 
-| **test_mmu** | test_mmu_SUBTESTSTEST_NAME | 0 | ✅ | 
-| **test_ppu** | test_ppu_SUBTESTSTEST_NAME | test_ppu_FAILED_SUBTESTS | ❌ | 
-| **test_timer** | test_timer_SUBTESTSTEST_NAME | 0 | ✅ | 
+| **test_cpu** | 25 | 25 | 0 | ✅ | 
+| **test_cpu_flags** | 0 | 0 | 0 | ✅ | 
+| **test_interrupt** | 8 | 8 | 0 | ✅ | 
+| **test_joypad** | 7 | 7 | 0 | ✅ | 
+| **test_joypad_irq** | 0 | 0 | 0 | ✅ | 
+| **test_mmu** | 10 | 10 | 0 | ✅ | 
+| **test_ppu** | 27 | 26 | 1 | ❌ | 
+| **test_timer** | 8 | 8 | 0 | ✅ | 
  
 ## 🔍 Détails des Tests 
  

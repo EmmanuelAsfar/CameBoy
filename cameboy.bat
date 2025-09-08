@@ -526,8 +526,8 @@ for %%t in (tests\unit\test_*.c) do (
             "%BIN_DIR%\!TEST_NAME!.exe" > "%TEMP%\!TEST_NAME!_output.txt" 2>&1
             set "!TEST_NAME!_SUBTESTS=0"
             for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"Test "') do set /a "!TEST_NAME!_SUBTESTS+=1"
-            set "CURRENT_SUBTESTS=!TEST_NAME!_SUBTESTS!"
-            echo ^| **!TEST_NAME!** ^| !CURRENT_SUBTESTS! ^| !CURRENT_SUBTESTS! ^| 0 ^| ✅ ^| >> "%TEST_MD%"
+            call :get_subtest_count "!TEST_NAME!" SUBTEST_COUNT
+            echo ^| **!TEST_NAME!** ^| !SUBTEST_COUNT! ^| !SUBTEST_COUNT! ^| 0 ^| ✅ ^| >> "%TEST_MD%"
         ) else (
             REM Compter les sous-tests reels meme en cas d'echec
             "%BIN_DIR%\!TEST_NAME!.exe" > "%TEMP%\!TEST_NAME!_output.txt" 2>&1
@@ -537,10 +537,10 @@ for %%t in (tests\unit\test_*.c) do (
             for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"FAIL"') do set /a "!TEST_NAME!_FAILED_SUBTESTS+=1"
             for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"Assertion failed"') do set /a "!TEST_NAME!_FAILED_SUBTESTS+=1"
             set /a "!TEST_NAME!_PASSED_SUBTESTS=!TEST_NAME!_SUBTESTS!-!TEST_NAME!_FAILED_SUBTESTS!"
-            set "CURRENT_SUBTESTS=!TEST_NAME!_SUBTESTS!"
-            set "CURRENT_PASSED=!TEST_NAME!_PASSED_SUBTESTS!"
-            set "CURRENT_FAILED=!TEST_NAME!_FAILED_SUBTESTS!"
-            echo ^| **!TEST_NAME!** ^| !CURRENT_SUBTESTS! ^| !CURRENT_PASSED! ^| !CURRENT_FAILED! ^| ❌ ^| >> "%TEST_MD%"
+            call :get_subtest_count "!TEST_NAME!" SUBTEST_COUNT
+            call :get_failed_count "!TEST_NAME!" FAILED_COUNT
+            set /a "PASSED_COUNT=!SUBTEST_COUNT!-!FAILED_COUNT!"
+            echo ^| **!TEST_NAME!** ^| !SUBTEST_COUNT! ^| !PASSED_COUNT! ^| !FAILED_COUNT! ^| ❌ ^| >> "%TEST_MD%"
         )
     )
 )
@@ -581,4 +581,19 @@ echo --- >> "%TEST_MD%"
 echo *Généré automatiquement par cameboy.bat* >> "%TEST_MD%"
 
 echo Rapport markdown genere: %TEST_MD%
+exit /b 0
+
+:get_subtest_count
+set "TEST_NAME=%~1"
+set "RESULT_VAR=%~2"
+set "!RESULT_VAR!=0"
+for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"Test "') do set /a "!RESULT_VAR!+=1"
+exit /b 0
+
+:get_failed_count
+set "TEST_NAME=%~1"
+set "RESULT_VAR=%~2"
+set "!RESULT_VAR!=0"
+for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"FAIL"') do set /a "!RESULT_VAR!+=1"
+for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"Assertion failed"') do set /a "!RESULT_VAR!+=1"
 exit /b 0
