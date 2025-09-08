@@ -98,8 +98,7 @@ u16 timer_get_threshold(u8 tac) {
 ## Comportement des timers
 
 ### SAquence d'overflow
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
     participant Timer
     participant MMU
     participant CPU

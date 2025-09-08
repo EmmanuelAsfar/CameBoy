@@ -56,8 +56,7 @@ RAf: [Pan Docs a" Audio Registers](https://gbdev.io/pandocs/Audio_Registers.html
 - Frame sequencer: 512 Hz (pilote length, sweep, enveloppe)
 - Sortie audio: Achantillonnage cAtA hAte (mixage a' buffer) A  une frAquence cible (ex: 44100 Hz)
 
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
   participant CPU
   participant APU
   participant MIX as Mixer/Host
@@ -107,8 +106,7 @@ static inline int8_t square_sample(SquareChannel* ch) {
   - Sweep (C1): ticks 2,6
   - Envelope: tick 7
 
-```
-gantt
+`````mermaid`r`ngantt
   dateFormat X
   axisFormat %s
   section FrameSequencer

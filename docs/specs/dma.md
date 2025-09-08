@@ -45,8 +45,7 @@ void dma_start(MMU* mmu, u8 source_high) {
 ## Processus de copie
 
 ### SAquence de copie
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
     participant CPU
     participant DMA
     participant OAM

@@ -74,8 +74,7 @@ bool can_access_oam(PPUMode mode) {
 - **Pixel Transfer** : Lecture de la VRAM, Acriture bloquAe
 
 ### Diagramme des restrictions
-```
-gantt
+`````mermaid`r`ngantt
     title Restrictions d'accAs VRAM/OAM
     dateFormat X
     axisFormat %s

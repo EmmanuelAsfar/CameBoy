@@ -37,8 +37,7 @@ RAf: [Pan Docs a" The Cartridge Header](https://gbdev.io/pandocs/The_Cartridge_H
 - SAlection du MBC (MBC1/MBC3/MBC5a) si nAcessaire
 - Initialisation des banques (ROM0/ROMX, RAM externe)
 
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
   participant FS as Fichier ROM
   participant MMU
   participant MBC

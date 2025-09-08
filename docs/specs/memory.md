@@ -8,8 +8,7 @@ La Game Boy utilise un adressage 16-bit (0x0000a"0xFFFF) dAcoupA en zones. Certa
 
 ### Carte mAmoire (DMG)
 
-```
-flowchart TD
+`````mermaid`r`nflowchart TD
     A[0x0000-0x3FFF<br/>ROM0<br/>Banc 0 fixe]:::rom
     B[0x4000-0x7FFF<br/>ROMX<br/>Bancs commutables]:::rom
     C[0x8000-0x9FFF<br/>VRAM<br/>DonnAes vidAo]:::vram
@@ -40,8 +39,7 @@ flowchart TD
 - Modes 2 (OAM Search) et 3: OAM bloquAe
 - Pendant un DMA OAM: OAM bloquAe
 
-```
-gantt
+`````mermaid`r`ngantt
   title Restrictions d'accAs VRAM/OAM (par ligne)
   dateFormat X
   axisFormat %s
@@ -129,8 +127,7 @@ Tests dans `tests/unit/test_mmu.c` (liste et objectifs):
 - `test_mmu_dma_oam_copy` (nouveau)
   - PrApare source WRAM `0xC000`, Acrit `0xFF46=0xC0`, vArifie que 160 octets ont AtA recopiAs vers OAM
 
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
   participant T as Test
   participant MMU
   participant PPU

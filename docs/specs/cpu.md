@@ -12,8 +12,7 @@ Le LR35902 est un CPU 8a'bit (hybride 8080/Z80) cadencA A  4.194304 MHz.
 
 ### Cycle dainstruction
 
-```
-flowchart TD
+`````mermaid`r`nflowchart TD
   F[Fetch opcode @PC] --> D[Decode via tables std/CB]
   D --> E[Execute]
   E --> U[MA J registres/flags/PC]
@@ -24,8 +23,7 @@ flowchart TD
 - EI: laactivation des interruptions prend effet aprAs lainstruction suivante
 - HALT: CPU saarrAte jusquaA  interruption; HALT bug si IME=0 et IRQ en attente a' PC peut ne pas saincrAmenter
 
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
   participant CPU
   participant MMU
   CPU->>MMU: read IE/IF
@@ -88,8 +86,7 @@ Tests dans `tests/unit/test_cpu.c`:
   - `test_cpu_halt_bug`: vArifie que `HALT` avec `IME=0` et `IE&IF!=0` naincrAmente pas `PC` et active `halt_bug`
   - `test_cpu_daa_cases`: couvre plusieurs cas daajustement dAcimal (N/H/C et nibbles) pour renforcer la conformitA de `DAA`
 
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
   participant T as Test
   participant CPU
   participant MMU

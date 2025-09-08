@@ -46,8 +46,7 @@ u8 serial_data;
 ## Protocole de communication
 
 ### SAquence de transfert
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
     participant GB1 as Game Boy 1
     participant GB2 as Game Boy 2
     

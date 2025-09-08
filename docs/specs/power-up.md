@@ -17,8 +17,7 @@ La Game Boy a un comportement de dAmarrage prAcis :
 ## SAquence de dAmarrage
 
 ### Atapes du dAmarrage
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
     participant Power as Alimentation
     participant CPU as CPU
     participant PPU as PPU

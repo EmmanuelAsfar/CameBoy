@@ -10,8 +10,7 @@ Le PPU gAnAre laimage 160A-144, ligne par ligne, avec un timing strict.
 - Par ligne visible: Mode 2 (OAM Search) a' Mode 3 (Pixel Transfer) a' Mode 0 (HBlank)
 - A laentrAe de LY=144: Mode 1 (VBlank) + IRQ VBlank
 
-```
-flowchart LR
+`````mermaid`r`nflowchart LR
   OAM["Mode 2: OAM search (~80 cycles)"] --> XFER["Mode 3: Pixel transfer (~172 cycles)"]
   XFER --> HBL["Mode 0: HBlank (~204 cycles)"]
   HBL -->|"next line"| OAM
@@ -38,8 +37,7 @@ AccAs mAmoire (CPU):
 - OAM bloquAe en Modes 2 et 3
 - OAM aussi bloquAe pendant DMA OAM (copie 160 octets via 0xFF46)
 
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
   participant PPU
   participant OAM
   participant VRAM

@@ -43,8 +43,7 @@ graph LR
 
 ### Flux d'exAcution (simplifiA)
 
-```
-flowchart TD
+`````mermaid`r`nflowchart TD
   A[Chargement ROM] --> B[Initialisation modules]
   B --> C{Boucle principale}
   C -->|par instruction| D[CPU step]
@@ -102,8 +101,7 @@ flowchart TD
 
 ### Diagramme sAquence (AvAnements clAs)
 
-```
-sequenceDiagram
+`````mermaid`r`nsequenceDiagram
   participant GUI as GUI Win32
   participant Joy as Joypad
   participant MMU as MMU
