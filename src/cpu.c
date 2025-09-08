@@ -85,10 +85,33 @@ void inst_halt(CPU* cpu, MMU* mmu) {
     }
 }
 
-void inst_stop(CPU* cpu, MMU* mmu) {
+static void inst_stop_legacy(CPU* cpu, MMU* mmu) {
     (void)mmu;  // Paramètre non utilisé
     cpu->halted = true;  // STOP équivalent à HALT pour simplifier
     cpu->pc += 2;  // STOP est sur 2 octets
+}
+
+// New STOP implementation with CGB speed switch handling
+void inst_stop(CPU* cpu, MMU* mmu) {
+    // CGB speed switch via KEY1: if prepare bit set, toggle speed and do not enter halt
+    if (mmu && mmu->is_cgb) {
+        u8 key1 = mmu_read8(mmu, KEY1_REG);
+        bool prepare = (key1 & 0x01) != 0;
+        if (prepare) {
+            // Toggle speed
+            mmu->cgb_double_speed = !mmu->cgb_double_speed;
+            // Clear prepare bit, reflect current speed in bit7
+            u8 new_key1 = (mmu->cgb_double_speed ? 0x80 : 0x00);
+            mmu_write8(mmu, KEY1_REG, 0x00); // clear prepare
+            // keep an IO mirror with bit7 for readback
+            mmu->io[KEY1_REG - 0xFF00] = new_key1;
+            cpu->pc += 2;
+            return;
+        }
+    }
+    // DMG or no prepare: STOP behaves as a low-power halt until joypad change (simplified)
+    cpu->halted = true;
+    cpu->pc += 2;  // STOP is 2 bytes
 }
 
 void inst_di(CPU* cpu, MMU* mmu) {

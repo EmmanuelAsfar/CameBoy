@@ -101,3 +101,16 @@ sequenceDiagram
 ```
 
 RÃ©fÃ©rences: Pan Docs (sections EI delay, HALT, DAA)
+
+### STOP et double-vitesse CGB (KEY1)
+
+STOP a deux comportements selon la préparation et le modèle:
+- DMG ou CGB sans préparation: STOP met le CPU en veille basse consommation (réveil via joypad). Pour simplifier dans un cadre pédagogique, on peut traiter ceci comme un HALT prolongé.
+- CGB avec préparation: si `KEY1` (`0xFF4D`) a `bit0=1` (préparation), l’exécution de STOP bascule la vitesse CPU (bit7 de `KEY1` reflète l’état: 0=normal, 1=double). La bascule efface `bit0` et l’exécution continue sans entrer en veille.
+
+Détails `KEY1` (CGB uniquement):
+- `bit7` (lecture seule): vitesse actuelle (0 = normal, 1 = double)
+- `bit0` (lecture/écriture): préparation de bascule (écrire 1 avant STOP)
+- bits 1–6: lecture à 1
+
+Impact: la vitesse double affecte le rythme des sous-systèmes synchronisés au CPU (timers, APU, certaines durées PPU côté hôte). Dans ce projet, on maintient la logique à fréquence CPU fixe et on traite le double-speed comme un facteur d’horloge global à propager au besoin dans les modules concernés.

@@ -100,6 +100,10 @@ typedef struct {
 
     // DMA OAM
     MmuDMA dma;
+
+    // CGB capabilities/state
+    bool is_cgb;            // True if running in CGB mode
+    bool cgb_double_speed;  // True if double-speed mode active (KEY1 bit7)
 } MMU;
 
 // Fonctions MMU

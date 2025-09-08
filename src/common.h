@@ -60,6 +60,18 @@ typedef int32_t  s32;
 #define OBP1_REG     0xFF49  // Object palette 1 data
 #define WY_REG       0xFF4A  // Window Y position
 #define WX_REG       0xFF4B  // Window X position
+// CGB only
+#define KEY1_REG     0xFF4D  // CGB speed switch (KEY1)
+#define VBK_REG      0xFF4F  // CGB VRAM bank
+#define HDMA1_REG    0xFF51  // CGB HDMA source high
+#define HDMA2_REG    0xFF52  // CGB HDMA source low
+#define HDMA3_REG    0xFF53  // CGB HDMA dest high
+#define HDMA4_REG    0xFF54  // CGB HDMA dest low
+#define HDMA5_REG    0xFF55  // CGB HDMA length/mode/start
+#define BCPS_REG     0xFF68  // CGB BG palette spec index
+#define BCPD_REG     0xFF69  // CGB BG palette data
+#define OCPS_REG     0xFF6A  // CGB OBJ palette spec index
+#define OCPD_REG     0xFF6B  // CGB OBJ palette data
 
 // Registres Audio (0xFF10-0xFF3F)
 #define NR10_REG     0xFF10  // Channel 1 Sweep

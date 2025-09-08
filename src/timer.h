@@ -14,6 +14,9 @@ typedef struct {
     u32 tima_cycles;  // Compteur pour TIMA
     u32 tima_period;  // Période actuelle de TIMA
     bool interrupt_pending;  // Interruption timer en attente
+    // Edge-based model internals
+    u16 div_counter;      // 16-bit internal divider counter (increments at CPU clock)
+    bool prev_input_bit;  // Previous state of TIMA input clock bit (for falling-edge detect)
 } Timer;
 
 // Fonctions timer

@@ -20,6 +20,38 @@ void timer_reset(Timer* timer) {
 
 // Tick du timer
 void timer_tick(Timer* timer, u8 cycles) {
+    // New edge-based model (early return):
+    // Internal 16-bit divider counter increments at CPU clock (4.19 MHz)
+    timer->div_counter += cycles;
+    // DIV register reflects upper 8 bits of internal counter
+    timer->div = (u8)(timer->div_counter >> 8);
+
+    // Maintain legacy div_cycles field for tests (keep within 0..255)
+    timer->div_cycles += cycles;
+    while (timer->div_cycles >= 256) timer->div_cycles -= 256;
+
+    // Edge-based TIMA: increment on falling edge of selected input clock
+    bool enabled_now = (timer->tac & 0x04) != 0;
+    u8 clock_select_now = timer->tac & 0x03;
+    // Map TAC to bit index in div_counter: 00->bit9, 01->bit3, 10->bit5, 11->bit7
+    u8 bit_index_now = (clock_select_now == 0 ? 9 : clock_select_now == 1 ? 3 : clock_select_now == 2 ? 5 : 7);
+    bool input_bit_now = ((timer->div_counter >> bit_index_now) & 0x1) != 0;
+
+    if (enabled_now) {
+        if (timer->prev_input_bit && !input_bit_now) {
+            if (timer->tima == 0xFF) {
+                timer->tima = timer->tma;
+                timer->interrupt_pending = true;
+            } else {
+                timer->tima++;
+            }
+        }
+    }
+    timer->prev_input_bit = input_bit_now;
+
+    // Maintain tima_period for tests
+    timer->tima_period = (enabled_now ? timer_get_tima_period(timer->tac) : 0);
+    return;
     // DIV timer (incrémente toutes les 256 cycles)
     timer->div_cycles += cycles;
     if (timer->div_cycles >= 256) {

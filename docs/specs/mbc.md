@@ -326,3 +326,11 @@ void test_mbc1_rom_banking() {
 
 - [The Cartridge Header](https://gbdev.io/pandocs/The_Cartridge_Header.html)
 - [MBCs](https://gbdev.io/pandocs/MBCs.html)
+
+### Autres MBC et RTC (aperçu)
+
+- MBC2, MBC6, MBC7, MMM01, M161, HuC1/HuC3: variantes de banking à documenter progressivement.
+- MBC3 RTC: registres temps réel (sec/min/h/low day/high+flags), latch, halt, day carry; persistance.
+- Sauvegardes: définir un format de fichiers SRAM/RTC simple par cartouche.
+
+Pédagogie: commencer par MBC1/MBC3/MBC5, ajouter le RTC MBC3 (latching, halt) quand nécessaire.

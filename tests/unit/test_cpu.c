@@ -50,6 +50,7 @@ void test_cpu_interrupts(void);
 void test_cpu_ei_delay(void);
 void test_cpu_halt_bug(void);
 void test_cpu_daa_cases(void);
+void test_cpu_stop_key1_speed_switch(void);
 
 // Table des tests CPU
 UnitTest cpu_tests[] = {
@@ -77,6 +78,7 @@ UnitTest cpu_tests[] = {
     {"EI Delay", test_cpu_ei_delay},
     {"HALT bug", test_cpu_halt_bug},
     {"DAA cases", test_cpu_daa_cases},
+    {"STOP + KEY1 speed switch (CGB)", test_cpu_stop_key1_speed_switch},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -717,6 +719,36 @@ void test_cpu_daa_cases(void) {
     assert(get_reg_a(&cpu) == 0x0F);
     assert(!get_flag(&cpu, FLAG_H));
     assert(!get_flag(&cpu, FLAG_C));
+
+    mmu_cleanup(&mmu);
+}
+
+void test_cpu_stop_key1_speed_switch(void) {
+    CPU cpu; MMU mmu;
+    cpu_init(&cpu);
+    mmu_init(&mmu);
+    // Simuler CGB
+    mmu.is_cgb = true;
+    mmu.cgb_double_speed = false;
+
+    // Placer opcode STOP à PC et préparer KEY1
+    mmu.memory[cpu.pc] = 0x10; // STOP
+    mmu.memory[cpu.pc + 1] = 0x00;
+    // Ecrire prepare bit
+    mmu_write8(&mmu, KEY1_REG, 0x01);
+
+    // Exécuter STOP
+    inst_stop(&cpu, &mmu);
+
+    // Doit basculer en double speed et ne pas être halted
+    assert(mmu.cgb_double_speed == true);
+    assert(cpu.halted == false);
+    assert(cpu.pc == 0x0102);
+
+    // PREP bit doit être effacé et KEY1 bit7 refléter le mode courant
+    u8 key1 = mmu_read8(&mmu, KEY1_REG);
+    assert((key1 & 0x01) == 0);
+    assert((key1 & 0x80) == 0x80);
 
     mmu_cleanup(&mmu);
 }

@@ -19,6 +19,7 @@ void test_timer_tima_counter(void);
 void test_timer_overflow(void);
 void test_timer_frequencies(void);
 void test_timer_control(void);
+void test_timer_edge_based(void);
 
 // Table des tests Timer
 typedef struct {
@@ -34,6 +35,7 @@ UnitTest timer_tests[] = {
     {"Timer Overflow", test_timer_overflow},
     {"Timer Frequencies", test_timer_frequencies},
     {"Timer Control", test_timer_control},
+    {"Timer Edge-based increments", test_timer_edge_based},
     {NULL, NULL} // Marqueur de fin
 };
 
@@ -226,4 +228,22 @@ void test_timer_control(void) {
     // Test écriture TMA
     timer_write(&timer, TMA_REG, 0x99);
     assert(timer.tma == 0x99);
+}
+
+void test_timer_edge_based(void) {
+    Timer timer; timer_init(&timer);
+    // Enable, 65536 Hz => increment every 64 cycles
+    timer_write(&timer, TAC_REG, 0x06);
+    // Advance 63 cycles: no increment on falling edge yet
+    for (int i = 0; i < 63; i++) timer_tick(&timer, 1);
+    assert(timer.tima == 0);
+    // One more cycle to hit 64 -> falling edge
+    timer_tick(&timer, 1);
+    assert(timer.tima == 1);
+
+    // Switch to 4096 Hz => bit9 -> 512 cycles per toggle, falling edge every 512 cycles
+    timer_write(&timer, TAC_REG, 0x04);
+    // Advance 1024 cycles -> two falling edges -> +2
+    for (int i = 0; i < 1024; i++) timer_tick(&timer, 1);
+    assert(timer.tima == 3);
 }

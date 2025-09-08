@@ -144,3 +144,14 @@ gantt
 - [Audio Registers](https://gbdev.io/pandocs/Audio_Registers.html)
 - [Audio Details](https://gbdev.io/pandocs/Audio_Details.html)
 
+
+### Détails importants (pédagogique)
+
+- NR52 master on/off: contrôle global des canaux.
+- « DAC off »: mettre à 0 le DAC d’un canal le coupe immédiatement.
+- Sweep (C1): overflow/invalid freq ? canal coupé; horloge 512 Hz (ticks 2/6 du frame sequencer).
+- Envelope: « zombie mode » (certaines écritures relancent l’enveloppe).
+- Canal 3 (wave): contraintes d’accès à la Wave RAM selon l’état de lecture.
+- Length counters: horloge 512 Hz (ticks 0/2/4/6), interactions avec trigger.
+
+Réfs Pan Docs: Audio, Audio Registers, Audio Details.

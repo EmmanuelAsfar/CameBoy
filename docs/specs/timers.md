@@ -257,3 +257,16 @@ void test_timer_overflow() {
 
 - [Timer and Divider Registers](https://gbdev.io/pandocs/Timer_and_Divider_Registers.html)
 - [Timer Obscure Behaviour](https://gbdev.io/pandocs/Timer_Obscure_Behaviour.html)
+
+### Modèle edge-based des timers
+
+- Compteur interne 16-bit (diviseur) incrémenté à 4.194304 MHz.
+- `DIV` lit les 8 bits hauts (counter >> 8).
+- `TIMA` s’incrémente sur front descendant d’un bit du compteur choisi par `TAC`:
+  - `TAC[1:0]=00` ? bit9 (4096 Hz)
+  - `01` ? bit3 (262144 Hz)
+  - `10` ? bit5 (65536 Hz)
+  - `11` ? bit7 (16384 Hz)
+- Overflow: `TIMA` recharge `TMA` et déclenche IRQ Timer. Les subtilités (glitches, délais) pourront être détaillées plus tard.
+
+Dans CameBoy, on modélise ces fronts via `div_counter` (16-bit) et `prev_input_bit`. On conserve en parallèle des compteurs « pédagogiques » pour garder des tests lisibles.

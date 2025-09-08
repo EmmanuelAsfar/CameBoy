@@ -318,3 +318,12 @@ void test_dma_copy() {
 ## RÃ©fÃ©rences Pan Docs
 
 - [OAM DMA Transfer](https://gbdev.io/pandocs/OAM_DMA_Transfer.html)
+
+### DMA CGB (GDMA/HDMA)
+
+- Registres `FF51`..`FF55` (source, destination, longueur/mode).
+- GDMA (General): copie immédiate d’un bloc, CPU suspendu pendant la copie.
+- HDMA (H-Blank): copie 16 octets par HBlank sans bloquer le CPU; `FF55.bit7=1` pendant le transfert.
+- Contraintes: VRAM destination (`0x8000-0x9FFF`) avec alignements spécifiques.
+
+Dans CameBoy, le support HDMA sera intégré côté MMU/PPU: écriture des registres, état de transfert, exécution sur HBlank.

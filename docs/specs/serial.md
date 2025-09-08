@@ -335,3 +335,11 @@ void test_serial_transfer() {
 ## RÃ©fÃ©rences Pan Docs
 
 - [Serial Data Transfer](https://gbdev.io/pandocs/Serial_Data_Transfer.html)
+
+### Modes master/esclave et SC
+
+- `SC` (DMG): bit7=Start, bit0=Source d’horloge (0=externe, 1=interne). En CGB, un mode rapide modifie la vitesse.
+- Master (horloge interne): 8192 Hz (DMG) / 262144 Hz (CGB fast); Slave: cadencé par l’horloge externe.
+- Fin de transfert: 8 bits échangés, `IF.SERIAL` levé, `SC.bit7` remis à 0.
+
+Objectif pédagogique: distinguer clairement master/slave et valider la levée d’IF.SERIAL à la fin du paquet.

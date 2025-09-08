@@ -138,3 +138,12 @@ RÃ©fÃ©rences Pan Docs:
 - [LCD Status Registers](https://gbdev.io/pandocs/LCD_Status_Registers.html)
 - [Rendering](https://gbdev.io/pandocs/Rendering.html)
 - [Accessing VRAM and OAM](https://gbdev.io/pandocs/Accessing_VRAM_and_OAM.html)
+
+### Variabilité du Mode 3 et IRQ STAT
+
+- Mode 3 n’est pas strictement 172 cycles: il varie avec SCX (fine scroll), la fenêtre (WX/WY) et la présence de sprites (stalls du fetcher).
+- STAT IRQs: respecter les moments d’assertion par mode (OAM=2, VBlank=1, HBlank=0) et la coïncidence LYC=LY.
+- Fenêtre: active si `LY >= WY` et `WX <= 166`, bascule du pipeline (WX-7 aligne le début de la fenêtre en pixels).
+- Priorités: la couleur BG=0 est transparente vis-à-vis des OBJ; l’ordre OAM et la position X déterminent la priorité entre sprites.
+
+Objectif pédagogique: expliciter ces règles dans le fetcher/FIFOs, avec tests dédiés (window edges, priorité OBJ/BG, FIFO overflow).

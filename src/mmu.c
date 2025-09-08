@@ -91,8 +91,14 @@ void mmu_reset(MMU* mmu) {
     mmu->memory[0xFF49] = 0xFF;  // OBP1
     mmu->memory[0xFF4A] = 0x00;  // WY
     mmu->memory[0xFF4B] = 0x00;  // WX
+    // CGB registers defaults
+    mmu->memory[KEY1_REG] = 0x00; // KEY1 (DMG would read as 0xFF)
     mmu->memory[0xFF50] = 0x01;  // BOOT ROM disable
     mmu->memory[0xFFFF] = 0x00;  // IE
+
+    // CGB flags
+    mmu->is_cgb = false;
+    mmu->cgb_double_speed = false;
 }
 
 // Chargement d'une ROM
@@ -202,6 +208,14 @@ u8 mmu_read8(MMU* mmu, u16 address) {
         if (address == 0xFF00 && mmu->joypad) {
             return joypad_read((Joypad*)mmu->joypad);
         }
+        // CGB KEY1 read: on DMG, reads 0xFF
+        if (address == KEY1_REG) {
+            if (!mmu->is_cgb) return 0xFF;
+            u8 key1 = mmu->io[KEY1_REG - 0xFF00] & 0x01; // bit0 prepare
+            if (mmu->cgb_double_speed) key1 |= 0x80;     // bit7 current speed
+            // Bits 1-6 typically return 1
+            return key1 | 0x7E;
+        }
         // Connecter les registres timer au timer
         if (address >= 0xFF04 && address <= 0xFF07) {
             return timer_read((Timer*)mmu->timer, address);
@@ -251,6 +265,7 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
     } else if (address >= 0xC000 && address <= 0xDFFF) {
         // WRAM
         mmu->wram[address - 0xC000] = value;
+        // if (address == 0xC100) { printf("WRAM[0xC100] <= 0x%02X\n", value); }
     } else if (address >= 0xE000 && address <= 0xFDFF) {
         // Echo RAM (miroir de WRAM)
         mmu->wram[address - 0xE000] = value;
@@ -311,12 +326,23 @@ void mmu_write8(MMU* mmu, u16 address, u8 value) {
                 mmu->io[address - 0xFF00] = 0x00;
             }
         } else {
+            // KEY1 write handling (CGB only)
+            if (address == KEY1_REG) {
+                if (!mmu->is_cgb) return; // ignore on DMG
+                // Only bit0 is writable (prepare speed switch)
+                u8 v = value & 0x01;
+                // preserve bit7 (current speed) in io mirror for readback convenience
+                u8 cur = mmu->io[address - 0xFF00] & 0x80;
+                mmu->io[address - 0xFF00] = cur | v;
+                return;
+            }
             // Autres registres IO
             mmu->io[address - 0xFF00] = value;
         }
     } else if (address >= 0xFF80 && address <= 0xFFFE) {
         // HRAM
         mmu->hram[address - 0xFF80] = value;
+        // if (address == 0xFF80) { printf("HRAM[0xFF80] <= 0x%02X\n", value); }
     } else if (address == 0xFFFF) {
         // IE
         mmu->memory[0xFFFF] = value;
