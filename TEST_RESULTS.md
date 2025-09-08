@@ -1,6 +1,6 @@
 # Résultats des Tests Unitaires - CameBoy 
  
-**Date:** 08/09/2025 12:48:41,62 
+**Date:** 08/09/2025 13:02:08,96 
 **Status:** ❌ CERTAINS TESTS ONT ECHOUE 
  
 ## 📊 Synthèse Globale 
@@ -15,14 +15,14 @@
  
 | Rubrique | Tests | Réussis | Échecs | Status | 
 |----------|-------|---------|--------|--------| 
-| **cpu** | 25 | 25 | 0 | ✅ | 
-| **mmu** | 10 | 10 | 0 | ✅ | 
-| **ppu** | 27 | 26 | 1 | ❌ | 
-| **timer** | 8 | 8 | 0 | ✅ | 
-| **interrupt** | 8 | 8 | 0 | ✅ | 
-| **joypad** | 7 | 7 | 0 | ✅ | 
-| **joypad_irq** | 1 | 1 | 0 | ✅ | 
-| **cpu_flags** | 1 | 1 | 0 | ✅ | 
+| **test_cpu** | test_cpu_SUBTESTSTEST_NAME | 0 | ✅ | 
+| **test_cpu_flags** | test_cpu_flags_SUBTESTSTEST_NAME | 0 | ✅ | 
+| **test_interrupt** | test_interrupt_SUBTESTSTEST_NAME | 0 | ✅ | 
+| **test_joypad** | test_joypad_SUBTESTSTEST_NAME | 0 | ✅ | 
+| **test_joypad_irq** | test_joypad_irq_SUBTESTSTEST_NAME | 0 | ✅ | 
+| **test_mmu** | test_mmu_SUBTESTSTEST_NAME | 0 | ✅ | 
+| **test_ppu** | test_ppu_SUBTESTSTEST_NAME | test_ppu_FAILED_SUBTESTS | ❌ | 
+| **test_timer** | test_timer_SUBTESTSTEST_NAME | 0 | ✅ | 
  
 ## 🔍 Détails des Tests 
  
@@ -64,6 +64,73 @@ Test 25: STOP + KEY1 speed switch (CGB)... PASS
 === RÉSULTATS ===
 Tests passés: 25/25
 ✅ TOUS LES TESTS SONT PASSÉS !
+``` 
+ 
+### test_cpu_flags 
+ 
+**Status:** 
+✅ **PASSED** 
+ 
+**Log:** 
+``` 
+=== TEST CPU FLAGS ===
+PASS
+``` 
+ 
+### test_interrupt 
+ 
+**Status:** 
+✅ **PASSED** 
+ 
+**Log:** 
+``` 
+=== TESTS UNITAIRES INTERRUPTIONS ===
+
+Test 1: Interrupt Initialisation... PASS
+Test 2: Interrupt Request... PASS
+Test 3: Interrupt Clear... PASS
+Test 4: Interrupt Priority... PASS
+Test 5: Interrupt Enable... PASS
+Test 6: Interrupt Service Routine... PASS
+Test 7: Interrupt VBlank... PASS
+Test 8: Interrupt LCD STAT... PASS
+
+=== RÉSULTATS ===
+Tests passés: 8/8
+✅ TOUS LES TESTS SONT PASSÉS !
+``` 
+ 
+### test_joypad 
+ 
+**Status:** 
+✅ **PASSED** 
+ 
+**Log:** 
+``` 
+=== TESTS UNITAIRES JOYPAD ===
+
+Test 1: Joypad Initialisation... PASS
+Test 2: Joypad Reset... PASS
+Test 3: Joypad Write... PASS
+Test 4: Joypad Read... PASS
+Test 5: Joypad Buttons... PASS
+Test 6: Joypad Directions... PASS
+Test 7: Joypad Mixed Input... PASS
+
+=== RÉSULTATS ===
+Tests passés: 7/7
+✅ TOUS LES TESTS SONT PASSÉS !
+``` 
+ 
+### test_joypad_irq 
+ 
+**Status:** 
+✅ **PASSED** 
+ 
+**Log:** 
+``` 
+=== TEST JOYPAD IRQ ===
+PASS
 ``` 
  
 ### test_mmu 
@@ -130,3 +197,33 @@ Test 26: PPU Window Edge Cases... PASS
 Test 27: PPU Sprite Priority Detailed... Assertion failed: ppu.framebuffer[12] == ppu_get_pixel_color(&ppu, 1), file tests\unit\test_ppu.c, line 918
 ``` 
  
+### test_timer 
+ 
+**Status:** 
+✅ **PASSED** 
+ 
+**Log:** 
+``` 
+=== TESTS UNITAIRES TIMER ===
+
+Test 1: Timer Initialisation... PASS
+Test 2: Timer Reset... PASS
+Test 3: Timer DIV Counter... PASS
+Test 4: Timer TIMA Counter... PASS
+Test 5: Timer Overflow... PASS
+Test 6: Timer Frequencies... PASS
+Test 7: Timer Control... PASS
+Test 8: Timer Edge-based increments... PASS
+
+=== RÉSULTATS ===
+Tests passés: 8/8
+✅ TOUS LES TESTS SONT PASSÉS !
+``` 
+ 
+## Logs Complets 
+ 
+Pour plus de détails, consultez le fichier de log complet: 
+- [test_results.log](logs/test_results.log) 
+ 
+--- 
+*Généré automatiquement par cameboy.bat* 

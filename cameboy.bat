@@ -49,9 +49,21 @@ REM Compiler directement avec GCC
 echo Compilation en cours...
 set "CFLAGS=-Wall -Wextra -std=c99 -O2 -g -Isrc -Ires"
 set "LDFLAGS=-lgdi32 -luser32 -lkernel32"
-set "SOURCES=src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\ppu.c src\joypad.c src\interrupt.c src\apu.c src\graphics_win32.c src\emulator_win32.c"
-set "GUI_SOURCES=src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\ppu.c src\joypad.c src\interrupt.c src\apu.c src\resource_manager.c src\graphics_win32_gui.c src\emulator_win32_gui.c"
 set "BUILD_LOG=%BUILD_DIR%\build.log"
+
+REM Construire dynamiquement la liste des sources
+set "SOURCES="
+for %%f in (src\*.c) do (
+    if not "%%~nf"=="emulator_win32_gui" if not "%%~nf"=="graphics_win32_gui" if not "%%~nf"=="resource_manager" (
+        set "SOURCES=!SOURCES! %%f"
+    )
+)
+
+REM Construire dynamiquement la liste des sources GUI
+set "GUI_SOURCES="
+for %%f in (src\*.c) do (
+    set "GUI_SOURCES=!GUI_SOURCES! %%f"
+)
 
 echo ======================================== > "%BUILD_LOG%"
 echo Build started %DATE% %TIME% >> "%BUILD_LOG%"
@@ -133,76 +145,26 @@ echo Test build started %DATE% %TIME% >> "%TEST_BUILD_LOG%"
 REM S'assurer que le dossier bin existe
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%" 2>nul
 
-echo Compilation test_cpu...
-gcc %CFLAGS% tests\unit\test_cpu.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_cpu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_cpu
-    echo FAIL: test_cpu compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_cpu compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-)
-
-echo Compilation test_mmu...
-gcc %CFLAGS% tests\unit\test_mmu.c src\mmu.c src\timer.c src\apu.c src\joypad.c src\ppu.c -o "%BIN_DIR%\test_mmu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_mmu
-    echo FAIL: test_mmu compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_mmu compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-)
-
-echo Compilation test_ppu...
-gcc %CFLAGS% tests\unit\test_ppu.c src\ppu.c -o "%BIN_DIR%\test_ppu.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_ppu
-    echo FAIL: test_ppu compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_ppu compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-)
-
-echo Compilation test_timer...
-gcc %CFLAGS% tests\unit\test_timer.c src\timer.c -o "%BIN_DIR%\test_timer.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_timer
-    echo FAIL: test_timer compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_timer compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-)
-
-echo Compilation test_interrupt...
-gcc %CFLAGS% tests\unit\test_interrupt.c src\interrupt.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_interrupt.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_interrupt
-    echo FAIL: test_interrupt compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_interrupt compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-)
-
-echo Compilation test_joypad...
-gcc %CFLAGS% tests\unit\test_joypad.c src\joypad.c -o "%BIN_DIR%\test_joypad.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_joypad
-    echo FAIL: test_joypad compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_joypad compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-)
-
-echo Compilation test_joypad_irq...
-gcc %CFLAGS% tests\unit\test_joypad_irq.c src\joypad.c -o "%BIN_DIR%\test_joypad_irq.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_joypad_irq
-    echo FAIL: test_joypad_irq compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_joypad_irq compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-)
-
-echo Compilation test_cpu_flags...
-gcc %CFLAGS% tests\unit\test_cpu_flags.c src\cpu.c src\cpu_tables.c src\cpu_tables_cb.c src\mmu.c src\timer.c src\apu.c src\joypad.c -o "%BIN_DIR%\test_cpu_flags.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
-if errorlevel 1 (
-    echo ERREUR compilation test_cpu_flags
-    echo FAIL: test_cpu_flags compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
-) else (
-    echo OK: test_cpu_flags compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
+REM Compiler dynamiquement tous les tests unitaires
+for %%t in (tests\unit\test_*.c) do (
+    set "TEST_NAME=%%~nt"
+    echo Compilation !TEST_NAME!...
+    
+    REM Construire dynamiquement les dépendances pour chaque test (exclure les fichiers GUI et émulateur)
+    set "TEST_DEPS="
+    for %%s in (src\*.c) do (
+        if not "%%~ns"=="emulator_win32_gui" if not "%%~ns"=="graphics_win32_gui" if not "%%~ns"=="graphics_win32_gui_clean" if not "%%~ns"=="graphics_win32_gui_old" if not "%%~ns"=="resource_manager" if not "%%~ns"=="emulator_simple" if not "%%~ns"=="emulator_win32" if not "%%~ns"=="graphics_win32" if not "%%~ns"=="png_loader" (
+            set "TEST_DEPS=!TEST_DEPS! %%s"
+        )
+    )
+    
+    gcc %CFLAGS% %%t !TEST_DEPS! -o "%BIN_DIR%\!TEST_NAME!.exe" %LDFLAGS% 2>> "%TEST_BUILD_LOG%"
+    if errorlevel 1 (
+        echo ERREUR compilation !TEST_NAME!
+        echo FAIL: !TEST_NAME! compilation at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
+    ) else (
+        echo OK: !TEST_NAME! compiled at %DATE% %TIME% >> "%TEST_BUILD_LOG%"
+    )
 )
 echo ======================================== > "%LOGS_DIR%\test_results.log"
 echo CameBoy Unit Tests - %DATE% %TIME% >> "%LOGS_DIR%\test_results.log"
@@ -212,55 +174,25 @@ echo. >> "%LOGS_DIR%\test_results.log"
 set total=0
 set passed=0
 
-for %%t in (cpu mmu ppu timer interrupt joypad) do (
-    if exist "%BIN_DIR%\test_%%t.exe" (
-        echo Running test_%%t...
-        echo Running test_%%t... >> "%LOGS_DIR%\test_results.log"
+REM Executer dynamiquement tous les tests unitaires
+for %%t in (tests\unit\test_*.c) do (
+    set "TEST_NAME=%%~nt"
+    if exist "%BIN_DIR%\!TEST_NAME!.exe" (
+        echo Running !TEST_NAME!...
+        echo Running !TEST_NAME!... >> "%LOGS_DIR%\test_results.log"
 
-        "%BIN_DIR%\test_%%t.exe" >> "%LOGS_DIR%\test_results.log" 2>&1
+        "%BIN_DIR%\!TEST_NAME!.exe" >> "%LOGS_DIR%\test_results.log" 2>&1
         if !errorlevel! equ 0 (
-            echo SUCCES test_%%t PASSED
-            echo SUCCES test_%%t PASSED >> "%LOGS_DIR%\test_results.log"
+            echo SUCCES !TEST_NAME! PASSED
+            echo SUCCES !TEST_NAME! PASSED >> "%LOGS_DIR%\test_results.log"
             set /a passed+=1
         ) else (
-            echo ERREUR test_%%t FAILED
-            echo ERREUR test_%%t FAILED >> "%LOGS_DIR%\test_results.log"
+            echo ERREUR !TEST_NAME! FAILED
+            echo ERREUR !TEST_NAME! FAILED >> "%LOGS_DIR%\test_results.log"
         )
         set /a total+=1
         echo. >> "%LOGS_DIR%\test_results.log"
     )
-)
-
-if exist "%BIN_DIR%\test_joypad_irq.exe" (
-    echo Running test_joypad_irq...
-    echo Running test_joypad_irq... >> "%LOGS_DIR%\test_results.log"
-    "%BIN_DIR%\test_joypad_irq.exe" >> "%LOGS_DIR%\test_results.log" 2>&1
-    if !errorlevel! equ 0 (
-        echo SUCCES test_joypad_irq PASSED
-        echo SUCCES test_joypad_irq PASSED >> "%LOGS_DIR%\test_results.log"
-        set /a passed+=1
-    ) else (
-        echo ERREUR test_joypad_irq FAILED
-        echo ERREUR test_joypad_irq FAILED >> "%LOGS_DIR%\test_results.log"
-    )
-    set /a total+=1
-    echo. >> "%LOGS_DIR%\test_results.log"
-)
-
-if exist "%BIN_DIR%\test_cpu_flags.exe" (
-    echo Running test_cpu_flags...
-    echo Running test_cpu_flags... >> "%LOGS_DIR%\test_results.log"
-    "%BIN_DIR%\test_cpu_flags.exe" >> "%LOGS_DIR%\test_results.log" 2>&1
-    if !errorlevel! equ 0 (
-        echo SUCCES test_cpu_flags PASSED
-        echo SUCCES test_cpu_flags PASSED >> "%LOGS_DIR%\test_results.log"
-        set /a passed+=1
-    ) else (
-        echo ERREUR test_cpu_flags FAILED
-        echo ERREUR test_cpu_flags FAILED >> "%LOGS_DIR%\test_results.log"
-    )
-    set /a total+=1
-    echo. >> "%LOGS_DIR%\test_results.log"
 )
 
 echo ======================================== >> "%LOGS_DIR%\test_results.log"
@@ -582,47 +514,30 @@ echo. >> "%TEST_MD%"
 echo ^| Rubrique ^| Tests ^| Réussis ^| Échecs ^| Status ^| >> "%TEST_MD%"
 echo ^|----------^|-------^|---------^|--------^|--------^| >> "%TEST_MD%"
 
-REM Analyser chaque test
-for %%t in (cpu mmu ppu timer interrupt joypad) do (
-    if exist "%BIN_DIR%\test_%%t.exe" (
-        set /a "%%t_TESTS+=1"
-        "%BIN_DIR%\test_%%t.exe" >nul 2>&1
+REM Analyser dynamiquement chaque test
+for %%t in (tests\unit\test_*.c) do (
+    set "TEST_NAME=%%~nt"
+    if exist "%BIN_DIR%\!TEST_NAME!.exe" (
+        set /a "!TEST_NAME!_TESTS+=1"
+        "%BIN_DIR%\!TEST_NAME!.exe" >nul 2>&1
         if !errorlevel! equ 0 (
-            set /a "%%t_PASSED+=1"
+            set /a "!TEST_NAME!_PASSED+=1"
             REM Compter les sous-tests reels
-            "%BIN_DIR%\test_%%t.exe" > "%TEMP%\test_%%t_output.txt" 2>&1
-            set "%%t_SUBTESTS=0"
-            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"Test "') do set /a "%%t_SUBTESTS+=1"
-            echo ^| **%%t** ^| !%%t_SUBTESTS! ^| !%%t_SUBTESTS! ^| 0 ^| ✅ ^| >> "%TEST_MD%"
+            "%BIN_DIR%\!TEST_NAME!.exe" > "%TEMP%\!TEST_NAME!_output.txt" 2>&1
+            set "!TEST_NAME!_SUBTESTS=0"
+            for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"Test "') do set /a "!TEST_NAME!_SUBTESTS+=1"
+            echo ^| **!TEST_NAME!** ^| !TEST_NAME!_SUBTESTS! ^| !TEST_NAME!_SUBTESTS! ^| 0 ^| ✅ ^| >> "%TEST_MD%"
         ) else (
             REM Compter les sous-tests reels meme en cas d'echec
-            "%BIN_DIR%\test_%%t.exe" > "%TEMP%\test_%%t_output.txt" 2>&1
-            set "%%t_SUBTESTS=0"
-            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"Test "') do set /a "%%t_SUBTESTS+=1"
-            set "%%t_FAILED_SUBTESTS=0"
-            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"FAIL"') do set /a "%%t_FAILED_SUBTESTS+=1"
-            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"Assertion failed"') do set /a "%%t_FAILED_SUBTESTS+=1"
-            set /a "%%t_PASSED_SUBTESTS=!%%t_SUBTESTS!-!%%t_FAILED_SUBTESTS!"
-            echo ^| **%%t** ^| !%%t_SUBTESTS! ^| !%%t_PASSED_SUBTESTS! ^| !%%t_FAILED_SUBTESTS! ^| ❌ ^| >> "%TEST_MD%"
+            "%BIN_DIR%\!TEST_NAME!.exe" > "%TEMP%\!TEST_NAME!_output.txt" 2>&1
+            set "!TEST_NAME!_SUBTESTS=0"
+            for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"Test "') do set /a "!TEST_NAME!_SUBTESTS+=1"
+            set "!TEST_NAME!_FAILED_SUBTESTS=0"
+            for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"FAIL"') do set /a "!TEST_NAME!_FAILED_SUBTESTS+=1"
+            for /f %%i in ('type "%TEMP%\!TEST_NAME!_output.txt" ^| findstr /c:"Assertion failed"') do set /a "!TEST_NAME!_FAILED_SUBTESTS+=1"
+            set /a "!TEST_NAME!_PASSED_SUBTESTS=!TEST_NAME!_SUBTESTS!-!TEST_NAME!_FAILED_SUBTESTS!"
+            echo ^| **!TEST_NAME!** ^| !TEST_NAME!_SUBTESTS! ^| !TEST_NAME!_PASSED_SUBTESTS! ^| !TEST_NAME!_FAILED_SUBTESTS! ^| ❌ ^| >> "%TEST_MD%"
         )
-    )
-)
-
-if exist "%BIN_DIR%\test_joypad_irq.exe" (
-    "%BIN_DIR%\test_joypad_irq.exe" >nul 2>&1
-    if !errorlevel! equ 0 (
-        echo ^| **joypad_irq** ^| 1 ^| 1 ^| 0 ^| ✅ ^| >> "%TEST_MD%"
-    ) else (
-        echo ^| **joypad_irq** ^| 1 ^| 0 ^| 1 ^| ❌ ^| >> "%TEST_MD%"
-    )
-)
-
-if exist "%BIN_DIR%\test_cpu_flags.exe" (
-    "%BIN_DIR%\test_cpu_flags.exe" >nul 2>&1
-    if !errorlevel! equ 0 (
-        echo ^| **cpu_flags** ^| 1 ^| 1 ^| 0 ^| ✅ ^| >> "%TEST_MD%"
-    ) else (
-        echo ^| **cpu_flags** ^| 1 ^| 0 ^| 1 ^| ❌ ^| >> "%TEST_MD%"
     )
 )
 
@@ -630,13 +545,14 @@ echo. >> "%TEST_MD%"
 echo ## 🔍 Détails des Tests >> "%TEST_MD%"
 echo. >> "%TEST_MD%"
 
-REM Ajouter les details de chaque test
-for %%t in (cpu mmu ppu timer interrupt joypad) do (
-    if exist "%BIN_DIR%\test_%%t.exe" (
-        echo ### test_%%t >> "%TEST_MD%"
+REM Ajouter dynamiquement les details de chaque test
+for %%t in (tests\unit\test_*.c) do (
+    set "TEST_NAME=%%~nt"
+    if exist "%BIN_DIR%\!TEST_NAME!.exe" (
+        echo ### !TEST_NAME! >> "%TEST_MD%"
         echo. >> "%TEST_MD%"
         echo **Status:** >> "%TEST_MD%"
-        "%BIN_DIR%\test_%%t.exe" >nul 2>&1
+        "%BIN_DIR%\!TEST_NAME!.exe" >nul 2>&1
         if !errorlevel! equ 0 (
             echo ✅ **PASSED** >> "%TEST_MD%"
         ) else (
@@ -645,47 +561,12 @@ for %%t in (cpu mmu ppu timer interrupt joypad) do (
         echo. >> "%TEST_MD%"
         echo **Log:** >> "%TEST_MD%"
         echo ``` >> "%TEST_MD%"
-        "%BIN_DIR%\test_%%t.exe" >> "%TEST_MD%" 2>&1
+        "%BIN_DIR%\!TEST_NAME!.exe" >> "%TEST_MD%" 2>&1
         echo ``` >> "%TEST_MD%"
         echo. >> "%TEST_MD%"
     )
 )
 
-if exist "%BIN_DIR%\test_joypad_irq.exe" (
-    echo ### test_joypad_irq >> "%TEST_MD%"
-    echo. >> "%TEST_MD%"
-    echo **Status:** >> "%TEST_MD%"
-    "%BIN_DIR%\test_joypad_irq.exe" >nul 2>&1
-    if !errorlevel! equ 0 (
-        echo ✅ **PASSED** >> "%TEST_MD%"
-    ) else (
-        echo ❌ **FAILED** >> "%TEST_MD%"
-    )
-    echo. >> "%TEST_MD%"
-    echo **Log:** >> "%TEST_MD%"
-    echo ``` >> "%TEST_MD%"
-    "%BIN_DIR%\test_joypad_irq.exe" >> "%TEST_MD%" 2>&1
-    echo ``` >> "%TEST_MD%"
-    echo. >> "%TEST_MD%"
-)
-
-if exist "%BIN_DIR%\test_cpu_flags.exe" (
-    echo ### test_cpu_flags >> "%TEST_MD%"
-    echo. >> "%TEST_MD%"
-    echo **Status:** >> "%TEST_MD%"
-    "%BIN_DIR%\test_cpu_flags.exe" >nul 2>&1
-    if !errorlevel! equ 0 (
-        echo ✅ **PASSED** >> "%TEST_MD%"
-    ) else (
-        echo ❌ **FAILED** >> "%TEST_MD%"
-    )
-    echo. >> "%TEST_MD%"
-    echo **Log:** >> "%TEST_MD%"
-    echo ``` >> "%TEST_MD%"
-    "%BIN_DIR%\test_cpu_flags.exe" >> "%TEST_MD%" 2>&1
-    echo ``` >> "%TEST_MD%"
-    echo. >> "%TEST_MD%"
-)
 
 echo ## Logs Complets >> "%TEST_MD%"
 echo. >> "%TEST_MD%"

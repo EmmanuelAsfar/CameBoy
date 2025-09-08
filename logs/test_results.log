@@ -1,5 +1,5 @@
 ======================================== 
-CameBoy Unit Tests - 08/09/2025 12:48:39,79 
+CameBoy Unit Tests - 08/09/2025 13:02:07,09 
 ======================================== 
  
 Running test_cpu... 
@@ -35,6 +35,49 @@ Test 25: STOP + KEY1 speed switch (CGB)... PASS
 Tests passés: 25/25
 ✅ TOUS LES TESTS SONT PASSÉS !
 SUCCES test_cpu PASSED 
+ 
+Running test_cpu_flags... 
+=== TEST CPU FLAGS ===
+PASS
+SUCCES test_cpu_flags PASSED 
+ 
+Running test_interrupt... 
+=== TESTS UNITAIRES INTERRUPTIONS ===
+
+Test 1: Interrupt Initialisation... PASS
+Test 2: Interrupt Request... PASS
+Test 3: Interrupt Clear... PASS
+Test 4: Interrupt Priority... PASS
+Test 5: Interrupt Enable... PASS
+Test 6: Interrupt Service Routine... PASS
+Test 7: Interrupt VBlank... PASS
+Test 8: Interrupt LCD STAT... PASS
+
+=== RÉSULTATS ===
+Tests passés: 8/8
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_interrupt PASSED 
+ 
+Running test_joypad... 
+=== TESTS UNITAIRES JOYPAD ===
+
+Test 1: Joypad Initialisation... PASS
+Test 2: Joypad Reset... PASS
+Test 3: Joypad Write... PASS
+Test 4: Joypad Read... PASS
+Test 5: Joypad Buttons... PASS
+Test 6: Joypad Directions... PASS
+Test 7: Joypad Mixed Input... PASS
+
+=== RÉSULTATS ===
+Tests passés: 7/7
+✅ TOUS LES TESTS SONT PASSÉS !
+SUCCES test_joypad PASSED 
+ 
+Running test_joypad_irq... 
+=== TEST JOYPAD IRQ ===
+PASS
+SUCCES test_joypad_irq PASSED 
  
 Running test_mmu... 
 === TESTS UNITAIRES MMU ===
@@ -104,49 +147,6 @@ Test 8: Timer Edge-based increments... PASS
 Tests passés: 8/8
 ✅ TOUS LES TESTS SONT PASSÉS !
 SUCCES test_timer PASSED 
- 
-Running test_interrupt... 
-=== TESTS UNITAIRES INTERRUPTIONS ===
-
-Test 1: Interrupt Initialisation... PASS
-Test 2: Interrupt Request... PASS
-Test 3: Interrupt Clear... PASS
-Test 4: Interrupt Priority... PASS
-Test 5: Interrupt Enable... PASS
-Test 6: Interrupt Service Routine... PASS
-Test 7: Interrupt VBlank... PASS
-Test 8: Interrupt LCD STAT... PASS
-
-=== RÉSULTATS ===
-Tests passés: 8/8
-✅ TOUS LES TESTS SONT PASSÉS !
-SUCCES test_interrupt PASSED 
- 
-Running test_joypad... 
-=== TESTS UNITAIRES JOYPAD ===
-
-Test 1: Joypad Initialisation... PASS
-Test 2: Joypad Reset... PASS
-Test 3: Joypad Write... PASS
-Test 4: Joypad Read... PASS
-Test 5: Joypad Buttons... PASS
-Test 6: Joypad Directions... PASS
-Test 7: Joypad Mixed Input... PASS
-
-=== RÉSULTATS ===
-Tests passés: 7/7
-✅ TOUS LES TESTS SONT PASSÉS !
-SUCCES test_joypad PASSED 
- 
-Running test_joypad_irq... 
-=== TEST JOYPAD IRQ ===
-PASS
-SUCCES test_joypad_irq PASSED 
- 
-Running test_cpu_flags... 
-=== TEST CPU FLAGS ===
-PASS
-SUCCES test_cpu_flags PASSED 
  
 ======================================== 
 Total: 7/8 tests passed 

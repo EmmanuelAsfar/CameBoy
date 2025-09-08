@@ -435,3 +435,114 @@ OK: test_interrupt compiled at 08/09/2025 12:48:38,08
 OK: test_joypad compiled at 08/09/2025 12:48:38,47 
 OK: test_joypad_irq compiled at 08/09/2025 12:48:38,79 
 OK: test_cpu_flags compiled at 08/09/2025 12:48:39,79 
+======================================== 
+Test build started 08/09/2025 12:57:16,62 
+FAIL: test_cpu compilation at 08/09/2025 12:57:16,63 
+src\graphics_win32_gui_clean.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_clean.c:399:54: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  399 |                                           gfx->hwnd, (HMENU)(1001 + i), GetModuleHandle(NULL), NULL);
+      |                                                      ^
+src\graphics_win32_gui_old.c: In function 'WindowProcGUI':
+src\graphics_win32_gui_old.c:218:20: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  218 |             if (gfx->hBgStatic && gfx->hBackground) {
+      |                    ^~
+src\graphics_win32_gui_old.c:225:33: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  225 |                 SetWindowPos(gfx->hBgStatic, NULL, 0, 0, draw_w, image_h, SWP_NOZORDER);
+      |                                 ^~
+src\graphics_win32_gui_old.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_old.c:389:12: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  389 |         gfx->hBgStatic = CreateWindowEx(
+      |            ^~
+src\graphics_win32_gui_old.c:402:24: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  402 |         SendMessage(gfx->hBgStatic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBmp);
+      |                        ^~
+FAIL: test_cpu_flags compilation at 08/09/2025 12:57:16,63 
+src\graphics_win32_gui_clean.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_clean.c:399:54: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  399 |                                           gfx->hwnd, (HMENU)(1001 + i), GetModuleHandle(NULL), NULL);
+      |                                                      ^
+src\graphics_win32_gui_old.c: In function 'WindowProcGUI':
+src\graphics_win32_gui_old.c:218:20: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  218 |             if (gfx->hBgStatic && gfx->hBackground) {
+      |                    ^~
+src\graphics_win32_gui_old.c:225:33: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  225 |                 SetWindowPos(gfx->hBgStatic, NULL, 0, 0, draw_w, image_h, SWP_NOZORDER);
+      |                                 ^~
+src\graphics_win32_gui_old.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_old.c:389:12: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  389 |         gfx->hBgStatic = CreateWindowEx(
+      |            ^~
+src\graphics_win32_gui_old.c:402:24: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  402 |         SendMessage(gfx->hBgStatic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBmp);
+      |                        ^~
+FAIL: test_interrupt compilation at 08/09/2025 12:57:16,63 
+src\graphics_win32_gui_clean.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_clean.c:399:54: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  399 |                                           gfx->hwnd, (HMENU)(1001 + i), GetModuleHandle(NULL), NULL);
+      |                                                      ^
+src\graphics_win32_gui_old.c: In function 'WindowProcGUI':
+src\graphics_win32_gui_old.c:218:20: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  218 |             if (gfx->hBgStatic && gfx->hBackground) {
+      |                    ^~
+src\graphics_win32_gui_old.c:225:33: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  225 |                 SetWindowPos(gfx->hBgStatic, NULL, 0, 0, draw_w, image_h, SWP_NOZORDER);
+      |                                 ^~
+src\graphics_win32_gui_old.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_old.c:389:12: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  389 |         gfx->hBgStatic = CreateWindowEx(
+      |            ^~
+src\graphics_win32_gui_old.c:402:24: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  402 |         SendMessage(gfx->hBgStatic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBmp);
+      |                        ^~
+FAIL: test_joypad compilation at 08/09/2025 12:57:16,63 
+src\graphics_win32_gui_clean.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_clean.c:399:54: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  399 |                                           gfx->hwnd, (HMENU)(1001 + i), GetModuleHandle(NULL), NULL);
+      |                                                      ^
+src\graphics_win32_gui_old.c: In function 'WindowProcGUI':
+src\graphics_win32_gui_old.c:218:20: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  218 |             if (gfx->hBgStatic && gfx->hBackground) {
+      |                    ^~
+src\graphics_win32_gui_old.c:225:33: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  225 |                 SetWindowPos(gfx->hBgStatic, NULL, 0, 0, draw_w, image_h, SWP_NOZORDER);
+      |                                 ^~
+src\graphics_win32_gui_old.c: In function 'graphics_win32_gui_init':
+src\graphics_win32_gui_old.c:389:12: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  389 |         gfx->hBgStatic = CreateWindowEx(
+      |            ^~
+src\graphics_win32_gui_old.c:402:24: error: 'GraphicsWin32GUI' has no member named 'hBgStatic'
+  402 |         SendMessage(gfx->hBgStatic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBmp);
+      |                        ^~
+FAIL: test_joypad_irq compilation at 08/09/2025 12:57:16,63 
+======================================== 
+Test build started 08/09/2025 12:59:29,62 
+FAIL: test_cpu compilation at 08/09/2025 12:59:29,63 
+======================================== 
+Test build started 08/09/2025 13:00:10,28 
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\cclgBO3N.o:emulator_simple.c:(.text+0xf63): multiple definition of `main'; C:\Users\EMMANU~1\AppData\Local\Temp\cce2P9C7.o:test_cpu.c:(.text+0x51): first defined here
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\cceelkyO.o:emulator_win32.c:(.text+0x7cf): multiple definition of `main'; C:\Users\EMMANU~1\AppData\Local\Temp\cce2P9C7.o:test_cpu.c:(.text+0x51): first defined here
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccbmBOCL.o:graphics_win32.c:(.text+0x241): undefined reference to `__imp_SetStretchBltMode'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccbmBOCL.o:graphics_win32.c:(.text+0x2c6): undefined reference to `__imp_StretchDIBits'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccbmBOCL.o:graphics_win32.c:(.text+0x675): undefined reference to `__imp_CreateCompatibleBitmap'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccbmBOCL.o:graphics_win32.c:(.text+0x6e3): undefined reference to `__imp_DeleteObject'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccmQLuYd.o:png_loader.c:(.text+0xdf): undefined reference to `__imp_DeleteObject'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccmQLuYd.o:png_loader.c:(.text+0x115): undefined reference to `__imp_GetObjectA'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccmQLuYd.o:png_loader.c:(.text+0x184): undefined reference to `__imp_DeleteObject'
+collect2.exe: error: ld returned 1 exit status
+FAIL: test_cpu compilation at 08/09/2025 13:00:10,30 
+FAIL: test_cpu_flags compilation at 08/09/2025 13:00:10,30 
+FAIL: test_cpu_flags compilation at 08/09/2025 12:59:29,63 
+FAIL: test_joypad compilation at 08/09/2025 13:00:10,30 
+FAIL: test_joypad_irq compilation at 08/09/2025 13:00:10,30 
+======================================== 
+Test build started 08/09/2025 13:01:57,30 
+OK: test_cpu compiled at 08/09/2025 13:01:57,31 
+OK: test_cpu_flags compiled at 08/09/2025 13:01:57,31 
+OK: test_interrupt compiled at 08/09/2025 13:01:57,31 
+OK: test_joypad compiled at 08/09/2025 13:01:57,31 
+OK: test_joypad_irq compiled at 08/09/2025 13:01:57,31 
+OK: test_mmu compiled at 08/09/2025 13:01:57,31 
+OK: test_ppu compiled at 08/09/2025 13:01:57,31 
+OK: test_timer compiled at 08/09/2025 13:01:57,31 
+Test build ended 08/09/2025 13:02:13,89 
+======================================== 
