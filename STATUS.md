@@ -8,7 +8,10 @@ This file tracks the live state of the project for all contributors: what passes
 Unit Test Status
 ----------------
 - **Résultats détaillés :** [TEST_RESULTS.md](TEST_RESULTS.md) *(généré automatiquement)*
-- **Logs complets :** `logs/test_results.log`
+- **Logs complets :** [logs/test_results.log](logs/test_results.log)
+- **Rapport ROM :** [logs/rom_test_results.log](logs/rom_test_results.log) *(tests ROM)*
+
+**⚠️ IMPORTANT pour les agents IA :** Toujours relancer `cameboy.bat test` avant d'entreprendre des tâches pour avoir l'état le plus récent des tests.
 
 ROM Test Status
 ---------------

@@ -401,3 +401,37 @@ OK: test_joypad_irq compiled at 08/09/2025 12:44:51,56
 OK: test_cpu_flags compiled at 08/09/2025 12:44:52,57 
 Test build ended 08/09/2025 12:45:05,94 
 ======================================== 
+======================================== 
+Test build started 08/09/2025 12:46:57,44 
+OK: test_cpu compiled at 08/09/2025 12:46:58,45 
+OK: test_mmu compiled at 08/09/2025 12:46:59,13 
+OK: test_ppu compiled at 08/09/2025 12:46:59,50 
+OK: test_timer compiled at 08/09/2025 12:46:59,80 
+OK: test_interrupt compiled at 08/09/2025 12:47:00,86 
+OK: test_joypad compiled at 08/09/2025 12:47:01,18 
+OK: test_joypad_irq compiled at 08/09/2025 12:47:01,49 
+OK: test_cpu_flags compiled at 08/09/2025 12:47:02,50 
+Test build ended 08/09/2025 12:47:08,14 
+======================================== 
+======================================== 
+Test build started 08/09/2025 12:47:44,37 
+OK: test_cpu compiled at 08/09/2025 12:47:45,41 
+OK: test_mmu compiled at 08/09/2025 12:47:46,20 
+OK: test_ppu compiled at 08/09/2025 12:47:46,65 
+OK: test_timer compiled at 08/09/2025 12:47:47,00 
+OK: test_interrupt compiled at 08/09/2025 12:47:48,27 
+OK: test_joypad compiled at 08/09/2025 12:47:48,60 
+OK: test_joypad_irq compiled at 08/09/2025 12:47:48,94 
+OK: test_cpu_flags compiled at 08/09/2025 12:47:50,31 
+Test build ended 08/09/2025 12:47:57,46 
+======================================== 
+======================================== 
+Test build started 08/09/2025 12:48:34,33 
+OK: test_cpu compiled at 08/09/2025 12:48:35,37 
+OK: test_mmu compiled at 08/09/2025 12:48:36,09 
+OK: test_ppu compiled at 08/09/2025 12:48:36,50 
+OK: test_timer compiled at 08/09/2025 12:48:36,86 
+OK: test_interrupt compiled at 08/09/2025 12:48:38,08 
+OK: test_joypad compiled at 08/09/2025 12:48:38,47 
+OK: test_joypad_irq compiled at 08/09/2025 12:48:38,79 
+OK: test_cpu_flags compiled at 08/09/2025 12:48:39,79 

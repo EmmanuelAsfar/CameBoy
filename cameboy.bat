@@ -589,9 +589,21 @@ for %%t in (cpu mmu ppu timer interrupt joypad) do (
         "%BIN_DIR%\test_%%t.exe" >nul 2>&1
         if !errorlevel! equ 0 (
             set /a "%%t_PASSED+=1"
-            echo ^| **%%t** ^| 1 ^| 1 ^| 0 ^| ✅ ^| >> "%TEST_MD%"
+            REM Compter les sous-tests reels
+            "%BIN_DIR%\test_%%t.exe" > "%TEMP%\test_%%t_output.txt" 2>&1
+            set "%%t_SUBTESTS=0"
+            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"Test "') do set /a "%%t_SUBTESTS+=1"
+            echo ^| **%%t** ^| !%%t_SUBTESTS! ^| !%%t_SUBTESTS! ^| 0 ^| ✅ ^| >> "%TEST_MD%"
         ) else (
-            echo ^| **%%t** ^| 1 ^| 0 ^| 1 ^| ❌ ^| >> "%TEST_MD%"
+            REM Compter les sous-tests reels meme en cas d'echec
+            "%BIN_DIR%\test_%%t.exe" > "%TEMP%\test_%%t_output.txt" 2>&1
+            set "%%t_SUBTESTS=0"
+            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"Test "') do set /a "%%t_SUBTESTS+=1"
+            set "%%t_FAILED_SUBTESTS=0"
+            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"FAIL"') do set /a "%%t_FAILED_SUBTESTS+=1"
+            for /f %%i in ('type "%TEMP%\test_%%t_output.txt" ^| findstr /c:"Assertion failed"') do set /a "%%t_FAILED_SUBTESTS+=1"
+            set /a "%%t_PASSED_SUBTESTS=!%%t_SUBTESTS!-!%%t_FAILED_SUBTESTS!"
+            echo ^| **%%t** ^| !%%t_SUBTESTS! ^| !%%t_PASSED_SUBTESTS! ^| !%%t_FAILED_SUBTESTS! ^| ❌ ^| >> "%TEST_MD%"
         )
     )
 )

@@ -66,6 +66,7 @@ Operating Rules (must do)
 - Plans: for multi‑step tasks, use the planning tool and keep exactly one step in progress.
 - File access: read files in ≤250 lines per chunk; use `rg` for search.
 - Validation: run unit tests, key ROMs, and check logs.
+- **MANDATORY**: Always run `cameboy.bat test` before starting any work to get the current test status.
 - After work: update `STATUS.md` (pass/fail and next actions) and ensure specs/tests are synced.
 - Cross‑references: whenever referencing another Markdown doc, add an explicit relative hyperlink (e.g., `docs/usage.md`).
 
