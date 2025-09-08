@@ -35,11 +35,11 @@ typedef struct {
     u8 ram_enabled;   // RAM activée
     u8 rtc_enabled;   // RTC activé
     u8 rtc_reg;       // Registre RTC actuel
-    RTC rtc;          // Horloge temps rAel
+    RTC rtc;          // Horloge temps réel
 } MBC3;
 ```
 
-**Pourquoi MBC3 ?** Il ajoute une horloge temps rAel (RTC) pour les jeux qui ont besoin de l'heure (ex: PokAmon).
+**Pourquoi MBC3 ?** Il ajoute une horloge temps réel (RTC) pour les jeux qui ont besoin de l'heure (ex: Pokémon).
 
 ### MBC5 (le plus avancé)
 ```c
@@ -53,31 +53,31 @@ typedef struct {
 
 **Pourquoi MBC5 ?** Il supporte des ROMs jusqu'à 8MB et des RAMs jusqu'à 128KB, plus des fonctionnalités avancées.
 
-## DAtection du type de MBC
+## Détection du type de MBC
 
-### En-tAte de cartouche
+### En-tête de cartouche
 ```c
 typedef struct {
-    u8 entry_point[4];     // Point d'entrAe
+    u8 entry_point[4];     // Point d'entrée
     u8 logo[48];           // Logo Nintendo
     char title[16];        // Titre du jeu
     u8 cgb_flag;           // Support CGB
-    u8 new_licensee[2];    // Nouveau licenciA
+    u8 new_licensee[2];    // Nouveau licencié
     u8 sgb_flag;           // Support SGB
     u8 cart_type;          // Type de cartouche (MBC)
     u8 rom_size;           // Taille de la ROM
     u8 ram_size;           // Taille de la RAM
     u8 destination;        // Destination (JPN/World)
-    u8 old_licensee;       // Ancien licenciA
+    u8 old_licensee;       // Ancien licencié
     u8 version;            // Version du jeu
     u8 checksum;           // Checksum
     u16 global_checksum;   // Checksum global
 } CartridgeHeader;
 ```
 
-**Pourquoi cette structure ?** C'est le format standard des en-tAtes de cartouche Game Boy, dAfini par Nintendo.
+**Pourquoi cette structure ?** C'est le format standard des en-têtes de cartouche Game Boy, défini par Nintendo.
 
-### DAtection du MBC
+### Détection du MBC
 ```c
 MBCType detect_mbc_type(u8 cart_type) {
     switch (cart_type) {
@@ -161,11 +161,11 @@ void mbc3_write_ram_bank(MMU* mmu, u16 addr, u8 value) {
 }
 ```
 
-**Pourquoi RTC ?** MBC3 intAgre une horloge temps rAel pour les jeux qui en ont besoin.
+**Pourquoi RTC ?** MBC3 intègre une horloge temps réel pour les jeux qui en ont besoin.
 
 ## Activation/désactivation de la RAM
 
-### ContrAle de la RAM
+### Contrôle de la RAM
 ```c
 void mbc_write_ram_enable(MMU* mmu, u16 addr, u8 value) {
     if (addr >= 0x0000 && addr < 0x2000) {
@@ -282,7 +282,7 @@ void rtc_update(RTC* rtc, u32 cycles) {
 }
 ```
 
-**Pourquoi cette logique ?** Le RTC compte le temps rAel, avec des conversions entre cycles CPU et unitAs de temps.
+**Pourquoi cette logique ?** Le RTC compte le temps réel, avec des conversions entre cycles CPU et unités de temps.
 
 ## Initialisation
 
@@ -291,7 +291,7 @@ void mbc_init(MMU* mmu, MBCType type) {
     memset(&mmu->mbc, 0, sizeof(MBC));
     mmu->mbc.type = type;
     
-    // Valeurs par dAfaut
+    // Valeurs par défaut
     mmu->mbc.rom_bank = 1;  // Banc 0 invalide
     mmu->mbc.ram_bank = 0;
     mmu->mbc.ram_enabled = false;
@@ -299,7 +299,7 @@ void mbc_init(MMU* mmu, MBCType type) {
 }
 ```
 
-**Pourquoi ces valeurs ?** Ce sont les valeurs par dAfaut des MBC au dAmarrage.
+**Pourquoi ces valeurs ?** Ce sont les valeurs par défaut des MBC au démarrage.
 
 ## Tests de conformité
 

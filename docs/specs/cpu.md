@@ -105,12 +105,12 @@ Références: Pan Docs (sections EI delay, HALT, DAA)
 ### STOP et double-vitesse CGB (KEY1)
 
 STOP a deux comportements selon la preparation et le modele:
-- DMG ou CGB sans preparation: STOP met le CPU en veille basse consommation (reveil via joypad). Pour simplifier dans un cadre pedagogique, on peut traiter ceci comme un HALT prolonge.
-- CGB avec preparation: si `KEY1` (`0xFF4D`) a `bit0=1` (preparation), l'execution de STOP bascule la vitesse CPU (bit7 de `KEY1` reflete l'etat: 0=normal, 1=double). La bascule efface `bit0` et l'execution continue sans entrer en veille.
+- DMG ou CGB sans préparation: STOP met le CPU en veille basse consommation (réveil via joypad). Pour simplifier dans un cadre pédagogique, on peut traiter ceci comme un HALT prolongé.
+- CGB avec préparation: si `KEY1` (`0xFF4D`) a `bit0=1` (préparation), l'exécution de STOP bascule la vitesse CPU (bit7 de `KEY1` reflète l'état: 0=normal, 1=double). La bascule efface `bit0` et l'exécution continue sans entrer en veille.
 
 Details `KEY1` (CGB uniquement):
 - `bit7` (lecture seule): vitesse actuelle (0 = normal, 1 = double)
-- `bit0` (lecture/ecriture): preparation de bascule (ecrire 1 avant STOP)
-- bits 1-6: lecture a 1
+- `bit0` (lecture/écriture): préparation de bascule (écrire 1 avant STOP)
+- bits 1-6: lecture à 1
 
-Impact: la vitesse double affecte le rythme des sous-systemes synchronises au CPU (timers, APU, certaines durees PPU cote hote). Dans ce projet, on maintient la logique a frequence CPU fixe et on traite le double-speed comme un facteur d'horloge global a propager au besoin dans les modules concernes.
+Impact: la vitesse double affecte le rythme des sous-systèmes synchronisés au CPU (timers, APU, certaines durées PPU côté hôte). Dans ce projet, on maintient la logique à fréquence CPU fixe et on traite le double-speed comme un facteur d'horloge global à propager au besoin dans les modules concernés.
