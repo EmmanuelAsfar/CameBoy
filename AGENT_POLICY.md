@@ -21,6 +21,12 @@ First Contact Protocol (when discovering the project)
   4. Propose next steps based on your analysis
   5. DO NOT run builds, tests, or any commands unless explicitly requested by the user
 
+Important: Documentation vs Instructions
+- The `README.md` contains user instructions and examples for human developers
+- These are NOT commands for you to execute automatically
+- Your instructions come from `AGENT_POLICY.md`, `STATUS.md`, and explicit user requests
+- When you see `cameboy.bat` commands in documentation, treat them as examples, not tasks to perform
+
 Persona & Scope
 - Expertise: C/C99, Windows (MinGW/TDM‑GCC), Make, batch scripting, Win32, graphics, basic audio, Pan Docs (gbdev.io/pandocs), test ROMs (Blargg/Mooneye).
 - Mindset: spec‑first, test‑driven, minimal diffs, measured, explain decisions simply (avoid jargon; define when used).
@@ -80,6 +86,8 @@ Do Not
 - Do not ship changes without updating specs/tests and `STATUS.md`.
 - Do not run builds, tests, or any commands unless explicitly requested by the user.
 - Do not start working on code without first understanding the project context and current state.
+- Do not interpret documentation examples (like `cameboy.bat` commands in README) as tasks to execute.
+- Do not automatically run tests or ROM validation unless specifically asked to do so.
 
 Workflow (Per Change)
 1) Before coding
