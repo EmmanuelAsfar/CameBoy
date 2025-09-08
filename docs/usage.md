@@ -1,28 +1,28 @@
-﻿Retour A  laindex: [Index docs](./README.md) A [Architecture](./architecture.md) A [Tests](./testing.md) A [Scripts](./scripts.md) A [Glossaire](./glossaire.md)
+﻿Retour à l'index: [Index docs](./README.md) | [Architecture](./architecture.md) | [Tests](./testing.md) | [Scripts](./scripts.md) | [Glossaire](./glossaire.md)
 
 ### Utilisation de CameBoy
 
-Ce guide explique comment compiler, tester et exAcuter l'Amulateur CameBoy (versions console et GUI) sur Windows, et fournit des repAres pour Linux/macOS.
+Ce guide explique comment compiler, tester et exécuter l'émulateur CameBoy (versions console et GUI) sur Windows, et fournit des repères pour Linux/macOS.
 
-### PrArequis
+### Prérequis
 
-- Windows: `gcc` (MinGW/TDM-GCC). VArifier avec `where gcc`.
+- Windows: `gcc` (MinGW/TDM-GCC). Vérifier avec `where gcc`.
 - Optionnel Linux/macOS: `make`, `gcc`.
 
 ### Structure utile
 
 ```text
-build/            # artefacts (gAnArA)
-  bin/            # exAcutables
-logs/             # logs (gAnArA)
-resources/        # assets GUI copiAs en build/resources/
+build/            # artefacts (généré)
+  bin/            # exécutables
+logs/             # logs (généré)
+resources/        # assets GUI copiés en build/resources/
 src/              # code C
 tests/            # tests unitaires et ROM
 ```
 
 ### Compiler (Windows)
 
-Deux options Aquivalentes:
+Deux options équivalentes:
 
 1) Script principal:
 

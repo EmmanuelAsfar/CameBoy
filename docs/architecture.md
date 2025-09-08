@@ -1,21 +1,21 @@
-﻿Retour A  laindex: [docs/README.md](./README.md) A [Utilisation](./usage.md) A [Tests](./testing.md) A [Scripts](./scripts.md) A [Glossaire](./glossaire.md)
+﻿Retour à l'index: [docs/README.md](./README.md) | [Utilisation](./usage.md) | [Tests](./testing.md) | [Scripts](./scripts.md) | [Glossaire](./glossaire.md)
 
 ### Architecture de CameBoy
 
-Ce document dAcrit l'architecture logique de l'Amulateur Game Boy CameBoy, en expliquant les composants, leurs responsabilitAs et leurs interactions. Le jargon est dAfini au fur et A  mesure.
+Ce document décrit l'architecture logique de l'émulateur Game Boy CameBoy, en expliquant les composants, leurs responsabilités et leurs interactions. Le jargon est défini au fur et à mesure.
 
 ### Vue d'ensemble
 
-- **CPU (LR35902)**: processeur 8-bit de la Game Boy. Il exAcute les instructions (fetch/decode/execute), gAre les registres et les drapeaux (flags Z/N/H/C).
-- **MMU (Memory Management Unit)**: bus mAmoire. Il mappe les adresses vers les bonnes zones (ROM, VRAM, WRAM, IO, etc.), gAre les accAs aux registres IO et le chargement de ROM.
-- **PPU (Picture Processing Unit)**: moteur vidAo. Il gAnAre l'image (160x144) ligne par ligne et gAre les modes (OAM, Transfert, HBlank, VBlank).
-- **Timer (DIV/TIMA/TMA/TAC)**: minuteries systAme. Le timer peut dAclencher des interruptions A  des frAquences prAcises.
-- **Interrupt**: gestionnaire d'interruptions. Priorise et sert VBlank, LCD STAT, Timer, SArie, Joypad.
-- **Joypad**: gestion des entrAes utilisateur via le registre `P1` (sAlection lignes boutons/directions) et gAnAration d'IRQ Joypad.
+- **CPU (LR35902)**: processeur 8-bit de la Game Boy. Il exécute les instructions (fetch/decode/execute), gère les registres et les drapeaux (flags Z/N/H/C).
+- **MMU (Memory Management Unit)**: bus mémoire. Il mappe les adresses vers les bonnes zones (ROM, VRAM, WRAM, IO, etc.), gère les accès aux registres IO et le chargement de ROM.
+- **PPU (Picture Processing Unit)**: moteur vidéo. Il génère l'image (160x144) ligne par ligne et gère les modes (OAM, Transfert, HBlank, VBlank).
+- **Timer (DIV/TIMA/TMA/TAC)**: minuteries système. Le timer peut déclencher des interruptions à des fréquences précises.
+- **Interrupt**: gestionnaire d'interruptions. Priorise et sert VBlank, LCD STAT, Timer, Série, Joypad.
+- **Joypad**: gestion des entrées utilisateur via le registre `P1` (sélection lignes boutons/directions) et génération d'IRQ Joypad.
 - **APU (Audio Processing Unit)**: audio (partiel/placeholder dans ce projet).
-- **Couche OS/GUI**: rendu Win32, fenAtre GUI et contrAles (option GUI), version simple console (option RUN).
+- **Couche OS/GUI**: rendu Win32, fenêtre GUI et contrôles (option GUI), version simple console (option RUN).
 
-### Diagramme des dApendances (logiques)
+### Diagramme des dépendances (logiques)
 
 ```
 graph LR

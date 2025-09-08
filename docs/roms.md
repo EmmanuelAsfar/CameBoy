@@ -1,33 +1,33 @@
-﻿# ROMs Game Boy a" Format, lecture, et construction
+﻿# ROMs Game Boy - Format, lecture, et construction
 
-Retour: [Index docs](./README.md) A [Architecture](./architecture.md)
+Retour: [Index docs](./README.md) | [Architecture](./architecture.md)
 
-## Quaest-ce quaune ROM ? (non-expert)
-Une ROM est un fichier binaire (ex: `.gb`) contenant le programme du jeu. LaAmulateur lit ce fichier et laexAcute comme si caAtait une cartouche insArAe dans la console.
+## Qu'est-ce qu'une ROM ? (non-expert)
+Une ROM est un fichier binaire (ex: `.gb`) contenant le programme du jeu. L'émulateur lit ce fichier et l'exécute comme si c'était une cartouche insérée dans la console.
 
-## Vue daensemble (expert)
-- Fichier binaire mappA en mAmoire A  partir de 0x0000 (ROM0/ROMX)
-- En-tAte cartouche A  0x0100a"0x014F (logo, titre, type, tailles, checksums)
-- Aventuel contrAleur MBC pour banques ROM/RAM
+## Vue d'ensemble (expert)
+- Fichier binaire mappé en mémoire à partir de 0x0000 (ROM0/ROMX)
+- En-tête cartouche à 0x0100-0x014F (logo, titre, type, tailles, checksums)
+- Éventuel contrôleur MBC pour banques ROM/RAM
 
-```
+```mermaid
 graph LR
   A[ROM file .gb] -->|map| B[0x0000-0x3FFF ROM0]
   A -->|banking| C[0x4000-0x7FFF ROMX]
   A --> D[Header 0x0100-0x014F]
 ```
 
-## En-tAte de cartouche (header)
-Adresse 0x0100a"0x014F. Champs principaux:
-- 0x0104a"0x0133: Logo Nintendo (doit matcher)
-- 0x0134a"0x0143: Titre (16 bytes)
-- 0x0147: Type de cartouche (dAtermine MBC)
+## En-tête de cartouche (header)
+Adresse 0x0100-0x014F. Champs principaux:
+- 0x0104-0x0133: Logo Nintendo (doit matcher)
+- 0x0134-0x0143: Titre (16 bytes)
+- 0x0147: Type de cartouche (détermine MBC)
 - 0x0148: Taille ROM (code -> nb de banques)
 - 0x0149: Taille RAM (code -> taille totale)
 - 0x014D: Header checksum
-- 0x014Ea"0x014F: Global checksum
+- 0x014E-0x014F: Global checksum
 
-RAf: [Pan Docs a" The Cartridge Header](https://gbdev.io/pandocs/The_Cartridge_Header.html)
+Réf: [Pan Docs - The Cartridge Header](https://gbdev.io/pandocs/The_Cartridge_Header.html)
 
 ## Lecture par laAmulateur
 

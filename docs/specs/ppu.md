@@ -1,83 +1,85 @@
-﻿# PPU (Picture Processing Unit) a" SpAcifications d'implAmentation
+﻿# PPU (Picture Processing Unit) - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Utilisation](../usage.md)
 
 ## 1) Principe de fonctionnement (Game Boy)
 
-Le PPU gAnAre laimage 160A-144, ligne par ligne, avec un timing strict.
-- 456 cycles par ligne (aussi appelAs A dots A: 1 dot = 1 cycle PPU a 1 cycle CPU)
-- 144 lignes visibles (LY 0a"143), puis ~10 lignes de VBlank (LY 144a"153)
-- Par ligne visible: Mode 2 (OAM Search) a' Mode 3 (Pixel Transfer) a' Mode 0 (HBlank)
-- A laentrAe de LY=144: Mode 1 (VBlank) + IRQ VBlank
+Le PPU génère l'image 160×144, ligne par ligne, avec un timing strict.
+- 456 cycles par ligne (aussi appelés à dots : 1 dot = 1 cycle PPU à 1 cycle CPU)
+- 144 lignes visibles (LY 0-143), puis ~10 lignes de VBlank (LY 144-153)
+- Par ligne visible: Mode 2 (OAM Search) → Mode 3 (Pixel Transfer) → Mode 0 (HBlank)
+- À l'entrée de LY=144: Mode 1 (VBlank) + IRQ VBlank
 
-`````mermaid`r`nflowchart LR
+```mermaid
+flowchart LR
   OAM["Mode 2: OAM search (~80 cycles)"] --> XFER["Mode 3: Pixel transfer (~172 cycles)"]
   XFER --> HBL["Mode 0: HBlank (~204 cycles)"]
   HBL -->|"next line"| OAM
   VBL["Mode 1: VBlank (LY 144-153)"] -->|"return"| OAM
 ```
 
-Jargon (clarifiA):
+Jargon (clarifié):
 - OAM: Object Attribute Memory (table des sprites)
-- HBlank: A Horizontal blank A (repos entre deux lignes)
-- VBlank: A Vertical blank A (repos entre deux frames)
+- HBlank: « Horizontal blank » (repos entre deux lignes)
+- VBlank: « Vertical blank » (repos entre deux frames)
 - Pixel transfer: phase de lecture VRAM + composition pixels (BG/Window/SPR)
-- Dot: tick PPU (a 1 cycle CPU) utilisA par Pan Docs pour les durAes
+- Dot: tick PPU (à 1 cycle CPU) utilisé par Pan Docs pour les durées
 
 STAT (0xFF41):
-- bits 1a"0 = mode (0 HBlank, 1 VBlank, 2 OAM, 3 XFER)
+- bits 1-0 = mode (0 HBlank, 1 VBlank, 2 OAM, 3 XFER)
 - bit 2 = LYC=LY
-- bits 3a"6 = sources daIRQ (HBlank, VBlank, OAM, LYC)
+- bits 3-6 = sources d'IRQ (HBlank, VBlank, OAM, LYC)
 
 LCDC (0xFF40):
 - Active BG/Window/Sprites, choisit les zones Tile Data (0x8000/0x8800) et Tile Map (0x9800/0x9C00)
 
-AccAs mAmoire (CPU):
-- VRAM bloquAe en Mode 3
-- OAM bloquAe en Modes 2 et 3
-- OAM aussi bloquAe pendant DMA OAM (copie 160 octets via 0xFF46)
+Accès mémoire (CPU):
+- VRAM bloqué en Mode 3
+- OAM bloqué en Modes 2 et 3
+- OAM aussi bloqué pendant DMA OAM (copie 160 octets via 0xFF46)
 
-`````mermaid`r`nsequenceDiagram
+```mermaid
+sequenceDiagram
   participant PPU
   participant OAM
   participant VRAM
   Note over PPU: Ligne visible (LY 0-143)
-  PPU->>OAM: Mode 2: sAlection jusqu'A  10 sprites intersectant la ligne
+  PPU->>OAM: Mode 2: sélection jusqu'à 10 sprites intersectant la ligne
   PPU->>VRAM: Mode 3: fetch BG/Window, tuiles et pixels (FIFO)
-  PPU->>PPU: Compose pixels BG/Window/OBJ (prioritAs)
+  PPU->>PPU: Compose pixels BG/Window/OBJ (priorités)
   PPU->>PPU: Mode 0: HBlank (~204 cycles)
-  Note over PPU: A LY=144 a' Mode 1 (VBlank) + IRQ VBlank
+  Note over PPU: À LY=144 → Mode 1 (VBlank) + IRQ VBlank
 ```
 
 Notes Pan Docs:
-- OAM Search: jusquaA  10 sprites max par ligne; prioritA A  laordre OAM et A  la position X
-- Pixel FIFO: pipeline A fetcher A + FIFO pour BG/Window/OBJ (dAtails fins optionnels ici)
-- VRAM/OAM restrictions: garantissent que le PPU accAde seul aux ressources pendant le rendu
+- OAM Search: jusqu'à 10 sprites max par ligne; priorité à l'ordre OAM et à la position X
+- Pixel FIFO: pipeline à fetcher + FIFO pour BG/Window/OBJ (détails fins optionnels ici)
+- VRAM/OAM restrictions: garantissent que le PPU accède seul aux ressources pendant le rendu
 
 ---
 
-## 2) Logique daimplAmentation (CameBoy)
+## 2) Logique d'implémentation (CameBoy)
 
-Atat PPU:
+État PPU:
 - Registres: `lcdc, stat, scy, scx, ly, lyc, bgp, obp0, obp1, wy, wx`
-- Atat interne: `mode`, `mode_cycles`, `line_cycles`
+- État interne: `mode`, `mode_cycles`, `line_cycles`
 - Framebuffer: `u32 framebuffer[160*144]`
-- Palettes DMG: conversion BGP/OBP0/OBP1 a' niveaux de gris (blanc a' noir)
+- Palettes DMG: conversion BGP/OBP0/OBP1 à niveaux de gris (blanc à noir)
 
 Avancement (`ppu_tick`):
-- Lignes 0a"143: 80 (Mode 2) a' 172 (Mode 3) a' 204 (Mode 0) = 456
-  - EntrAe en Mode 3 a' rendu de la ligne via `ppu_render_line` (implAmentation BG simple)
-  - Fin de ligne: `ly++`, retour Mode 2; A  `ly==144`, passage Mode 1 + IRQ VBlank
-- VBlank (LY 144a"153): 456 cycles/ligne; A  fin de 153 a' `ly=0`, Mode 2
+- Lignes 0-143: 80 (Mode 2) → 172 (Mode 3) → 204 (Mode 0) = 456
+  - Entrée en Mode 3 → rendu de la ligne via `ppu_render_line` (implémentation BG simple)
+  - Fin de ligne: `ly++`, retour Mode 2; à `ly==144`, passage Mode 1 + IRQ VBlank
+- VBlank (LY 144-153): 456 cycles/ligne; à fin de 153 → `ly=0`, Mode 2
 - STAT: `stat = (stat & 0xF8) | (mode & 0x03)`; bit 2 si `ly==lyc`
 
 Rendu (actuel):
-- BG uniquement (fenAtre/sprites pas encore rendus); tile map `0x9800/0x9C00`, data `0x8000/0x8800`
+- BG uniquement (fenêtre/sprites pas encore rendus); tile map `0x9800/0x9C00`, data `0x8000/0x8800`
 - Couleur via `ppu_get_pixel_color` et palette BGP
 
-Restrictions daaccAs: gArAes cAtA MMU
-- VRAM bloquAe en Mode 3
-- OAM bloquAe en Modes 2/3 et pendant DMA OAM
+Restrictions d'accès: gérées côté MMU
+- VRAM bloqué en Mode 3
+- OAM bloqué en Modes 2/3 et pendant DMA OAM
 
 ---
 

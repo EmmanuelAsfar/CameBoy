@@ -1,23 +1,23 @@
-﻿# APU (Audio Processing Unit) a" SpAcifications d'implAmentation
+﻿# APU (Audio Processing Unit) - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md)
 
 ## Vue d'ensemble
 
-L'APU de la Game Boy gAnAre le son via 4 canaux:
-- Canal 1: onde carrAe + sweep
-- Canal 2: onde carrAe
-- Canal 3: onde personnalisAe (wave)
+L'APU de la Game Boy génère le son via 4 canaux:
+- Canal 1: onde carrée + sweep
+- Canal 2: onde carrée
+- Canal 3: onde personnalisée (wave)
 - Canal 4: bruit (LFSR)
 
 ### Pourquoi cette conception ?
-- Aconomie matArielle: gAnArateurs simples (carrA, LFSR) peu coAteux
-- FlexibilitA: enveloppes de volume, sweep, duty cycle
-- CompatibilitA: registres mappAs mAmoire pour contrAle depuis le CPU
+- Économie matérielle: générateurs simples (carrée, LFSR) peu coûteux
+- Flexibilité: enveloppes de volume, sweep, duty cycle
+- Compatibilité: registres mappés mémoire pour contrôle depuis le CPU
 
-## Carte des registres (0xFF10a"0xFF3F)
+## Carte des registres (0xFF10-0xFF3F)
 
-```
+```mermaid
 graph TD
   NR10[NR10 (FF10) Sweep C1]
   NR11[NR11 (FF11) Duty/Length C1]
@@ -45,36 +45,37 @@ graph TD
   NR51[NR51 (FF25) Panning]
   NR52[NR52 (FF26) Master On]
 
-  WAVE[Wave RAM FF30a"FF3F]
+  WAVE[Wave RAM FF30-FF3F]
 ```
 
-RAf: [Pan Docs a" Audio Registers](https://gbdev.io/pandocs/Audio_Registers.html)
+Réf: [Pan Docs - Audio Registers](https://gbdev.io/pandocs/Audio_Registers.html)
 
-## ModAle dahorloge et pas audio
+## Modèle d'horloge et pas audio
 
-- FrAquence de base: 4.194304 MHz
+- Fréquence de base: 4.194304 MHz
 - Frame sequencer: 512 Hz (pilote length, sweep, enveloppe)
-- Sortie audio: Achantillonnage cAtA hAte (mixage a' buffer) A  une frAquence cible (ex: 44100 Hz)
+- Sortie audio: échantillonnage côté hôte (mixage à buffer) à une fréquence cible (ex: 44100 Hz)
 
-`````mermaid`r`nsequenceDiagram
+```mermaid
+sequenceDiagram
   participant CPU
   participant APU
   participant MIX as Mixer/Host
-  CPU->>APU: Acrit registres NRxx
+  CPU->>APU: Écrit registres NRxx
   APU->>APU: 512 Hz frame sequencer (length/sweep/envelope)
-  APU->>MIX: ticks audio (gAnAration ondes)
+  APU->>MIX: ticks audio (génération ondes)
   MIX->>MIX: resampling/low-pass vers 44.1 kHz
 ```
 
 ## Canaux
 
-### Canaux 1 et 2 (onde carrAe)
+### Canaux 1 et 2 (onde carrée)
 - Duty cycle: 12.5%, 25%, 50%, 75%
-- Enveloppe volume: montAe/descente A  intervalle rAglable
-- FrAquence: 11 bits (NR13/NR14 ou NR23/NR24)
-- Canal 1: sweep (NR10) modifie la frAquence au fil du temps
+- Enveloppe volume: montée/descente à intervalle réglable
+- Fréquence: 11 bits (NR13/NR14 ou NR23/NR24)
+- Canal 1: sweep (NR10) modifie la fréquence au fil du temps
 
-ImplAmentation (esquisse):
+Implémentation (esquisse):
 ```c
 typedef struct {
   bool enabled; u16 freq; u8 duty; u8 duty_pos;
@@ -92,11 +93,11 @@ static inline int8_t square_sample(SquareChannel* ch) {
 ```
 
 ### Canal 3 (wave)
-- Wave RAM: 32 Achantillons 4-bit (FF30a"FF3F)
-- Lecture avec facteur daAchelle (NR32)
+- Wave RAM: 32 échantillons 4-bit (FF30-FF3F)
+- Lecture avec facteur d'échelle (NR32)
 
 ### Canal 4 (bruit)
-- LFSR 15-bit (ou 7-bit) pour gAnArer du bruit
+- LFSR 15-bit (ou 7-bit) pour générer du bruit
 - ParamAtres: clock shift, width mode, divisor (NR43)
 
 ## Sequencer 512 Hz

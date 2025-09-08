@@ -1,30 +1,30 @@
-﻿# Port SArie a" SpAcifications d'implAmentation
+﻿# Port Série - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Utilisation](../usage.md)
 
 ## Vue d'ensemble
 
-Le port sArie de la Game Boy permet la communication entre deux Game Boy ou avec des pAriphAriques externes. C'est un composant essentiel pour les jeux multijoueurs.
+Le port série de la Game Boy permet la communication entre deux Game Boy ou avec des périphériques externes. C'est un composant essentiel pour les jeux multijoueurs.
 
-### Pourquoi un port sArie ?
+### Pourquoi un port série ?
 
-La Game Boy a AtA conAue pour le multijoueur :
-- **Communication** : Achanger des donnAes entre Game Boy
-- **PAriphAriques** : Imprimante, camAra, etc.
-- **SimplicitA** : Protocole simple et fiable
-- **Aconomie** : CoAt rAduit par rapport A  des solutions plus complexes
+La Game Boy a été conçue pour le multijoueur :
+- **Communication** : Échanger des données entre Game Boy
+- **Périphériques** : Imprimante, caméra, etc.
+- **Simplicité** : Protocole simple et fiable
+- **Économie** : Coût réduit par rapport à des solutions plus complexes
 
-## Registres du port sArie
+## Registres du port série
 
 ### SB (0xFF01) - Serial Data
 ```c
 #define SB_REG 0xFF01
 
-// Registre de donnAes sArie (8 bits)
+// Registre de données série (8 bits)
 u8 serial_data;
 ```
 
-**Pourquoi 8 bits ?** C'est la taille standard pour les communications sArie de l'Apoque.
+**Pourquoi 8 bits ?** C'est la taille standard pour les communications série de l'époque.
 
 ### SC (0xFF02) - Serial Control
 ```c

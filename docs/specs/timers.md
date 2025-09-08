@@ -1,18 +1,18 @@
-﻿# Timers a" SpAcifications d'implAmentation
+﻿# Timers - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Tests](../testing.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Tests](../testing.md)
 
 ## Vue d'ensemble
 
-La Game Boy dispose de plusieurs compteurs temporels pour la synchronisation et les effets temporels. Le systAme de timers est crucial pour la compatibilitA des jeux.
+La Game Boy dispose de plusieurs compteurs temporels pour la synchronisation et les effets temporels. Le système de timers est crucial pour la compatibilité des jeux.
 
 ### Pourquoi des timers ?
 
-Les timers servent A  :
-- **Synchronisation** : Mesurer le temps AcoulA
-- **Effets temporels** : Animations, dAlais, rythme de jeu
-- **Interruptions** : DAclencher des AvAnements A  intervalles rAguliers
-- **Audio** : GAnArer des frAquences sonores
+Les timers servent à :
+- **Synchronisation** : Mesurer le temps écoulé
+- **Effets temporels** : Animations, délais, rythme de jeu
+- **Interruptions** : Déclencher des événements à intervalles réguliers
+- **Audio** : Générer des fréquences sonores
 
 ## Registres des timers
 
@@ -20,7 +20,7 @@ Les timers servent A  :
 ```c
 #define DIV_REG 0xFF04
 
-// DIV s'incrAmente A  16384 Hz (frAquence fixe)
+// DIV s'incrémente à 16384 Hz (fréquence fixe)
 void timer_update_div(Timer* timer, u8 cycles) {
     timer->div_cycles += cycles;
     if (timer->div_cycles >= 256) {  // 4194304 / 16384 = 256

@@ -1,34 +1,34 @@
 ﻿# Documentation CameBoy
 
-## Parcours conseillA
-- [DAmarrage rapide](../README.md)
+## Parcours conseillé
+- [Démarrage rapide](../README.md)
 - [Utilisation (build/run/GUI)](./usage.md)
-- [Architecture (vue daensemble)](./architecture.md)
-- [SpAcifications (dAtaillAes)](./specs/README.md)
+- [Architecture (vue d'ensemble)](./architecture.md)
+- [Spécifications (détaillées)](./specs/README.md)
 - [ROMs (format/lecture/build)](./roms.md)
   - [Conception d'une ROM](./roms.md#conception-dune-rom-guidelines)
   - [Toolchains RGBDS / GBDK-2020](./tools.md)
-- [Tests et rAsultats](./testing.md)
+- [Tests et résultats](./testing.md)
 - [Scripts utiles](./scripts.md)
-- [Glossaire (jargon expliquA)](./glossaire.md)
+- [Glossaire (jargon expliqué)](./glossaire.md)
 - [Contribution](../CONTRIBUTING.md)
 
 ## Sections
 - Conception et architecture
   - [Architecture](./architecture.md)
-  - [SpAcifications d'implAmentation](./specs/README.md)
+  - [Spécifications d'implémentation](./specs/README.md)
 - Utilisation
-  - [Guide dautilisation](./usage.md)
+  - [Guide d'utilisation](./usage.md)
   - [Scripts](./scripts.md)
-- DonnAes et cartouches
+- Données et cartouches
   - [ROMs (format/lecture/build)](./roms.md)
   - [Toolchains (RGBDS, GBDK-2020)](./tools.md)
-- QualitA et validation
+- Qualité et validation
   - [Tests unitaires et ROM](./testing.md)
-- RAfArences
+- Références
   - Pan Docs (copie locale): `./pandocs/`
   - Suites de tests: `../tests/blargg/`, `../tests/mooneye/`
 
-Astuce GitHub: utilisez la table des matiAres automatique (TOC) affichAe A  droite pour sauter aux sections daun document.
+Astuce GitHub: utilisez la table des matières automatique (TOC) affichée à droite pour sauter aux sections d'un document.
 
 

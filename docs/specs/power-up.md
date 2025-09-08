@@ -1,23 +1,24 @@
-﻿# SAquence de dAmarrage a" SpAcifications d'implAmentation
+﻿# Séquence de démarrage - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Utilisation](../usage.md)
 
 ## Vue d'ensemble
 
-La sAquence de dAmarrage (power-up) de la Game Boy initialise tous les composants avec des valeurs spAcifiques. Cette initialisation est cruciale pour la compatibilitA des jeux.
+La séquence de démarrage (power-up) de la Game Boy initialise tous les composants avec des valeurs spécifiques. Cette initialisation est cruciale pour la compatibilité des jeux.
 
-### Pourquoi une sAquence spAcifique ?
+### Pourquoi une séquence spécifique ?
 
-La Game Boy a un comportement de dAmarrage prAcis :
-- **Valeurs initiales** : Chaque registre a une valeur spAcifique
+La Game Boy a un comportement de démarrage précis :
+- **Valeurs initiales** : Chaque registre a une valeur spécifique
 - **Timing** : L'ordre d'initialisation est important
-- **CompatibilitA** : Les jeux s'appuient sur ces valeurs
-- **StabilitA** : Avite les Atats indAterminAs
+- **Compatibilité** : Les jeux s'appuient sur ces valeurs
+- **Stabilité** : Évite les états indéterminés
 
-## SAquence de dAmarrage
+## Séquence de démarrage
 
-### Atapes du dAmarrage
-`````mermaid`r`nsequenceDiagram
+### Étapes du démarrage
+```mermaid
+sequenceDiagram
     participant Power as Alimentation
     participant CPU as CPU
     participant PPU as PPU

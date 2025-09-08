@@ -1,17 +1,17 @@
-﻿# MBC (Memory Bank Controllers) a" SpAcifications d'implAmentation
+﻿# MBC (Memory Bank Controllers) - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Utilisation](../usage.md)
 
 ## Vue d'ensemble
 
-Les MBC (Memory Bank Controllers) sont des circuits intAgrAs dans les cartouches Game Boy qui permettent de gArer des ROMs et des RAMs plus grandes que ce que la Game Boy peut adresser directement.
+Les MBC (Memory Bank Controllers) sont des circuits intégrés dans les cartouches Game Boy qui permettent de gérer des ROMs et des RAMs plus grandes que ce que la Game Boy peut adresser directement.
 
 ### Pourquoi des MBC ?
 
 La Game Boy a des limitations d'adressage :
 - **ROM** : 32KB maximum (0x0000-0x7FFF)
 - **RAM** : 8KB maximum (0xA000-0xBFFF)
-- **Jeux plus gros** : Besoin de "bank switching" pour accAder A  plus de donnAes
+- **Jeux plus gros** : Besoin de "bank switching" pour accéder à plus de données
 
 ## Types de MBC
 
@@ -20,12 +20,12 @@ La Game Boy a des limitations d'adressage :
 typedef struct {
     u8 rom_bank;      // Banc ROM actuel (1-127)
     u8 ram_bank;      // Banc RAM actuel (0-3)
-    u8 ram_enabled;   // RAM activAe
+    u8 ram_enabled;   // RAM activée
     u8 banking_mode;  // Mode de banking (0=ROM, 1=RAM)
 } MBC1;
 ```
 
-**Pourquoi MBC1 ?** C'est le MBC le plus simple et le plus courant. Il permet de gArer jusqu'A  2MB de ROM et 32KB de RAM.
+**Pourquoi MBC1 ?** C'est le MBC le plus simple et le plus courant. Il permet de gérer jusqu'à 2MB de ROM et 32KB de RAM.
 
 ### MBC3 (avec RTC)
 ```c

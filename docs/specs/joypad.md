@@ -1,17 +1,17 @@
-﻿# Joypad a" SpAcifications d'implAmentation
+﻿# Joypad - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Tests](../testing.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Tests](../testing.md)
 
 ## Vue d'ensemble
 
-Le joypad de la Game Boy gAre les entrAes utilisateur via un systAme de matrices de boutons. C'est un composant essentiel pour l'interaction avec les jeux.
+Le joypad de la Game Boy gère les entrées utilisateur via un système de matrices de boutons. C'est un composant essentiel pour l'interaction avec les jeux.
 
 ### Pourquoi cette approche ?
 
-La Game Boy utilise un systAme de matrices pour Aconomiser les broches :
+La Game Boy utilise un système de matrices pour économiser les broches :
 - **8 boutons** : 4 directions + 4 boutons d'action
-- **2 lignes** : SAlection des groupes de boutons
-- **1 registre** : P1 (0xFF00) pour tout gArer
+- **2 lignes** : Sélection des groupes de boutons
+- **1 registre** : P1 (0xFF00) pour tout gérer
 
 ## Structure du joypad
 
@@ -34,7 +34,7 @@ typedef enum {
 - **Boutons d'action** : A, B, Start, Select
 
 ### Matrice de boutons
-```
+```mermaid
 graph TD
     A[P1 Registre] --> B[P15: Directions]
     A --> C[P14: Boutons]
@@ -46,7 +46,7 @@ graph TD
     style C fill:#bfb,stroke:#333,stroke-width:2px
 ```
 
-**Pourquoi une matrice ?** Aconomie de broches. Au lieu d'avoir 8 broches pour 8 boutons, on utilise 2 broches de sAlection + 4 broches de lecture.
+**Pourquoi une matrice ?** Économie de broches. Au lieu d'avoir 8 broches pour 8 boutons, on utilise 2 broches de sélection + 4 broches de lecture.
 
 ## Registre P1 (0xFF00)
 
@@ -54,7 +54,7 @@ graph TD
 ```c
 #define P1_REG 0xFF00
 
-// Bits de sAlection (Acriture)
+// Bits de sélection (écriture)
 #define P1_SELECT_DIRECTIONS 0x20  // P15 = 0, P14 = 1
 #define P1_SELECT_BUTTONS   0x10  // P15 = 1, P14 = 0
 #define P1_SELECT_NONE      0x30  // P15 = 1, P14 = 1

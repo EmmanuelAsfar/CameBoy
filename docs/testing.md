@@ -1,14 +1,14 @@
-﻿Retour A  laindex: [docs/README.md](./README.md) A [Architecture](./architecture.md) A [Utilisation](./usage.md) A [Scripts](./scripts.md) A [Glossaire](./glossaire.md)
+﻿Retour à l'index: [docs/README.md](./README.md) | [Architecture](./architecture.md) | [Utilisation](./usage.md) | [Scripts](./scripts.md) | [Glossaire](./glossaire.md)
 
-### StratAgie de tests
+### Stratégie de tests
 
-Ce document dAcrit les tests unitaires, les tests ROM (sArie/visuels) et laorganisation des logs.
+Ce document décrit les tests unitaires, les tests ROM (série/visuels) et l'organisation des logs.
 
 ### Types de tests
 
 - Tests unitaires C: binaire par composant (CPU, MMU, PPU, Timer, Interrupt, Joypad).
-- Tests ROM (dossier `tests/rom/`): petites ROMs affichant texte/sorties sArie ou visuels (PPM/logs).
-- ConformitA Blargg/Mooneye: ROMs de rAfArence A  exAcuter manuellement/plus tard dans CI.
+- Tests ROM (dossier `tests/rom/`): petites ROMs affichant texte/sorties série ou visuels (PPM/logs).
+- Conformité Blargg/Mooneye: ROMs de référence à exécuter manuellement/plus tard dans CI.
 
 ### Lancer les tests unitaires (Windows)
 
@@ -17,7 +17,7 @@ cameboy.bat test
 type logs\test_results.log | more
 ```
 
-Le script compile chaque test en `build\bin\test_*.exe`, les exAcute et cumule les rAsultats.
+Le script compile chaque test en `build\bin\test_*.exe`, les exécute et cumule les résultats.
 
 Sortie attendue (extrait):
 

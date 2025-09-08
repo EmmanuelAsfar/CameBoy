@@ -1,43 +1,43 @@
-﻿# Interruptions a" SpAcifications d'implAmentation
+﻿# Interruptions - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Tests](../testing.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Tests](../testing.md)
 
 ## Vue d'ensemble
 
-Le systAme d'interruptions de la Game Boy permet aux composants matAriels de signaler des AvAnements au CPU. C'est un mAcanisme essentiel pour la synchronisation et la rAactivitA.
+Le système d'interruptions de la Game Boy permet aux composants matériels de signaler des événements au CPU. C'est un mécanisme essentiel pour la synchronisation et la réactivité.
 
 ### Pourquoi des interruptions ?
 
 Les interruptions permettent :
 - **Synchronisation** : Coordonner les composants (PPU, timers, joypad)
-- **RAactivitA** : RAagir immAdiatement aux AvAnements
-- **EfficacitA** : Aviter de poller constamment les pAriphAriques
-- **MultitAche** : Simuler l'exAcution simultanAe de plusieurs tAches
+- **Réactivité** : Réagir immédiatement aux événements
+- **Efficacité** : Éviter de poller constamment les périphériques
+- **Multitâche** : Simuler l'exécution simultanée de plusieurs tâches
 
 ## Types d'interruptions
 
 ### Les 5 interruptions de la Game Boy
 ```c
-#define IRQ_VBLANK  0x01  // Fin de frame vidAo
-#define IRQ_LCD     0x02  // AvAnement LCD (HBlank, VBlank, OAM, LYC)
+#define IRQ_VBLANK  0x01  // Fin de frame vidéo
+#define IRQ_LCD     0x02  // Événement LCD (HBlank, VBlank, OAM, LYC)
 #define IRQ_TIMER   0x04  // Overflow du timer
-#define IRQ_SERIAL  0x08  // Transfert sArie terminA
+#define IRQ_SERIAL  0x08  // Transfert série terminé
 #define IRQ_JOYPAD  0x10  // Appui sur une touche
 ```
 
-**Pourquoi ces interruptions ?** Chaque interruption correspond A  un AvAnement critique :
-- **VBlank** : Fin de frame, temps pour mettre A  jour l'Acran
-- **LCD** : AvAnements de rendu (lignes, modes)
-- **Timer** : AvAnements temporels
+**Pourquoi ces interruptions ?** Chaque interruption correspond à un événement critique :
+- **VBlank** : Fin de frame, temps pour mettre à jour l'écran
+- **LCD** : Événements de rendu (lignes, modes)
+- **Timer** : Événements temporels
 - **Serial** : Communication avec d'autres Game Boy
-- **Joypad** : EntrAes utilisateur
+- **Joypad** : Entrées utilisateur
 
-### PrioritA des interruptions
+### Priorité des interruptions
 ```c
 u8 get_highest_priority_irq(u8 if_reg, u8 ie_reg) {
     u8 pending = if_reg & ie_reg;
     
-    // VArifier dans l'ordre de prioritA
+    // Vérifier dans l'ordre de priorité
     if (pending & IRQ_VBLANK) return IRQ_VBLANK;
     if (pending & IRQ_LCD) return IRQ_LCD;
     if (pending & IRQ_TIMER) return IRQ_TIMER;
@@ -48,7 +48,7 @@ u8 get_highest_priority_irq(u8 if_reg, u8 ie_reg) {
 }
 ```
 
-**Pourquoi cette prioritA ?** VBlank est critique pour l'affichage, LCD pour le rendu, Timer pour la synchronisation, etc.
+**Pourquoi cette priorité ?** VBlank est critique pour l'affichage, LCD pour le rendu, Timer pour la synchronisation, etc.
 
 ## Registres d'interruption
 
@@ -67,13 +67,13 @@ typedef struct {
 } InterruptFlags;
 ```
 
-**Pourquoi ces bits ?** Chaque bit correspond A  une source d'interruption. Les bits 5-7 sont toujours A  1 (comportement matAriel).
+**Pourquoi ces bits ?** Chaque bit correspond à une source d'interruption. Les bits 5-7 sont toujours à 1 (comportement matériel).
 
 ### IE (0xFFFF) - Interrupt Enable
 ```c
 #define IE_REG 0xFFFF
 
-// Chaque bit active/dAsactive une interruption
+// Chaque bit active/désactive une interruption
 typedef struct {
     u8 vblank : 1;  // Bit 0
     u8 lcd    : 1;  // Bit 1

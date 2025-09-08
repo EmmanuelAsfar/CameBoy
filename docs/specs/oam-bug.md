@@ -1,33 +1,33 @@
-﻿# Bug de corruption OAM a" SpAcifications et implications
+﻿# Bug de corruption OAM - Spécifications et implications
 
-Retour: [Index specs](./README.md) A [PPU](./ppu.md)
+Retour: [Index specs](./README.md) | [PPU](./ppu.md)
 
-## De quoi saagit-il ?
-Le A OAM Corruption Bug A est un comportement matAriel de la DMG oA, dans certaines conditions (Acriture/lecture OAM pendant des phases critiques), les donnAes sprites (OAM) peuvent Atre corrompues.
+## De quoi s'agit-il ?
+Le « OAM Corruption Bug » est un comportement matériel de la DMG où, dans certaines conditions (écriture/lecture OAM pendant des phases critiques), les données sprites (OAM) peuvent être corrompues.
 
-### Pourquoi Aa existe ?
-- Contraintes matArielles du bus: accAs concurrents PPU/CPU
-- FenAtres temporelles serrAes pendant OAM Search/Pixel Transfer
-- Acritures non arbitAes a' duplication/mirroring partiel de bytes
+### Pourquoi ça existe ?
+- Contraintes matérielles du bus: accès concurrents PPU/CPU
+- Fenêtres temporelles serrées pendant OAM Search/Pixel Transfer
+- Écritures non arbitrées à duplication/mirroring partiel de bytes
 
 ## Quand survient-il ?
-- Acritures/lectures OAM pendant Mode 2 (OAM Search) ou Mode 3 (Pixel Transfer)
-- DMA OAM en cours + accAs CPU
-- SAquences spAcifiques dainstructions impactant les timings
+- Écritures/lectures OAM pendant Mode 2 (OAM Search) ou Mode 3 (Pixel Transfer)
+- DMA OAM en cours + accès CPU
+- Séquences spécifiques d'instructions impactant les timings
 
-## SymptAmes
-- Sprites incorrects (positions/tiles/attributs A bizarres A)
-- Patterns de duplication de bytes (ex: 0xAB a' 0xAA/0xBB)
+## Symptômes
+- Sprites incorrects (positions/tiles/attributs « bizarres »)
+- Patterns de duplication de bytes (ex: 0xAB → 0xAA/0xBB)
 
-## StratAgies daAmulation
+## Stratégies d'émulation
 
-1) Approche simple (sAcurisAe)
-- Interdire strictement lecture/Acriture OAM en Mode 2/3 et pendant DMA a' retourner 0xFF, ignorer writes
+1) Approche simple (sécurisée)
+- Interdire strictement lecture/écriture OAM en Mode 2/3 et pendant DMA → retourner 0xFF, ignorer writes
 - Pros: simple, stable
-- Cons: ne reproduit pas toutes corruptions A rAelles A
+- Cons: ne reproduit pas toutes corruptions « réelles »
 
-2) Approche rAaliste (avancAe)
-- ModAliser des corruptions probabilistes/dAterministes selon timing/micro-Atats
+2) Approche réaliste (avancée)
+- Modéliser des corruptions probabilistes/déterministes selon timing/micro-états
 - ImplAmenter mirroring partiel des nibbles/bytes selon cycles
 - Pros: haute fidAlitA pour dAmos/tests exploitant le bug
 - Cons: complexitA forte, dApendances timing CPU/PPU prAcises

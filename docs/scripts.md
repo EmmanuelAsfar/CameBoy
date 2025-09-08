@@ -1,23 +1,23 @@
-﻿Retour A  laindex: [docs/README.md](./README.md) A [Architecture](./architecture.md) A [Utilisation](./usage.md) A [Tests](./testing.md) A [Glossaire](./glossaire.md)
+﻿Retour à l'index: [docs/README.md](./README.md) | [Architecture](./architecture.md) | [Utilisation](./usage.md) | [Tests](./testing.md) | [Glossaire](./glossaire.md)
 
 ### Scripts et automatisation
 
-Ce document dAcrit les scripts Windows fournis et leur usage, ainsi que les alternatives Make/SH.
+Ce document décrit les scripts Windows fournis et leur usage, ainsi que les alternatives Make/SH.
 
 ### `cameboy.bat` (racine)
 
 Commandes:
 - `build`: compile la version console (`cameboy.exe`) et GUI (`cameboy_gui.exe`).
-- `test`: compile et exAcute les tests unitaires; agrAge dans `logs\test_results.log`.
-- `run [rom]`: lance laAmulateur console; Acrit `logs\emulator.log`.
-- `gui [rom]`: lance laAmulateur GUI; Acrit `logs\emulator_gui.log` et `logs/rom/<rom>/...`.
-- `testrom`: exAcute `tests\rom\run_rom_tests.bat`.
+- `test`: compile et exécute les tests unitaires; agrège dans `logs\test_results.log`.
+- `run [rom]`: lance l'émulateur console; écrit `logs\emulator.log`.
+- `gui [rom]`: lance l'émulateur GUI; écrit `logs\emulator_gui.log` et `logs/rom/<rom>/...`.
+- `testrom`: exécute `tests\rom\run_rom_tests.bat`.
 - `clean`: supprime `build/` et les `.log` sous `logs/`.
 
-CaractAristiques:
-- VArifie `gcc`, tue les exe en cours (`taskkill`) avant link pour Aviter A AccAs refusA A.
+Caractéristiques:
+- Vérifie `gcc`, tue les exe en cours (`taskkill`) avant link pour éviter les accès refusés.
 - Copie `resources/` vers `build/resources/`.
-- ParamAtres de compilation principaux: `-std=c99 -Wall -Wextra -O2 -g`.
+- Paramètres de compilation principaux: `-std=c99 -Wall -Wextra -O2 -g`.
 
 ### Scripts utilitaires (`user/`)
 

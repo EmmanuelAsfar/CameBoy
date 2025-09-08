@@ -1,33 +1,33 @@
 ﻿# Toolchains pour construire des ROMs Game Boy
 
-Ce guide explique comment installer et configurer les toolchains recommandAes pour compiler des ROMs `.gb` A  partir des exemples fournis dans `examples/`.
+Ce guide explique comment installer et configurer les toolchains recommandées pour compiler des ROMs `.gb` à partir des exemples fournis dans `examples/`.
 
-## Outils A  installer
+## Outils à installer
 
 - RGBDS (assembleur/linker/fixer)
   - Site: `https://rgbds.gbdev.io/`
-  - TAlAchargements: `https://github.com/gbdev/rgbds/releases`
+  - Téléchargements: `https://github.com/gbdev/rgbds/releases`
   - Binaries: `rgbasm`, `rgblink`, `rgbfix`, `rgbgfx`
-- GBDK-2020 (SDK C basA sur SDCC)
+- GBDK-2020 (SDK C basé sur SDCC)
   - Site: `https://gbdk-2020.github.io/`
-  - TAlAchargements: `https://github.com/gbdk-2020/gbdk-2020/releases`
+  - Téléchargements: `https://github.com/gbdk-2020/gbdk-2020/releases`
   - Binaire principal: `lcc`
 
-RAfArence matArielle: [Pan Docs](https://gbdev.io/pandocs)
+Référence matérielle: [Pan Docs](https://gbdev.io/pandocs)
 
 ## Installation (Windows)
 
 Deux approches, au choix:
 
-1) PATH (recommandA)
-- Ajoutez les binaires RGBDS (`rgbasm.exe`, `rgblink.exe`, `rgbfix.exe`) A  votre PATH
-- Ajoutez `.../gbdk/bin` (contenant `lcc.exe`) A  votre PATH
+1) PATH (recommandé)
+- Ajoutez les binaires RGBDS (`rgbasm.exe`, `rgblink.exe`, `rgbfix.exe`) à votre PATH
+- Ajoutez `.../gbdk/bin` (contenant `lcc.exe`) à votre PATH
 
-2) Sans toucher au PATH (recommandA dans ce repo)
+2) Sans toucher au PATH (recommandé dans ce repo)
 - Placez les outils dans le repo:
   - `tools/rgbds/bin/` contenant `rgbasm.exe`, `rgblink.exe`, `rgbfix.exe`
   - `tools/gbdk/bin/` contenant `lcc.exe`
-- Les scripts d'exemples dAtectent d'abord ces chemins repo-locaux
+- Les scripts d'exemples détectent d'abord ces chemins repo-locaux
 - Optionnel: variables d'env
   - `RGBDS_HOME` (ex: `C:\tools\rgbds`)
   - `GBDK_HOME` (ex: `C:\tools\gbdk`)

@@ -1,23 +1,24 @@
-﻿# MAmoire (Memory Map) a" SpAcifications d'implAmentation
+﻿# Mémoire (Memory Map) - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Utilisation](../usage.md)
 
 ## 1) Principe de fonctionnement (Game Boy)
 
-La Game Boy utilise un adressage 16-bit (0x0000a"0xFFFF) dAcoupA en zones. Certaines zones sont restreintes selon laAtat vidAo (PPU) et des opArations spAciales (DMA OAM).
+La Game Boy utilise un adressage 16-bit (0x0000-0xFFFF) découpé en zones. Certaines zones sont restreintes selon l'état vidéo (PPU) et des opérations spéciales (DMA OAM).
 
-### Carte mAmoire (DMG)
+### Carte mémoire (DMG)
 
-`````mermaid`r`nflowchart TD
+```mermaid
+flowchart TD
     A[0x0000-0x3FFF<br/>ROM0<br/>Banc 0 fixe]:::rom
     B[0x4000-0x7FFF<br/>ROMX<br/>Bancs commutables]:::rom
-    C[0x8000-0x9FFF<br/>VRAM<br/>DonnAes vidAo]:::vram
+    C[0x8000-0x9FFF<br/>VRAM<br/>Données vidéo]:::vram
     D[0xA000-0xBFFF<br/>ERAM<br/>RAM externe]:::ram
     E[0xC000-0xDFFF<br/>WRAM<br/>RAM de travail]:::ram
     F[0xE000-0xFDFF<br/>Echo<br/>Miroir WRAM]:::echo
     G[0xFE00-0xFE9F<br/>OAM<br/>Sprites]:::oam
     H[0xFEA0-0xFEFF<br/>Unusable<br/>Zone interdite]:::bad
-    I[0xFF00-0xFF7F<br/>IO<br/>Registres pAriphAriques]:::io
+    I[0xFF00-0xFF7F<br/>IO<br/>Registres périphériques]:::io
     J[0xFF80-0xFFFE<br/>HRAM<br/>RAM haute vitesse]:::ram
     K[0xFFFF<br/>IE<br/>Masque interruptions]:::io
 
@@ -30,17 +31,18 @@ La Game Boy utilise un adressage 16-bit (0x0000a"0xFFFF) dAcoupA en zones. Certa
     classDef bad fill:#eee,stroke:#999,stroke-width:2px,stroke-dasharray:2 2
 ```
 
-- Echo RAM (0xE000a"0xFDFF) miroite WRAM (0xC000a"0xDDFF)
-- Zone 0xFEA0a"0xFEFF inutilisable (lectures=0xFF, Acritures ignorAes)
+- Echo RAM (0xE000-0xFDFF) miroite WRAM (0xC000-0xDDFF)
+- Zone 0xFEA0-0xFEFF inutilisable (lectures=0xFF, écritures ignorées)
 
-### Restrictions daaccAs VRAM/OAM (timing PPU)
+### Restrictions d'accès VRAM/OAM (timing PPU)
 
-- Mode 3 (Pixel Transfer): VRAM bloquAe
-- Modes 2 (OAM Search) et 3: OAM bloquAe
-- Pendant un DMA OAM: OAM bloquAe
+- Mode 3 (Pixel Transfer): VRAM bloqué
+- Modes 2 (OAM Search) et 3: OAM bloqué
+- Pendant un DMA OAM: OAM bloqué
 
-`````mermaid`r`ngantt
-  title Restrictions d'accAs VRAM/OAM (par ligne)
+```mermaid
+gantt
+  title Restrictions d'accès VRAM/OAM (par ligne)
   dateFormat X
   axisFormat %s
   section Modes visibles
@@ -53,14 +55,14 @@ La Game Boy utilise un adressage 16-bit (0x0000a"0xFFFF) dAcoupA en zones. Certa
 
 ### OAM DMA (0xFF46)
 
-- Acrire `val` A  `0xFF46` copie 160 octets depuis `(val << 8)` vers OAM (0xFE00a"0xFE9F)
-- Vitesse matArielle: 1 octet/cycle (nous offrons une version synchrone simple)
+- Écrire `val` à `0xFF46` copie 160 octets depuis `(val << 8)` vers OAM (0xFE00-0xFE9F)
+- Vitesse matérielle: 1 octet/cycle (nous offrons une version synchrone simple)
 
-### Pourquoi ces rAgles ? (non-expert)
-- Le PPU a besoin daun accAs prioritaire A  VRAM/OAM pendant le dessin de laimage; bloquer les accAs CPU Avite les corruptions
-- Le DMA OAM accAlAre la mise A  jour des sprites (copie daun bloc)
+### Pourquoi ces règles ? (non-expert)
+- Le PPU a besoin d'un accès prioritaire à VRAM/OAM pendant le dessin de l'image; bloquer les accès CPU évite les corruptions
+- Le DMA OAM accélère la mise à jour des sprites (copie d'un bloc)
 
-RAfs Pan Docs: Memory Map, Accessing VRAM and OAM, OAM DMA Transfer
+Réfs Pan Docs: Memory Map, Accessing VRAM and OAM, OAM DMA Transfer
 
 ---
 

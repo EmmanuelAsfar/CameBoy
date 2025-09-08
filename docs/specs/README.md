@@ -1,27 +1,27 @@
-﻿# SpAcifications d'implAmentation CameBoy
+﻿# Spécifications d'implémentation CameBoy
 
-Cette section synthAtise, en franAais et de faAon didactique, les rAgles A  appliquer pour coder l'Amulateur, avec explications A expert A et A non-expert A (dAjargonisAes) et schAmas.
+Cette section synthétise, en français et de façon didactique, les règles à appliquer pour coder l'émulateur, avec explications « expert » et « non-expert » (déjargonisées) et schémas.
 
 ## Pourquoi cette approche ?
 
-L'Amulation Game Boy nAcessite de reproduire fidAlement le comportement matAriel. Chaque dAtail compte car les jeux s'appuient sur des comportements spAcifiques, parfois non documentAs, pour fonctionner correctement.
+L'émulation Game Boy nécessite de reproduire fidèlement le comportement matériel. Chaque détail compte car les jeux s'appuient sur des comportements spécifiques, parfois non documentés, pour fonctionner correctement.
 
-## Structure des spAcifications
+## Structure des spécifications
 
-- [MAmoire (Memory Map)](./memory.md) - Comment organiser l'accAs aux donnAes
+- [Mémoire (Memory Map)](./memory.md) - Comment organiser l'accès aux données
 - [CPU (LR35902)](./cpu.md) - Le cerveau de la Game Boy
-- [PPU (VidAo)](./ppu.md) - Comment dessiner l'Acran
+- [PPU (Vidéo)](./ppu.md) - Comment dessiner l'écran
 - [Timers](./timers.md) - Compteurs et minuteries
-- [Interruptions](./interrupts.md) - Gestion des AvAnements
-- [Joypad](./joypad.md) - ContrAles utilisateur
-- [Port SArie](./serial.md) - Communication externe
+- [Interruptions](./interrupts.md) - Gestion des événements
+- [Joypad](./joypad.md) - Contrôles utilisateur
+- [Port Série](./serial.md) - Communication externe
 - [MBC (Cartouches)](./mbc.md) - Gestion des cartouches
-- [DMA/OAM](./dma.md) - Transferts de donnAes rapides
-- [AccAs VRAM/OAM](./vram-access.md) - Restrictions d'accAs
-- [SAquence de dAmarrage](./power-up.md) - Initialisation systAme
-- [APU (Audio)](./apu.md) - GAnAration sonore et registres
+- [DMA/OAM](./dma.md) - Transferts de données rapides
+- [Accès VRAM/OAM](./vram-access.md) - Restrictions d'accès
+- [Séquence de démarrage](./power-up.md) - Initialisation système
+- [APU (Audio)](./apu.md) - Génération sonore et registres
 - [Bug de corruption OAM](./oam-bug.md) - Cas limites PPU
-- [CGB (Game Boy Color)](./cgb.md) - DiffArences et cadrage
+- [CGB (Game Boy Color)](./cgb.md) - Différences et cadrage
 
 ## Pour en savoir plus (optionnel)
 

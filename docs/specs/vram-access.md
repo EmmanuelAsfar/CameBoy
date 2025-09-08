@@ -1,20 +1,20 @@
-﻿# AccAs VRAM/OAM a" SpAcifications d'implAmentation
+﻿# Accès VRAM/OAM - Spécifications d'implémentation
 
-Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) | [Architecture](../architecture.md) | [Utilisation](../usage.md)
 
 ## Vue d'ensemble
 
-L'accAs A  la VRAM et A  l'OAM est restreint pendant certaines phases du rendu pour Aviter les corruptions. Ces restrictions sont cruciales pour la compatibilitA des jeux.
+L'accès à la VRAM et à l'OAM est restreint pendant certaines phases du rendu pour éviter les corruptions. Ces restrictions sont cruciales pour la compatibilité des jeux.
 
 ### Pourquoi des restrictions ?
 
 Le PPU lit la VRAM et l'OAM pendant le rendu :
-- **VRAM** : DonnAes des tuiles et des cartes
-- **OAM** : DonnAes des sprites
-- **Conflits** : AccAs simultanAs causent des corruptions
-- **Timing** : Le rendu doit Atre synchronisA
+- **VRAM** : Données des tuiles et des cartes
+- **OAM** : Données des sprites
+- **Conflits** : Accès simultanés causent des corruptions
+- **Timing** : Le rendu doit être synchronisé
 
-## Zones concernAes
+## Zones concernées
 
 ### VRAM (0x8000-0x9FFF)
 ```c
@@ -22,10 +22,10 @@ Le PPU lit la VRAM et l'OAM pendant le rendu :
 #define VRAM_END   0x9FFF
 
 // Sous-zones de la VRAM
-#define TILE_DATA_0_START 0x8000  // DonnAes des tuiles (0x8000-0x87FF)
-#define TILE_DATA_1_START 0x8800  // DonnAes des tuiles (0x8800-0x8FFF)
-#define TILE_MAP_0_START  0x9800  // Carte d'arriAre-plan 0 (0x9800-0x9BFF)
-#define TILE_MAP_1_START  0x9C00  // Carte d'arriAre-plan 1 (0x9C00-0x9FFF)
+#define TILE_DATA_0_START 0x8000  // Données des tuiles (0x8000-0x87FF)
+#define TILE_DATA_1_START 0x8800  // Données des tuiles (0x8800-0x8FFF)
+#define TILE_MAP_0_START  0x9800  // Carte d'arrière-plan 0 (0x9800-0x9BFF)
+#define TILE_MAP_1_START  0x9C00  // Carte d'arrière-plan 1 (0x9C00-0x9FFF)
 ```
 
 **Pourquoi ces zones ?** Chaque zone a un rAle spAcifique dans le rendu :
