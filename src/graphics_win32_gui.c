@@ -257,17 +257,7 @@ LRESULT CALLBACK WindowProcGUI(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
                         SRCCOPY
                     );
                     
-                    // Debug : dessiner un cadre autour de l'écran LCD
-                    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
-                    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
-                    HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
-                    
-                    Rectangle(hdc, layout.lcd_x-1, layout.lcd_y-1, 
-                             layout.lcd_x + layout.lcd_w + 1, layout.lcd_y + layout.lcd_h + 1);
-                    
-                    SelectObject(hdc, hOldBrush);
-                    SelectObject(hdc, hOldPen);
-                    DeleteObject(hPen);
+                    // Cadre retiré (ancien debug)
                 }
             }
             
@@ -503,7 +493,7 @@ void graphics_win32_gui_cleanup(GraphicsWin32GUI* gfx) {
 void graphics_win32_gui_update(GraphicsWin32GUI* gfx, u32* ppu_framebuffer) {
     if (!gfx || !ppu_framebuffer) return;
 
-    // Palette DMG teintée "Game Boy" (vert caca d'oie -> gris foncé)
+    // Palette DMG teintée "Game Boy" (vert clair -> gris foncé)
     // Niveaux du plus clair (index 0) au plus foncé (index 3)
     static const u8 DMG_TINT[4][3] = {
         { 0xE0, 0xF8, 0xD0 }, // #E0F8D0 (clair)
@@ -523,10 +513,16 @@ void graphics_win32_gui_update(GraphicsWin32GUI* gfx, u32* ppu_framebuffer) {
             // Les 4 niveaux DMG que nous émettons sont en niveaux de gris (R=G=B). Déterminer l'index.
             // Seuils robustes pour {0xFF, 0xAA, 0x55, 0x00}
             int level = (r > 0xCC) ? 0 : (r > 0x88) ? 1 : (r > 0x33) ? 2 : 3;
+            // Inverser la perception (texte foncé sur fond clair):
+            // sur DMG, l'index 0 est le plus clair (fond), 3 le plus sombre (encre).
+            // Si le framebuffer encode 0=blanc, 3=noir, on veut conserver cela et
+            // teinter en conséquence. Si l'écran te paraît inversé, c'était le cas
+            // contraire: appliquer shade = 3 - level corrige visuellement.
+            int shade = 3 - level;
 
-            u8 tr = DMG_TINT[level][0];
-            u8 tg = DMG_TINT[level][1];
-            u8 tb = DMG_TINT[level][2];
+            u8 tr = DMG_TINT[shade][0];
+            u8 tg = DMG_TINT[shade][1];
+            u8 tb = DMG_TINT[shade][2];
 
             gfx->framebuffer[dst_idx + 0] = tb; // B
             gfx->framebuffer[dst_idx + 1] = tg; // G

@@ -15,6 +15,9 @@ SECTION "Code", ROM0
 Start:
     di
     ld sp, $FFFE
+    ; Initialiser P1: aucune ligne sélectionnée, bits bas tirés haut
+    ld a, $30
+    ld [P1], a
     
     ; Activer les interruptions
     ld a, 1
@@ -35,8 +38,10 @@ Start:
 
 ; Vérifie l'état du joypad et affiche les touches pressées
 CheckJoypad:
-    ; Lire les boutons directionnels
-    ld a, $20        ; Sélectionner boutons directionnels
+    ; Lire les boutons directionnels (P14=0, P15=1)
+    ld a, $30        ; désélectionner
+    ld [P1], a
+    ld a, $20        ; P14=0 (directions), P15=1
     ld [P1], a
     ld a, [P1]       ; Lire plusieurs fois pour stabiliser
     ld a, [P1]
@@ -45,8 +50,10 @@ CheckJoypad:
     and $0F          ; Garder seulement les 4 bits directionnels
     ld b, a
     
-    ; Lire les boutons d'action
-    ld a, $10        ; Sélectionner boutons d'action
+    ; Lire les boutons d'action (P15=0, P14=1)
+    ld a, $30        ; désélectionner
+    ld [P1], a
+    ld a, $10        ; P15=0 (boutons), P14=1
     ld [P1], a
     ld a, [P1]       ; Lire plusieurs fois pour stabiliser
     ld a, [P1]
@@ -72,6 +79,9 @@ CheckJoypad:
     ; Afficher l'état
     ld a, c
     call SendJoypadState
+    ; Réinitialiser la sélection
+    ld a, $30
+    ld [P1], a
     ret
 
 ; Affiche l'état du joypad sur le port série
