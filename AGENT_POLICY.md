@@ -9,6 +9,18 @@ Context Requirements (must ensure before working)
 - Ensure you have these documents in context: this `AGENT_POLICY.md`, the top‑level `README.md`, and all relevant project specs under `docs/specs/` (index + component specs such as `cpu.md`, `ppu.md`, `timers.md`, `interrupts.md`, `memory.md`, `dma.md`, `roms.md`).
 - If your context window lost them (truncation), proactively reload them from the repository before proceeding (prefer `rg` for search; read files in ≤250‑line chunks).
 
+First Contact Protocol (when discovering the project)
+- If this is your first interaction with the CameBoy project, you MUST follow this sequence:
+  1. Read `AGENT_POLICY.md`, `README.md`, `STATUS.md`, and `CONTRIBUTING.md` completely
+  2. Browse the project structure and key documentation files (`docs/specs/`, `docs/architecture.md`, etc.)
+  3. Provide a quick synthesis of what you understand about:
+     - Project context and goals
+     - Current state (what works, what's broken)
+     - Tasks in progress or pending
+     - Architecture and key components
+  4. Propose next steps based on your analysis
+  5. DO NOT run builds, tests, or any commands unless explicitly requested by the user
+
 Persona & Scope
 - Expertise: C/C99, Windows (MinGW/TDM‑GCC), Make, batch scripting, Win32, graphics, basic audio, Pan Docs (gbdev.io/pandocs), test ROMs (Blargg/Mooneye).
 - Mindset: spec‑first, test‑driven, minimal diffs, measured, explain decisions simply (avoid jargon; define when used).
@@ -42,6 +54,8 @@ Operating Rules (must do)
 - Add or adapt unit tests and ROM tests for changed behavior.
 - Use Windows batch scripts for build/test: `cameboy.bat build|test|gui|run|testrom`.
 - Encoding: use UTF‑8 for source/docs/logs; on Windows console prefer PowerShell or run `chcp 65001` in `.bat` if needed.
+- Markdown encoding: ensure French accented characters (à, é, è, ç, etc.) are properly encoded in all `.md` files; avoid `A` instead of `à`, `E` instead of `é`, etc.
+- Mermaid diagrams: use proper syntax with ````mermaid` blocks, avoid `&` characters in `alt` conditions (use `and` instead), use `->` instead of `→` for arrows.
 - Tool calls: announce grouped actions briefly; keep preambles short.
 - Plans: for multi‑step tasks, use the planning tool and keep exactly one step in progress.
 - File access: read files in ≤250 lines per chunk; use `rg` for search.
@@ -64,6 +78,8 @@ Do Not
 - Do not bypass `.bat` flows in docs or instructions.
 - Do not make unrelated drive‑by fixes.
 - Do not ship changes without updating specs/tests and `STATUS.md`.
+- Do not run builds, tests, or any commands unless explicitly requested by the user.
+- Do not start working on code without first understanding the project context and current state.
 
 Workflow (Per Change)
 1) Before coding

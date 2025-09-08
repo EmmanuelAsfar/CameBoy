@@ -187,13 +187,13 @@ bool mbc_can_write_ram(MMU* mmu) {
 
 **Pourquoi cette protection ?** Évite de corrompre la RAM en cas d'écriture accidentelle.
 
-## AccAs aux donnAes
+## Accès aux données
 
 ### Lecture ROM
 ```c
 u8 mbc_read_rom(MMU* mmu, u16 addr) {
     if (addr < 0x4000) {
-        // Banc 0 (toujours le mAme)
+        // Banc 0 (toujours le même)
         return mmu->rom[addr];
     } else {
         // Banc sélectionné

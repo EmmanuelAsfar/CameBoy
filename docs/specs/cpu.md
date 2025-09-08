@@ -32,7 +32,7 @@ sequenceDiagram
   alt IME=0 and (IE&IF)!=0
     CPU->>CPU: HALT bug (PC n'avance pas)
   else IME=1 and IRQ en attente
-    CPU->>CPU: push PC; IME=0; PC=handler
+    CPU->>CPU: push PC, IME=0, PC=handler
   end
 ```
 
