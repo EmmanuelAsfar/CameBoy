@@ -84,7 +84,7 @@ typedef struct {
 } InterruptEnable;
 ```
 
-**Pourquoi un registre sAparA ?** Permet d'activer/dAsactiver les interruptions individuellement sans affecter les flags.
+**Pourquoi un registre séparé ?** Permet d'activer/désactiver les interruptions individuellement sans affecter les flags.
 
 ## Gestion des interruptions
 
@@ -122,7 +122,7 @@ void handle_interrupt(CPU* cpu, MMU* mmu, u8 irq) {
     cpu->sp -= 2;
     mmu_write16(mmu, cpu->sp, cpu->pc);
     
-    // Sauter A  la routine d'interruption
+    // Sauter à la routine d'interruption
     switch (irq) {
         case IRQ_VBLANK: cpu->pc = 0x40; break;
         case IRQ_LCD:    cpu->pc = 0x48; break;
@@ -133,7 +133,7 @@ void handle_interrupt(CPU* cpu, MMU* mmu, u8 irq) {
 }
 ```
 
-**Pourquoi sauvegarder PC ?** Pour pouvoir revenir A  l'instruction interrompue aprAs le traitement.
+**Pourquoi sauvegarder PC ?** Pour pouvoir revenir à l'instruction interrompue après le traitement.
 
 ### Adresses des routines d'interruption
 ```c
@@ -175,13 +175,13 @@ void clear_interrupt(MMU* mmu, u8 irq) {
 ### VBlank (0x40)
 ```c
 void ppu_vblank_interrupt(PPU* ppu, MMU* mmu) {
-    if (ppu->ly >= 144) {  // VBlank commence A  la ligne 144
+    if (ppu->ly >= 144) {  // VBlank commence à la ligne 144
         request_interrupt(mmu, IRQ_VBLANK);
     }
 }
 ```
 
-**Pourquoi VBlank ?** C'est le moment oA l'Acran n'est pas en cours de rendu, idAal pour mettre A  jour les graphismes.
+**Pourquoi VBlank ?** C'est le moment où l'écran n'est pas en cours de rendu, idéal pour mettre à jour les graphismes.
 
 ### LCD (0x48)
 ```c
@@ -221,7 +221,7 @@ void timer_interrupt(Timer* timer, MMU* mmu) {
 ### Serial (0x58)
 ```c
 void serial_interrupt(MMU* mmu) {
-    // DAclencher quand le transfert sArie est terminA
+    // Déclencher quand le transfert série est terminé
     request_interrupt(mmu, IRQ_SERIAL);
 }
 ```
@@ -274,7 +274,7 @@ void cpu_step(CPU* cpu, MMU* mmu) {
 }
 ```
 
-**Pourquoi un dAlai ?** SAcuritA. Si les interruptions Ataient activAes immAdiatement, l'instruction en cours pourrait Atre interrompue de maniAre inattendue.
+**Pourquoi un délai ?** Sécurité. Si les interruptions étaient activées immédiatement, l'instruction en cours pourrait être interrompue de manière inattendue.
 
 ## Initialisation
 
@@ -283,16 +283,16 @@ void interrupt_init(InterruptManager* im) {
     memset(im, 0, sizeof(InterruptManager));
     
     // Valeurs de power-up
-    im->if_reg = 0xE1;  // Bits 5-7 toujours A  1
+    im->if_reg = 0xE1;  // Bits 5-7 toujours à 1
     im->ie_reg = 0x00;  // Toutes les interruptions dAsactivAes
 }
 ```
 
-**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au dAmarrage, importantes pour la compatibilitA.
+**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au démarrage, importantes pour la compatibilité.
 
-## Tests de conformitA
+## Tests de conformité
 
-### Test de prioritA
+### Test de priorité
 ```c
 void test_interrupt_priority() {
     CPU cpu;
@@ -302,7 +302,7 @@ void test_interrupt_priority() {
     mmu_write8(&mmu, IF_REG, IRQ_TIMER | IRQ_VBLANK);
     mmu_write8(&mmu, IE_REG, IRQ_TIMER | IRQ_VBLANK);
     
-    // VBlank doit avoir la prioritA
+    // VBlank doit avoir la priorité
     u8 irq = get_highest_priority_irq(mmu_read8(&mmu, IF_REG), mmu_read8(&mmu, IE_REG));
     assert(irq == IRQ_VBLANK);
 }

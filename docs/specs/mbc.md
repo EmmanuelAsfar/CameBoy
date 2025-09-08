@@ -32,8 +32,8 @@ typedef struct {
 typedef struct {
     u8 rom_bank;      // Banc ROM actuel (1-127)
     u8 ram_bank;      // Banc RAM actuel (0-3)
-    u8 ram_enabled;   // RAM activAe
-    u8 rtc_enabled;   // RTC activA
+    u8 ram_enabled;   // RAM activée
+    u8 rtc_enabled;   // RTC activé
     u8 rtc_reg;       // Registre RTC actuel
     RTC rtc;          // Horloge temps rAel
 } MBC3;
@@ -41,17 +41,17 @@ typedef struct {
 
 **Pourquoi MBC3 ?** Il ajoute une horloge temps rAel (RTC) pour les jeux qui ont besoin de l'heure (ex: PokAmon).
 
-### MBC5 (le plus avancA)
+### MBC5 (le plus avancé)
 ```c
 typedef struct {
     u16 rom_bank;     // Banc ROM actuel (1-511)
     u8 ram_bank;      // Banc RAM actuel (0-15)
-    u8 ram_enabled;   // RAM activAe
+    u8 ram_enabled;   // RAM activée
     u8 rumble;        // Moteur de vibration
 } MBC5;
 ```
 
-**Pourquoi MBC5 ?** Il supporte des ROMs jusqu'A  8MB et des RAMs jusqu'A  128KB, plus des fonctionnalitAs avancAes.
+**Pourquoi MBC5 ?** Il supporte des ROMs jusqu'à 8MB et des RAMs jusqu'à 128KB, plus des fonctionnalités avancées.
 
 ## DAtection du type de MBC
 
@@ -126,7 +126,7 @@ void mbc5_write_rom_bank(MMU* mmu, u16 addr, u8 value) {
 }
 ```
 
-**Pourquoi 9 bits ?** MBC5 supporte jusqu'A  512 bancs ROM (2^9), permettant des ROMs jusqu'A  8MB.
+**Pourquoi 9 bits ?** MBC5 supporte jusqu'à 512 bancs ROM (2^9), permettant des ROMs jusqu'à 8MB.
 
 ## Gestion des bancs RAM
 
@@ -134,7 +134,7 @@ void mbc5_write_rom_bank(MMU* mmu, u16 addr, u8 value) {
 ```c
 void mbc1_write_ram_bank(MMU* mmu, u16 addr, u8 value) {
     if (addr >= 0x4000 && addr < 0x6000) {
-        // SAlection du banc RAM (bits 0-1)
+        // Sélection du banc RAM (bits 0-1)
         mmu->mbc1.ram_bank = value & 0x03;
     } else if (addr >= 0x6000 && addr < 0x8000) {
         // Changement de mode de banking
@@ -149,7 +149,7 @@ void mbc1_write_ram_bank(MMU* mmu, u16 addr, u8 value) {
 ```c
 void mbc3_write_ram_bank(MMU* mmu, u16 addr, u8 value) {
     if (addr >= 0x4000 && addr < 0x6000) {
-        // SAlection du banc RAM ou RTC
+        // Sélection du banc RAM ou RTC
         if (value >= 0x00 && value <= 0x03) {
             mmu->mbc3.ram_bank = value;
             mmu->mbc3.rtc_enabled = false;
@@ -163,20 +163,20 @@ void mbc3_write_ram_bank(MMU* mmu, u16 addr, u8 value) {
 
 **Pourquoi RTC ?** MBC3 intAgre une horloge temps rAel pour les jeux qui en ont besoin.
 
-## Activation/dAsactivation de la RAM
+## Activation/désactivation de la RAM
 
 ### ContrAle de la RAM
 ```c
 void mbc_write_ram_enable(MMU* mmu, u16 addr, u8 value) {
     if (addr >= 0x0000 && addr < 0x2000) {
-        // Activation/dAsactivation de la RAM
+        // Activation/désactivation de la RAM
         u8 enable = (value & 0x0A) == 0x0A;
         mmu->mbc.ram_enabled = enable;
     }
 }
 ```
 
-**Pourquoi 0x0A ?** C'est la valeur magique pour activer la RAM. D'autres valeurs la dAsactivent.
+**Pourquoi 0x0A ?** C'est la valeur magique pour activer la RAM. D'autres valeurs la désactivent.
 
 ### Protection contre les Acritures accidentelles
 ```c
@@ -185,7 +185,7 @@ bool mbc_can_write_ram(MMU* mmu) {
 }
 ```
 
-**Pourquoi cette protection ?** Avite de corrompre la RAM en cas d'Acriture accidentelle.
+**Pourquoi cette protection ?** Évite de corrompre la RAM en cas d'écriture accidentelle.
 
 ## AccAs aux donnAes
 
@@ -196,20 +196,20 @@ u8 mbc_read_rom(MMU* mmu, u16 addr) {
         // Banc 0 (toujours le mAme)
         return mmu->rom[addr];
     } else {
-        // Banc sAlectionnA
+        // Banc sélectionné
         u16 bank_addr = (mmu->mbc.rom_bank * 0x4000) + (addr - 0x4000);
         return mmu->rom[bank_addr];
     }
 }
 ```
 
-**Pourquoi cette logique ?** La zone 0x0000-0x3FFF contient toujours le banc 0, la zone 0x4000-0x7FFF contient le banc sAlectionnA.
+**Pourquoi cette logique ?** La zone 0x0000-0x3FFF contient toujours le banc 0, la zone 0x4000-0x7FFF contient le banc sélectionné.
 
-### Lecture/Acriture RAM
+### Lecture/Écriture RAM
 ```c
 u8 mbc_read_ram(MMU* mmu, u16 addr) {
     if (!mbc_can_write_ram(mmu)) {
-        return 0xFF;  // RAM dAsactivAe
+        return 0xFF;  // RAM désactivée
     }
     
     u16 ram_addr = (mmu->mbc.ram_bank * 0x2000) + (addr - 0xA000);
@@ -218,7 +218,7 @@ u8 mbc_read_ram(MMU* mmu, u16 addr) {
 
 void mbc_write_ram(MMU* mmu, u16 addr, u8 value) {
     if (!mbc_can_write_ram(mmu)) {
-        return;  // RAM dAsactivAe
+        return;  // RAM désactivée
     }
     
     u16 ram_addr = (mmu->mbc.ram_bank * 0x2000) + (addr - 0xA000);
@@ -226,7 +226,7 @@ void mbc_write_ram(MMU* mmu, u16 addr, u8 value) {
 }
 ```
 
-**Pourquoi cette logique ?** La RAM est mappAe A  partir de 0xA000, avec des bancs de 8KB.
+**Pourquoi cette logique ?** La RAM est mappée à partir de 0xA000, avec des bancs de 8KB.
 
 ## RTC (Real Time Clock)
 
@@ -245,14 +245,14 @@ typedef struct {
 
 **Pourquoi cette structure ?** C'est le format standard du RTC MBC3, compatible avec les jeux existants.
 
-### Mise A  jour du RTC
+### Mise à jour du RTC
 ```c
 void rtc_update(RTC* rtc, u32 cycles) {
-    if (rtc->halt) return;  // RTC arrAtA
+    if (rtc->halt) return;  // RTC arrêté
     
     rtc->cycles += cycles;
     
-    // Mettre A  jour les secondes
+    // Mettre à jour les secondes
     if (rtc->cycles >= 4194304) {  // 1 seconde
         rtc->cycles -= 4194304;
         rtc->seconds++;
@@ -301,7 +301,7 @@ void mbc_init(MMU* mmu, MBCType type) {
 
 **Pourquoi ces valeurs ?** Ce sont les valeurs par dAfaut des MBC au dAmarrage.
 
-## Tests de conformitA
+## Tests de conformité
 
 ### Test de banking ROM
 ```c
@@ -331,6 +331,6 @@ void test_mbc1_rom_banking() {
 
 - MBC2, MBC6, MBC7, MMM01, M161, HuC1/HuC3: variantes de banking a documenter progressivement.
 - MBC3 RTC: registres temps reel (sec/min/h/low day/high+flags), latch, halt, day carry; persistance.
-- Sauvegardes: definir un format de fichiers SRAM/RTC simple par cartouche.
+- Sauvegardes: définir un format de fichiers SRAM/RTC simple par cartouche.
 
 Pedagogie: commencer par MBC1/MBC3/MBC5, ajouter le RTC MBC3 (latching, halt) quand necessaire.

@@ -48,7 +48,7 @@ sequenceDiagram
   PPU->>VRAM: Mode 3: fetch BG/Window, tuiles et pixels (FIFO)
   PPU->>PPU: Compose pixels BG/Window/OBJ (priorités)
   PPU->>PPU: Mode 0: HBlank (~204 cycles)
-  Note over PPU: À LY=144 → Mode 1 (VBlank) + IRQ VBlank
+  Note over PPU: À LY=144 -> Mode 1 (VBlank) + IRQ VBlank
 ```
 
 Notes Pan Docs:

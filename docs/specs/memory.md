@@ -129,16 +129,17 @@ Tests dans `tests/unit/test_mmu.c` (liste et objectifs):
 - `test_mmu_dma_oam_copy` (nouveau)
   - PrApare source WRAM `0xC000`, Acrit `0xFF46=0xC0`, vArifie que 160 octets ont AtA recopiAs vers OAM
 
-`````mermaid`r`nsequenceDiagram
+```mermaid
+sequenceDiagram
   participant T as Test
   participant MMU
   participant PPU
   T->>PPU: set mode = PIXEL_TRANSFER
   T->>MMU: write 0x8000
-  MMU-->>T: read 0x8000 = 0xFF (bloquA)
+  MMU-->>T: read 0x8000 = 0xFF (bloqué)
   T->>PPU: set mode = OAM_SEARCH
   T->>MMU: write 0xFE00
-  MMU-->>T: read 0xFE00 = 0xFF (bloquA)
+  MMU-->>T: read 0xFE00 = 0xFF (bloqué)
   T->>PPU: set mode = HBLANK
   T->>MMU: write 0x8000/0xFE00
   MMU-->>T: reads = valeurs Acrites

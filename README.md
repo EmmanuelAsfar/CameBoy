@@ -151,3 +151,7 @@ flowchart TD
   L -- oui --> M[GUI update/present]
   M --> C
 ```
+
+### Note pour les agents IA
+
+**Pour les agents IA, merci de lire attentivement ces deux fichiers: `AGENT_POLICY.md` et `AGENT_TASKS.md` !**

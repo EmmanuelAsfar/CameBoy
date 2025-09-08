@@ -98,12 +98,13 @@ u16 timer_get_threshold(u8 tac) {
 ## Comportement des timers
 
 ### SAquence d'overflow
-`````mermaid`r`nsequenceDiagram
+```mermaid
+sequenceDiagram
     participant Timer
     participant MMU
     participant CPU
     
-    Timer->>Timer: TIMA s'incrAmente
+    Timer->>Timer: TIMA s'incrémente
     Note over Timer: TIMA atteint 0xFF
     Timer->>Timer: TIMA = 0x00 (overflow)
     Timer->>Timer: TIMA = TMA (rechargement)

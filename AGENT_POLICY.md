@@ -1,6 +1,61 @@
 Agent notes - CameBoy
 =====================
 
+Agent Operating Guide
+---------------------
+This project uses a spec-first workflow aligned with Pan Docs. When changing code, documentation and tests must be kept in sync. This section codifies how the agent works and must be updated whenever new working directives are provided.
+
+Principles
+- Spec-first: read the relevant Pan Docs section before any change and link it from our specs.
+- Keep docs in sync: update our component spec Markdown files alongside code and tests.
+- Plain-language code comments: explain concepts without emulator jargon; if a technical term is used, define it inline.
+- Tests-first mindset: add/update unit tests and ROM tests when behavior changes; do not rely on manual testing only.
+- Windows-first scripts: build, test and ROM flows use the `.bat` scripts (do not bypass them in docs/instructions).
+- Minimal, focused changes: keep interfaces stable; avoid unrelated edits.
+- Traceability: reference files touched and rationale in PR descriptions or commit messages.
+
+Standard Structure For Component Spec Docs
+Each spec Markdown under `docs/specs/` must follow this structure:
+1) Component Logic (from Pan Docs, simplified): describe the behavior in clear, non-expert terms; include small diagrams; add external links to the precise Pan Docs pages.
+2) Implementation Choices: how the spec is implemented here, trade-offs and internal data flows; include diagrams.
+3) Status & TODOs: what is done, what is missing or to improve.
+4) Unit Tests: list of our unit tests that cover this component.
+5) Test ROMs: list of our ROM tests that exercise this component.
+
+Workflow (Per Change)
+1) Before coding
+   - Read Pan Docs for the topic; note edge cases/timings.
+   - Review/update the corresponding spec file under `docs/specs/` (ensure it follows the structure above).
+   - Define or update tests (unit + ROM) that will validate the change.
+2) Implementation
+   - Implement minimal, targeted changes; keep code commented in plain language.
+   - Keep interfaces consistent with headers; verify all required components are wired (CPU, MMU, PPU, Timer, Interrupts, Joypad, APU).
+   - If any build script changes are required, modify the `.bat` scripts and update `docs/scripts.md` (and `docs/usage.md` if needed).
+3) Validation
+   - Run `cameboy.bat test`; check `logs\test_results.log` until green.
+   - Run ROM tests via `cameboy.bat testrom` and review outputs under `logs\rom\<romname>`.
+   - For GUI checks, use `cameboy.bat gui <rom>`; for console frame dumps, use the CLI options provided by the console emulator.
+4) Documentation & Agent Notes
+   - Ensure the relevant `docs/specs/*.md` are updated (logic, implementation, status, unit tests, ROM tests).
+   - Update the "Current Status" section after each step: reflect what is done and what remains (in this file and in each component spec's Status & TODOs).
+   - If new working directives were introduced, update this Agent Operating Guide.
+
+Testing & Logging Expectations
+- Unit tests produce aggregate results in `logs\test_results.log` and per-binary stdout.
+- ROM tests write runtime logs, serial output and optional frame dumps under `logs\rom/<romname>/`.
+- Prefer deterministic tests; where timing-sensitive, document tolerances in the spec.
+
+When Build Scripts Change
+- Update `docs/scripts.md` and `docs/usage.md` to reflect new commands, parameters or outputs.
+- Keep `.bat` the source of truth for Windows flows; ensure Make/SH remain optional mirrors only.
+
+Update Policy
+- Every time new working rules are provided by maintainers, amend this section to keep future contributors and agents aligned.
+
+Policy-to-Tasks Rule
+--------------------
+After completing work (code, tests, or docs), always update `AGENT_TASKS.md` to reflect the current state (what works, what fails, and next actions). This keeps the project’s live status accurate for future agents and contributors.
+
 Build & Logs
 ------------
 - Main script: `cameboy.bat`
@@ -35,6 +90,7 @@ Known caveats
 -------------
 - Do not embed resources for now; use file-based loading.
 - If Access Denied on build, script kills running `cameboy*.exe` before link.
+- Character encoding (French accents): use UTF-8 for source, docs and logs. On Windows consoles, prefer PowerShell (UTF-8) or run `chcp 65001` in `.bat` before emitting text; ensure editors save files as UTF-8. If mojibake appears in logs/GUI, verify file encodings and console code page.
 ## CameBoy – Guide Agent (Vue d'ensemble, commandes, état)
 
 ### 1) Projet en bref

@@ -107,7 +107,8 @@ static inline int8_t square_sample(SquareChannel* ch) {
   - Sweep (C1): ticks 2,6
   - Envelope: tick 7
 
-`````mermaid`r`ngantt
+```mermaid
+gantt
   dateFormat X
   axisFormat %s
   section FrameSequencer

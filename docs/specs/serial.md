@@ -46,16 +46,17 @@ u8 serial_data;
 ## Protocole de communication
 
 ### SAquence de transfert
-`````mermaid`r`nsequenceDiagram
+```mermaid
+sequenceDiagram
     participant GB1 as Game Boy 1
     participant GB2 as Game Boy 2
     
-    GB1->>GB1: Acrire donnAes dans SB
+    GB1->>GB1: Écrire données dans SB
     GB1->>GB1: Configurer SC (START + CLOCK)
     GB1->>GB2: Envoyer bit par bit
     GB2->>GB2: Recevoir et stocker dans SB
-    GB1->>GB1: Transfert terminA a' IRQ
-    GB2->>GB2: Transfert terminA a' IRQ
+    GB1->>GB1: Transfert terminé -> IRQ
+    GB2->>GB2: Transfert terminé -> IRQ
 ```
 
 **Pourquoi bit par bit ?** C'est le protocole sArie standard. Les donnAes sont envoyAes un bit A  la fois.
