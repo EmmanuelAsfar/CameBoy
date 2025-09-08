@@ -1,43 +1,43 @@
-# Interruptions – Spécifications d'implémentation
+﻿# Interruptions a" SpAcifications d'implAmentation
 
-Retour: [Index specs](./README.md) · [Architecture](../architecture.md) · [Tests](../testing.md)
+Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Tests](../testing.md)
 
 ## Vue d'ensemble
 
-Le système d'interruptions de la Game Boy permet aux composants matériels de signaler des événements au CPU. C'est un mécanisme essentiel pour la synchronisation et la réactivité.
+Le systAme d'interruptions de la Game Boy permet aux composants matAriels de signaler des AvAnements au CPU. C'est un mAcanisme essentiel pour la synchronisation et la rAactivitA.
 
 ### Pourquoi des interruptions ?
 
 Les interruptions permettent :
 - **Synchronisation** : Coordonner les composants (PPU, timers, joypad)
-- **Réactivité** : Réagir immédiatement aux événements
-- **Efficacité** : Éviter de poller constamment les périphériques
-- **Multitâche** : Simuler l'exécution simultanée de plusieurs tâches
+- **RAactivitA** : RAagir immAdiatement aux AvAnements
+- **EfficacitA** : Aviter de poller constamment les pAriphAriques
+- **MultitAche** : Simuler l'exAcution simultanAe de plusieurs tAches
 
 ## Types d'interruptions
 
 ### Les 5 interruptions de la Game Boy
 ```c
-#define IRQ_VBLANK  0x01  // Fin de frame vidéo
-#define IRQ_LCD     0x02  // Événement LCD (HBlank, VBlank, OAM, LYC)
+#define IRQ_VBLANK  0x01  // Fin de frame vidAo
+#define IRQ_LCD     0x02  // AvAnement LCD (HBlank, VBlank, OAM, LYC)
 #define IRQ_TIMER   0x04  // Overflow du timer
-#define IRQ_SERIAL  0x08  // Transfert série terminé
+#define IRQ_SERIAL  0x08  // Transfert sArie terminA
 #define IRQ_JOYPAD  0x10  // Appui sur une touche
 ```
 
-**Pourquoi ces interruptions ?** Chaque interruption correspond à un événement critique :
-- **VBlank** : Fin de frame, temps pour mettre à jour l'écran
-- **LCD** : Événements de rendu (lignes, modes)
-- **Timer** : Événements temporels
+**Pourquoi ces interruptions ?** Chaque interruption correspond A  un AvAnement critique :
+- **VBlank** : Fin de frame, temps pour mettre A  jour l'Acran
+- **LCD** : AvAnements de rendu (lignes, modes)
+- **Timer** : AvAnements temporels
 - **Serial** : Communication avec d'autres Game Boy
-- **Joypad** : Entrées utilisateur
+- **Joypad** : EntrAes utilisateur
 
-### Priorité des interruptions
+### PrioritA des interruptions
 ```c
 u8 get_highest_priority_irq(u8 if_reg, u8 ie_reg) {
     u8 pending = if_reg & ie_reg;
     
-    // Vérifier dans l'ordre de priorité
+    // VArifier dans l'ordre de prioritA
     if (pending & IRQ_VBLANK) return IRQ_VBLANK;
     if (pending & IRQ_LCD) return IRQ_LCD;
     if (pending & IRQ_TIMER) return IRQ_TIMER;
@@ -48,7 +48,7 @@ u8 get_highest_priority_irq(u8 if_reg, u8 ie_reg) {
 }
 ```
 
-**Pourquoi cette priorité ?** VBlank est critique pour l'affichage, LCD pour le rendu, Timer pour la synchronisation, etc.
+**Pourquoi cette prioritA ?** VBlank est critique pour l'affichage, LCD pour le rendu, Timer pour la synchronisation, etc.
 
 ## Registres d'interruption
 
@@ -67,13 +67,13 @@ typedef struct {
 } InterruptFlags;
 ```
 
-**Pourquoi ces bits ?** Chaque bit correspond à une source d'interruption. Les bits 5-7 sont toujours à 1 (comportement matériel).
+**Pourquoi ces bits ?** Chaque bit correspond A  une source d'interruption. Les bits 5-7 sont toujours A  1 (comportement matAriel).
 
 ### IE (0xFFFF) - Interrupt Enable
 ```c
 #define IE_REG 0xFFFF
 
-// Chaque bit active/désactive une interruption
+// Chaque bit active/dAsactive une interruption
 typedef struct {
     u8 vblank : 1;  // Bit 0
     u8 lcd    : 1;  // Bit 1
@@ -84,14 +84,14 @@ typedef struct {
 } InterruptEnable;
 ```
 
-**Pourquoi un registre séparé ?** Permet d'activer/désactiver les interruptions individuellement sans affecter les flags.
+**Pourquoi un registre sAparA ?** Permet d'activer/dAsactiver les interruptions individuellement sans affecter les flags.
 
 ## Gestion des interruptions
 
-### Vérification des interruptions
+### VArification des interruptions
 ```c
 bool check_interrupts(CPU* cpu, MMU* mmu) {
-    if (!cpu->ime) return false;  // Interruptions désactivées
+    if (!cpu->ime) return false;  // Interruptions dAsactivAes
     
     u8 if_reg = mmu_read8(mmu, IF_REG);
     u8 ie_reg = mmu_read8(mmu, IE_REG);
@@ -105,12 +105,12 @@ bool check_interrupts(CPU* cpu, MMU* mmu) {
 }
 ```
 
-**Pourquoi vérifier IME ?** Le CPU peut désactiver temporairement les interruptions pour des opérations critiques.
+**Pourquoi vArifier IME ?** Le CPU peut dAsactiver temporairement les interruptions pour des opArations critiques.
 
 ### Traitement d'une interruption
 ```c
 void handle_interrupt(CPU* cpu, MMU* mmu, u8 irq) {
-    // Désactiver les interruptions
+    // DAsactiver les interruptions
     cpu->ime = false;
     
     // Effacer le flag d'interruption
@@ -122,7 +122,7 @@ void handle_interrupt(CPU* cpu, MMU* mmu, u8 irq) {
     cpu->sp -= 2;
     mmu_write16(mmu, cpu->sp, cpu->pc);
     
-    // Sauter à la routine d'interruption
+    // Sauter A  la routine d'interruption
     switch (irq) {
         case IRQ_VBLANK: cpu->pc = 0x40; break;
         case IRQ_LCD:    cpu->pc = 0x48; break;
@@ -133,7 +133,7 @@ void handle_interrupt(CPU* cpu, MMU* mmu, u8 irq) {
 }
 ```
 
-**Pourquoi sauvegarder PC ?** Pour pouvoir revenir à l'instruction interrompue après le traitement.
+**Pourquoi sauvegarder PC ?** Pour pouvoir revenir A  l'instruction interrompue aprAs le traitement.
 
 ### Adresses des routines d'interruption
 ```c
@@ -144,11 +144,11 @@ void handle_interrupt(CPU* cpu, MMU* mmu, u8 irq) {
 #define IRQ_JOYPAD_ADDR 0x60
 ```
 
-**Pourquoi ces adresses ?** Ce sont les adresses fixes définies par la Game Boy. Chaque interruption a sa propre routine.
+**Pourquoi ces adresses ?** Ce sont les adresses fixes dAfinies par la Game Boy. Chaque interruption a sa propre routine.
 
 ## Gestion des flags d'interruption
 
-### Déclencher une interruption
+### DAclencher une interruption
 ```c
 void request_interrupt(MMU* mmu, u8 irq) {
     u8 if_reg = mmu_read8(mmu, IF_REG);
@@ -157,7 +157,7 @@ void request_interrupt(MMU* mmu, u8 irq) {
 }
 ```
 
-**Pourquoi un flag ?** Permet de signaler qu'un événement s'est produit, même si les interruptions sont temporairement désactivées.
+**Pourquoi un flag ?** Permet de signaler qu'un AvAnement s'est produit, mAme si les interruptions sont temporairement dAsactivAes.
 
 ### Effacer une interruption
 ```c
@@ -168,27 +168,27 @@ void clear_interrupt(MMU* mmu, u8 irq) {
 }
 ```
 
-**Pourquoi effacer ?** Évite de traiter la même interruption plusieurs fois.
+**Pourquoi effacer ?** Avite de traiter la mAme interruption plusieurs fois.
 
-## Interruptions spécifiques
+## Interruptions spAcifiques
 
 ### VBlank (0x40)
 ```c
 void ppu_vblank_interrupt(PPU* ppu, MMU* mmu) {
-    if (ppu->ly >= 144) {  // VBlank commence à la ligne 144
+    if (ppu->ly >= 144) {  // VBlank commence A  la ligne 144
         request_interrupt(mmu, IRQ_VBLANK);
     }
 }
 ```
 
-**Pourquoi VBlank ?** C'est le moment où l'écran n'est pas en cours de rendu, idéal pour mettre à jour les graphismes.
+**Pourquoi VBlank ?** C'est le moment oA l'Acran n'est pas en cours de rendu, idAal pour mettre A  jour les graphismes.
 
 ### LCD (0x48)
 ```c
 void ppu_lcd_interrupt(PPU* ppu, MMU* mmu) {
     u8 stat = mmu_read8(mmu, 0xFF41);
     
-    // Vérifier les différents types d'interruption LCD
+    // VArifier les diffArents types d'interruption LCD
     if (ppu->mode == PPU_MODE_HBLANK && (stat & 0x08)) {
         request_interrupt(mmu, IRQ_LCD);
     }
@@ -204,7 +204,7 @@ void ppu_lcd_interrupt(PPU* ppu, MMU* mmu) {
 }
 ```
 
-**Pourquoi LCD ?** Permet de synchroniser avec les phases de rendu pour des effets spéciaux.
+**Pourquoi LCD ?** Permet de synchroniser avec les phases de rendu pour des effets spAciaux.
 
 ### Timer (0x50)
 ```c
@@ -216,12 +216,12 @@ void timer_interrupt(Timer* timer, MMU* mmu) {
 }
 ```
 
-**Pourquoi Timer ?** Pour les événements temporels (animations, délais, rythme de jeu).
+**Pourquoi Timer ?** Pour les AvAnements temporels (animations, dAlais, rythme de jeu).
 
 ### Serial (0x58)
 ```c
 void serial_interrupt(MMU* mmu) {
-    // Déclencher quand le transfert série est terminé
+    // DAclencher quand le transfert sArie est terminA
     request_interrupt(mmu, IRQ_SERIAL);
 }
 ```
@@ -237,44 +237,44 @@ void joypad_interrupt(Joypad* joypad, MMU* mmu) {
 }
 ```
 
-**Pourquoi Joypad ?** Pour réagir immédiatement aux entrées utilisateur.
+**Pourquoi Joypad ?** Pour rAagir immAdiatement aux entrAes utilisateur.
 
 ## Gestion des interruptions en cours
 
-### Interruptions imbriquées
+### Interruptions imbriquAes
 ```c
 void handle_interrupt(CPU* cpu, MMU* mmu, u8 irq) {
-    // Désactiver les interruptions
+    // DAsactiver les interruptions
     cpu->ime = false;
     
     // ... traiter l'interruption ...
     
-    // Réactiver les interruptions (après l'instruction suivante)
+    // RAactiver les interruptions (aprAs l'instruction suivante)
     cpu->ime_pending = true;
 }
 ```
 
-**Pourquoi désactiver ?** Évite les interruptions imbriquées qui pourraient corrompre l'état du système.
+**Pourquoi dAsactiver ?** Avite les interruptions imbriquAes qui pourraient corrompre l'Atat du systAme.
 
-### Délai d'activation (EI)
+### DAlai d'activation (EI)
 ```c
 void op_ei(CPU* cpu, MMU* mmu) {
-    // EI active les interruptions après l'instruction suivante
+    // EI active les interruptions aprAs l'instruction suivante
     cpu->ime_pending = true;
 }
 
 void cpu_step(CPU* cpu, MMU* mmu) {
-    // Vérifier si on doit activer les interruptions
+    // VArifier si on doit activer les interruptions
     if (cpu->ime_pending) {
         cpu->ime = true;
         cpu->ime_pending = false;
     }
     
-    // ... exécuter l'instruction ...
+    // ... exAcuter l'instruction ...
 }
 ```
 
-**Pourquoi un délai ?** Sécurité. Si les interruptions étaient activées immédiatement, l'instruction en cours pourrait être interrompue de manière inattendue.
+**Pourquoi un dAlai ?** SAcuritA. Si les interruptions Ataient activAes immAdiatement, l'instruction en cours pourrait Atre interrompue de maniAre inattendue.
 
 ## Initialisation
 
@@ -283,16 +283,16 @@ void interrupt_init(InterruptManager* im) {
     memset(im, 0, sizeof(InterruptManager));
     
     // Valeurs de power-up
-    im->if_reg = 0xE1;  // Bits 5-7 toujours à 1
-    im->ie_reg = 0x00;  // Toutes les interruptions désactivées
+    im->if_reg = 0xE1;  // Bits 5-7 toujours A  1
+    im->ie_reg = 0x00;  // Toutes les interruptions dAsactivAes
 }
 ```
 
-**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au démarrage, importantes pour la compatibilité.
+**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au dAmarrage, importantes pour la compatibilitA.
 
-## Tests de conformité
+## Tests de conformitA
 
-### Test de priorité
+### Test de prioritA
 ```c
 void test_interrupt_priority() {
     CPU cpu;
@@ -302,15 +302,15 @@ void test_interrupt_priority() {
     mmu_write8(&mmu, IF_REG, IRQ_TIMER | IRQ_VBLANK);
     mmu_write8(&mmu, IE_REG, IRQ_TIMER | IRQ_VBLANK);
     
-    // VBlank doit avoir la priorité
+    // VBlank doit avoir la prioritA
     u8 irq = get_highest_priority_irq(mmu_read8(&mmu, IF_REG), mmu_read8(&mmu, IE_REG));
     assert(irq == IRQ_VBLANK);
 }
 ```
 
-**Pourquoi ces tests ?** Ils vérifient que le comportement des interruptions est conforme aux spécifications.
+**Pourquoi ces tests ?** Ils vArifient que le comportement des interruptions est conforme aux spAcifications.
 
-## Références Pan Docs
+## RAfArences Pan Docs
 
 - [Interrupts](https://gbdev.io/pandocs/Interrupts.html)
 - [Interrupt Sources](https://gbdev.io/pandocs/Interrupt_Sources.html)

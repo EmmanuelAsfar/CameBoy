@@ -1,65 +1,65 @@
-# Port Série – Spécifications d'implémentation
+﻿# Port SArie a" SpAcifications d'implAmentation
 
-Retour: [Index specs](./README.md) · [Architecture](../architecture.md) · [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
 
 ## Vue d'ensemble
 
-Le port série de la Game Boy permet la communication entre deux Game Boy ou avec des périphériques externes. C'est un composant essentiel pour les jeux multijoueurs.
+Le port sArie de la Game Boy permet la communication entre deux Game Boy ou avec des pAriphAriques externes. C'est un composant essentiel pour les jeux multijoueurs.
 
-### Pourquoi un port série ?
+### Pourquoi un port sArie ?
 
-La Game Boy a été conçue pour le multijoueur :
-- **Communication** : Échanger des données entre Game Boy
-- **Périphériques** : Imprimante, caméra, etc.
-- **Simplicité** : Protocole simple et fiable
-- **Économie** : Coût réduit par rapport à des solutions plus complexes
+La Game Boy a AtA conAue pour le multijoueur :
+- **Communication** : Achanger des donnAes entre Game Boy
+- **PAriphAriques** : Imprimante, camAra, etc.
+- **SimplicitA** : Protocole simple et fiable
+- **Aconomie** : CoAt rAduit par rapport A  des solutions plus complexes
 
-## Registres du port série
+## Registres du port sArie
 
 ### SB (0xFF01) - Serial Data
 ```c
 #define SB_REG 0xFF01
 
-// Registre de données série (8 bits)
+// Registre de donnAes sArie (8 bits)
 u8 serial_data;
 ```
 
-**Pourquoi 8 bits ?** C'est la taille standard pour les communications série de l'époque.
+**Pourquoi 8 bits ?** C'est la taille standard pour les communications sArie de l'Apoque.
 
 ### SC (0xFF02) - Serial Control
 ```c
 #define SC_REG 0xFF02
 
-// Bits de contrôle
+// Bits de contrAle
 #define SC_INTERNAL_CLOCK 0x80  // Utiliser l'horloge interne
 #define SC_CLOCK_SPEED    0x02  // Vitesse (0 = normal, 1 = rapide)
-#define SC_TRANSFER_START 0x80  // Démarrer le transfert
+#define SC_TRANSFER_START 0x80  // DAmarrer le transfert
 #define SC_TRANSFER_FLAG  0x02  // Transfert en cours
 ```
 
-**Pourquoi ces bits ?** Chaque bit contrôle un aspect de la communication :
+**Pourquoi ces bits ?** Chaque bit contrAle un aspect de la communication :
 - **INTERNAL_CLOCK** : Utiliser l'horloge interne (vs externe)
 - **CLOCK_SPEED** : Vitesse de transfert
-- **TRANSFER_START** : Démarrer un transfert
+- **TRANSFER_START** : DAmarrer un transfert
 - **TRANSFER_FLAG** : Indiquer qu'un transfert est en cours
 
 ## Protocole de communication
 
-### Séquence de transfert
-```mermaid
+### SAquence de transfert
+```
 sequenceDiagram
     participant GB1 as Game Boy 1
     participant GB2 as Game Boy 2
     
-    GB1->>GB1: Écrire données dans SB
+    GB1->>GB1: Acrire donnAes dans SB
     GB1->>GB1: Configurer SC (START + CLOCK)
     GB1->>GB2: Envoyer bit par bit
     GB2->>GB2: Recevoir et stocker dans SB
-    GB1->>GB1: Transfert terminé → IRQ
-    GB2->>GB2: Transfert terminé → IRQ
+    GB1->>GB1: Transfert terminA a' IRQ
+    GB2->>GB2: Transfert terminA a' IRQ
 ```
 
-**Pourquoi bit par bit ?** C'est le protocole série standard. Les données sont envoyées un bit à la fois.
+**Pourquoi bit par bit ?** C'est le protocole sArie standard. Les donnAes sont envoyAes un bit A  la fois.
 
 ### Vitesses de transfert
 ```c
@@ -77,21 +77,21 @@ u32 get_serial_speed(u8 sc_reg) {
 }
 ```
 
-**Pourquoi ces vitesses ?** Elles sont calculées à partir de la fréquence CPU (4.194304 MHz) et des diviseurs matériels.
+**Pourquoi ces vitesses ?** Elles sont calculAes A  partir de la frAquence CPU (4.194304 MHz) et des diviseurs matAriels.
 
 ## Gestion du transfert
 
-### Démarrage d'un transfert
+### DAmarrage d'un transfert
 ```c
 void serial_start_transfer(MMU* mmu) {
     u8 sc = mmu_read8(mmu, SC_REG);
     
-    // Vérifier si le transfert est déjà en cours
+    // VArifier si le transfert est dAjA  en cours
     if (sc & SC_TRANSFER_FLAG) {
-        return;  // Transfert déjà en cours
+        return;  // Transfert dAjA  en cours
     }
     
-    // Démarrer le transfert
+    // DAmarrer le transfert
     sc |= SC_TRANSFER_START | SC_TRANSFER_FLAG;
     mmu_write8(mmu, SC_REG, sc);
     
@@ -101,26 +101,26 @@ void serial_start_transfer(MMU* mmu) {
 }
 ```
 
-**Pourquoi vérifier le flag ?** Évite de démarrer plusieurs transferts simultanés.
+**Pourquoi vArifier le flag ?** Avite de dAmarrer plusieurs transferts simultanAs.
 
-### Mise à jour du transfert
+### Mise A  jour du transfert
 ```c
 void serial_tick(MMU* mmu, u8 cycles) {
     u8 sc = mmu_read8(mmu, SC_REG);
     
-    // Vérifier si un transfert est en cours
+    // VArifier si un transfert est en cours
     if (!(sc & SC_TRANSFER_FLAG)) {
         return;
     }
     
-    // Mettre à jour le compteur de cycles
+    // Mettre A  jour le compteur de cycles
     mmu->serial_cycles += cycles;
     
     // Calculer la vitesse de transfert
     u32 speed = get_serial_speed(sc);
     u32 cycles_per_bit = 4194304 / speed;
     
-    // Vérifier si on doit envoyer le bit suivant
+    // VArifier si on doit envoyer le bit suivant
     if (mmu->serial_cycles >= cycles_per_bit) {
         mmu->serial_cycles -= cycles_per_bit;
         serial_send_bit(mmu);
@@ -142,7 +142,7 @@ void serial_send_bit(MMU* mmu) {
     // Passer au bit suivant
     mmu->serial_bit_count++;
     
-    // Vérifier si le transfert est terminé
+    // VArifier si le transfert est terminA
     if (mmu->serial_bit_count >= 8) {
         serial_complete_transfer(mmu);
     }
@@ -160,16 +160,16 @@ void serial_complete_transfer(MMU* mmu) {
     sc &= ~(SC_TRANSFER_START | SC_TRANSFER_FLAG);
     mmu_write8(mmu, SC_REG, sc);
     
-    // Déclencher l'interruption série
+    // DAclencher l'interruption sArie
     request_interrupt(mmu, IRQ_SERIAL);
     
-    // Réinitialiser le compteur
+    // RAinitialiser le compteur
     mmu->serial_bit_count = 0;
     mmu->serial_cycles = 0;
 }
 ```
 
-**Pourquoi déclencher une interruption ?** Pour notifier le CPU que le transfert est terminé.
+**Pourquoi dAclencher une interruption ?** Pour notifier le CPU que le transfert est terminA.
 
 ## Communication externe
 
@@ -182,13 +182,13 @@ typedef struct {
 } SerialConnection;
 
 void serial_send_bit_to_external(u8 bit) {
-    // Simulation : stocker le bit reçu
+    // Simulation : stocker le bit reAu
     if (serial_connection.connected) {
         serial_connection.data |= (bit << (7 - serial_connection.bit_count));
         serial_connection.bit_count++;
         
         if (serial_connection.bit_count >= 8) {
-            // Octet complet reçu
+            // Octet complet reAu
             serial_connection.bit_count = 0;
             serial_connection.data = 0;
         }
@@ -196,7 +196,7 @@ void serial_send_bit_to_external(u8 bit) {
 }
 ```
 
-**Pourquoi simuler ?** Dans un émulateur, on ne peut pas vraiment connecter deux Game Boy physiques.
+**Pourquoi simuler ?** Dans un Amulateur, on ne peut pas vraiment connecter deux Game Boy physiques.
 
 ### Gestion des connexions
 ```c
@@ -211,11 +211,11 @@ bool serial_is_connected() {
 }
 ```
 
-**Pourquoi gérer les connexions ?** Pour simuler la présence/absence d'une Game Boy connectée.
+**Pourquoi gArer les connexions ?** Pour simuler la prAsence/absence d'une Game Boy connectAe.
 
-## Intégration avec la MMU
+## IntAgration avec la MMU
 
-### Lecture du port série
+### Lecture du port sArie
 ```c
 u8 mmu_read_serial(MMU* mmu, u16 addr) {
     switch (addr) {
@@ -229,9 +229,9 @@ u8 mmu_read_serial(MMU* mmu, u16 addr) {
 }
 ```
 
-**Pourquoi passer par la MMU ?** Le CPU accède au port série via le bus mémoire.
+**Pourquoi passer par la MMU ?** Le CPU accAde au port sArie via le bus mAmoire.
 
-### Écriture dans le port série
+### Acriture dans le port sArie
 ```c
 void mmu_write_serial(MMU* mmu, u16 addr, u8 value) {
     switch (addr) {
@@ -248,18 +248,18 @@ void mmu_write_serial(MMU* mmu, u16 addr, u8 value) {
 }
 ```
 
-**Pourquoi démarrer automatiquement ?** Quand on écrit SC avec le bit START, le transfert commence immédiatement.
+**Pourquoi dAmarrer automatiquement ?** Quand on Acrit SC avec le bit START, le transfert commence immAdiatement.
 
 ## Gestion des erreurs
 
-### Détection d'erreurs
+### DAtection d'erreurs
 ```c
 void serial_check_errors(MMU* mmu) {
     u8 sc = mmu_read8(mmu, SC_REG);
     
-    // Vérifier si le transfert est bloqué
+    // VArifier si le transfert est bloquA
     if (sc & SC_TRANSFER_FLAG) {
-        // Vérifier le timeout
+        // VArifier le timeout
         if (mmu->serial_cycles > SERIAL_TIMEOUT) {
             serial_abort_transfer(mmu);
         }
@@ -267,7 +267,7 @@ void serial_check_errors(MMU* mmu) {
 }
 ```
 
-**Pourquoi gérer les erreurs ?** Pour éviter que l'émulateur se bloque si un transfert échoue.
+**Pourquoi gArer les erreurs ?** Pour Aviter que l'Amulateur se bloque si un transfert Achoue.
 
 ### Abandon d'un transfert
 ```c
@@ -278,13 +278,13 @@ void serial_abort_transfer(MMU* mmu) {
     sc &= ~(SC_TRANSFER_START | SC_TRANSFER_FLAG);
     mmu_write8(mmu, SC_REG, sc);
     
-    // Réinitialiser le compteur
+    // RAinitialiser le compteur
     mmu->serial_bit_count = 0;
     mmu->serial_cycles = 0;
 }
 ```
 
-**Pourquoi abandonner ?** Pour éviter que l'émulateur reste bloqué en cas de problème.
+**Pourquoi abandonner ?** Pour Aviter que l'Amulateur reste bloquA en cas de problAme.
 
 ## Initialisation
 
@@ -294,18 +294,18 @@ void serial_init(MMU* mmu) {
     mmu->serial_data = 0x00;
     mmu->serial_control = 0x7E;  // Pas de transfert en cours
     
-    // Réinitialiser les compteurs
+    // RAinitialiser les compteurs
     mmu->serial_bit_count = 0;
     mmu->serial_cycles = 0;
     
-    // Pas de connexion par défaut
+    // Pas de connexion par dAfaut
     serial_connection.connected = false;
 }
 ```
 
-**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au démarrage.
+**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au dAmarrage.
 
-## Tests de conformité
+## Tests de conformitA
 
 ### Test de transfert
 ```c
@@ -313,10 +313,10 @@ void test_serial_transfer() {
     MMU mmu;
     serial_init(&mmu);
     
-    // Configurer les données
+    // Configurer les donnAes
     mmu_write8(&mmu, SB_REG, 0x55);
     
-    // Démarrer le transfert
+    // DAmarrer le transfert
     mmu_write8(&mmu, SC_REG, 0x81);  // START + INTERNAL_CLOCK
     
     // Simuler le transfert
@@ -324,22 +324,22 @@ void test_serial_transfer() {
         serial_tick(&mmu, 512);  // 8192 Hz
     }
     
-    // Vérifier que le transfert est terminé
+    // VArifier que le transfert est terminA
     u8 sc = mmu_read8(&mmu, SC_REG);
     assert(!(sc & SC_TRANSFER_FLAG));
 }
 ```
 
-**Pourquoi ces tests ?** Ils vérifient que le comportement du port série est conforme aux spécifications.
+**Pourquoi ces tests ?** Ils vArifient que le comportement du port sArie est conforme aux spAcifications.
 
-## Références Pan Docs
+## RAfArences Pan Docs
 
 - [Serial Data Transfer](https://gbdev.io/pandocs/Serial_Data_Transfer.html)
 
 ### Modes master/esclave et SC
 
-- `SC` (DMG): bit7=Start, bit0=Source d�horloge (0=externe, 1=interne). En CGB, un mode rapide modifie la vitesse.
-- Master (horloge interne): 8192 Hz (DMG) / 262144 Hz (CGB fast); Slave: cadenc� par l�horloge externe.
-- Fin de transfert: 8 bits �chang�s, `IF.SERIAL` lev�, `SC.bit7` remis � 0.
+- `SC` (DMG): bit7=Start, bit0=Source d'horloge (0=externe, 1=interne). En CGB, un mode rapide modifie la vitesse.
+- Master (horloge interne): 8192 Hz (DMG) / 262144 Hz (CGB fast); Slave: cadence par l'horloge externe.
+- Fin de transfert: 8 bits echanges, `IF.SERIAL` leve, `SC.bit7` remis a 0.
 
-Objectif p�dagogique: distinguer clairement master/slave et valider la lev�e d�IF.SERIAL � la fin du paquet.
+Objectif pedagogique: distinguer clairement master/slave et valider la levee d'IF.SERIAL a la fin du paquet.

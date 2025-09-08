@@ -1,23 +1,23 @@
-# Séquence de démarrage – Spécifications d'implémentation
+﻿# SAquence de dAmarrage a" SpAcifications d'implAmentation
 
-Retour: [Index specs](./README.md) · [Architecture](../architecture.md) · [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
 
 ## Vue d'ensemble
 
-La séquence de démarrage (power-up) de la Game Boy initialise tous les composants avec des valeurs spécifiques. Cette initialisation est cruciale pour la compatibilité des jeux.
+La sAquence de dAmarrage (power-up) de la Game Boy initialise tous les composants avec des valeurs spAcifiques. Cette initialisation est cruciale pour la compatibilitA des jeux.
 
-### Pourquoi une séquence spécifique ?
+### Pourquoi une sAquence spAcifique ?
 
-La Game Boy a un comportement de démarrage précis :
-- **Valeurs initiales** : Chaque registre a une valeur spécifique
+La Game Boy a un comportement de dAmarrage prAcis :
+- **Valeurs initiales** : Chaque registre a une valeur spAcifique
 - **Timing** : L'ordre d'initialisation est important
-- **Compatibilité** : Les jeux s'appuient sur ces valeurs
-- **Stabilité** : Évite les états indéterminés
+- **CompatibilitA** : Les jeux s'appuient sur ces valeurs
+- **StabilitA** : Avite les Atats indAterminAs
 
-## Séquence de démarrage
+## SAquence de dAmarrage
 
-### Étapes du démarrage
-```mermaid
+### Atapes du dAmarrage
+```
 sequenceDiagram
     participant Power as Alimentation
     participant CPU as CPU
@@ -31,25 +31,25 @@ sequenceDiagram
     CPU->>PPU: Initialisation
     CPU->>Timer: Initialisation
     CPU->>MMU: Initialisation
-    CPU->>CPU: Exécution du Boot ROM
+    CPU->>CPU: ExAcution du Boot ROM
     CPU->>CPU: PC = 0x0100 (ROM du jeu)
 ```
 
-**Pourquoi cette séquence ?** L'ordre d'initialisation est important pour éviter les conflits entre composants.
+**Pourquoi cette sAquence ?** L'ordre d'initialisation est important pour Aviter les conflits entre composants.
 
 ### Boot ROM
 ```c
-// Le Boot ROM est exécuté en premier (0x0000-0x00FF)
+// Le Boot ROM est exAcutA en premier (0x0000-0x00FF)
 void boot_rom_execute(CPU* cpu, MMU* mmu) {
-    // Le Boot ROM vérifie l'intégrité de la cartouche
+    // Le Boot ROM vArifie l'intAgritA de la cartouche
     // et affiche le logo Nintendo
     
-    // À la fin, il saute à 0x0100 (début de la ROM du jeu)
+    // A la fin, il saute A  0x0100 (dAbut de la ROM du jeu)
     cpu->pc = 0x0100;
 }
 ```
 
-**Pourquoi un Boot ROM ?** Il vérifie l'intégrité de la cartouche et affiche le logo Nintendo avant de lancer le jeu.
+**Pourquoi un Boot ROM ?** Il vArifie l'intAgritA de la cartouche et affiche le logo Nintendo avant de lancer le jeu.
 
 ## Initialisation du CPU
 
@@ -66,30 +66,30 @@ void cpu_power_up(CPU* cpu) {
     cpu->h = 0x01;
     cpu->l = 0x4D;
     cpu->sp = 0xFFFE;
-    cpu->pc = 0x0000;  // Démarre au Boot ROM
+    cpu->pc = 0x0000;  // DAmarre au Boot ROM
     
-    // État des interruptions
-    cpu->ime = false;  // Interruptions désactivées
+    // Atat des interruptions
+    cpu->ime = false;  // Interruptions dAsactivAes
     cpu->halted = false;
     cpu->halt_bug = false;
 }
 ```
 
-**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au démarrage, importantes pour la compatibilité.
+**Pourquoi ces valeurs ?** Ce sont les valeurs exactes de la Game Boy au dAmarrage, importantes pour la compatibilitA.
 
 ### Flags CPU
 ```c
-// Valeurs des flags au démarrage
+// Valeurs des flags au dAmarrage
 #define POWER_UP_FLAGS 0xB0  // 10110000
 
-// Détail des flags
-#define FLAG_Z 0x80  // 1 (zéro)
+// DAtail des flags
+#define FLAG_Z 0x80  // 1 (zAro)
 #define FLAG_N 0x40  // 0 (pas de soustraction)
 #define FLAG_H 0x20  // 1 (demi-retient)
 #define FLAG_C 0x10  // 0 (pas de retient)
 ```
 
-**Pourquoi ces flags ?** Ils reflètent l'état du CPU après l'initialisation matérielle.
+**Pourquoi ces flags ?** Ils reflAtent l'Atat du CPU aprAs l'initialisation matArielle.
 
 ## Initialisation du PPU
 
@@ -97,7 +97,7 @@ void cpu_power_up(CPU* cpu) {
 ```c
 void ppu_power_up(PPU* ppu) {
     // Valeurs exactes de power-up
-    ppu->lcdc = 0x91;  // LCD activé, BG activé
+    ppu->lcdc = 0x91;  // LCD activA, BG activA
     ppu->stat = 0x85;  // Mode VBlank
     ppu->scy = 0x00;   // Scroll Y
     ppu->scx = 0x00;   // Scroll X
@@ -109,23 +109,23 @@ void ppu_power_up(PPU* ppu) {
     ppu->wy = 0x00;    // Window Y
     ppu->wx = 0x00;    // Window X
     
-    // État interne
+    // Atat interne
     ppu->mode = PPU_MODE_HBLANK;
     ppu->mode_cycles = 0;
     ppu->line_cycles = 0;
 }
 ```
 
-**Pourquoi ces valeurs ?** Elles correspondent à l'état du PPU après l'initialisation matérielle.
+**Pourquoi ces valeurs ?** Elles correspondent A  l'Atat du PPU aprAs l'initialisation matArielle.
 
 ### Mode PPU initial
 ```c
-// Le PPU démarre en mode HBlank
+// Le PPU dAmarre en mode HBlank
 ppu->mode = PPU_MODE_HBLANK;
 ppu->ly = 0x00;  // Ligne 0
 ```
 
-**Pourquoi HBlank ?** C'est le mode le plus sûr pour l'initialisation, sans conflits d'accès.
+**Pourquoi HBlank ?** C'est le mode le plus sAr pour l'initialisation, sans conflits d'accAs.
 
 ## Initialisation des timers
 
@@ -133,27 +133,27 @@ ppu->ly = 0x00;  // Ligne 0
 ```c
 void timer_power_up(Timer* timer) {
     // Valeurs exactes de power-up
-    timer->div = 0xAB;    // DIV commence à 0xAB
-    timer->tima = 0x00;   // TIMA commence à 0x00
-    timer->tma = 0x00;    // TMA commence à 0x00
-    timer->tac = 0xF8;    // TAC commence à 0xF8 (timer désactivé)
+    timer->div = 0xAB;    // DIV commence A  0xAB
+    timer->tima = 0x00;   // TIMA commence A  0x00
+    timer->tma = 0x00;    // TMA commence A  0x00
+    timer->tac = 0xF8;    // TAC commence A  0xF8 (timer dAsactivA)
     
-    // État interne
+    // Atat interne
     timer->div_cycles = 0;
     timer->tima_cycles = 0;
     timer->overflow = false;
 }
 ```
 
-**Pourquoi ces valeurs ?** Elles reflètent l'état des timers après l'initialisation matérielle.
+**Pourquoi ces valeurs ?** Elles reflAtent l'Atat des timers aprAs l'initialisation matArielle.
 
 ### DIV initial
 ```c
-// DIV commence à 0xAB, pas 0x00
+// DIV commence A  0xAB, pas 0x00
 timer->div = 0xAB;
 ```
 
-**Pourquoi 0xAB ?** C'est la valeur exacte de DIV au démarrage, importante pour la synchronisation.
+**Pourquoi 0xAB ?** C'est la valeur exacte de DIV au dAmarrage, importante pour la synchronisation.
 
 ## Initialisation de la MMU
 
@@ -162,8 +162,8 @@ timer->div = 0xAB;
 void mmu_power_up(MMU* mmu) {
     // Valeurs exactes de power-up
     mmu->io[0xFF00 - 0xFF00] = 0xCF;  // P1 (joypad)
-    mmu->io[0xFF01 - 0xFF00] = 0x00;  // SB (série)
-    mmu->io[0xFF02 - 0xFF00] = 0x7E;  // SC (série)
+    mmu->io[0xFF01 - 0xFF00] = 0x00;  // SB (sArie)
+    mmu->io[0xFF02 - 0xFF00] = 0x7E;  // SC (sArie)
     mmu->io[0xFF04 - 0xFF00] = 0xAB;  // DIV
     mmu->io[0xFF05 - 0xFF00] = 0x00;  // TIMA
     mmu->io[0xFF06 - 0xFF00] = 0x00;  // TMA
@@ -181,37 +181,37 @@ void mmu_power_up(MMU* mmu) {
     mmu->io[0xFF49 - 0xFF00] = 0xFF;  // OBP1
     mmu->io[0xFF4A - 0xFF00] = 0x00;  // WY
     mmu->io[0xFF4B - 0xFF00] = 0x00;  // WX
-    mmu->io[0xFFFF - 0xFF00] = 0x00;  // IE (toutes interruptions désactivées)
+    mmu->io[0xFFFF - 0xFF00] = 0x00;  // IE (toutes interruptions dAsactivAes)
 }
 ```
 
-**Pourquoi ces valeurs ?** Ce sont les valeurs exactes des registres IO au démarrage.
+**Pourquoi ces valeurs ?** Ce sont les valeurs exactes des registres IO au dAmarrage.
 
-### Mémoire
+### MAmoire
 ```c
 void mmu_power_up_memory(MMU* mmu) {
-    // WRAM initialisé à 0xFF (pas 0x00)
+    // WRAM initialisA A  0xFF (pas 0x00)
     memset(mmu->wram, 0xFF, sizeof(mmu->wram));
     
-    // VRAM initialisé à 0x00
+    // VRAM initialisA A  0x00
     memset(mmu->vram, 0x00, sizeof(mmu->vram));
     
-    // OAM initialisé à 0x00
+    // OAM initialisA A  0x00
     memset(mmu->oam, 0x00, sizeof(mmu->oam));
     
-    // HRAM initialisé à 0x00
+    // HRAM initialisA A  0x00
     memset(mmu->hram, 0x00, sizeof(mmu->hram));
 }
 ```
 
-**Pourquoi 0xFF pour WRAM ?** C'est le comportement matériel. La WRAM est initialisée à 0xFF, pas 0x00.
+**Pourquoi 0xFF pour WRAM ?** C'est le comportement matAriel. La WRAM est initialisAe A  0xFF, pas 0x00.
 
 ## Initialisation du joypad
 
-### État du joypad
+### Atat du joypad
 ```c
 void joypad_power_up(Joypad* joypad) {
-    // Tous les boutons sont relâchés au démarrage
+    // Tous les boutons sont relAchAs au dAmarrage
     joypad->right = false;
     joypad->left = false;
     joypad->up = false;
@@ -221,16 +221,16 @@ void joypad_power_up(Joypad* joypad) {
     joypad->start = false;
     joypad->select = false;
     
-    // Interruptions désactivées
+    // Interruptions dAsactivAes
     joypad->irq_enabled = false;
     joypad->irq_callback = NULL;
     joypad->irq_user_data = NULL;
 }
 ```
 
-**Pourquoi tous relâchés ?** C'est l'état naturel des boutons au démarrage.
+**Pourquoi tous relAchAs ?** C'est l'Atat naturel des boutons au dAmarrage.
 
-## Séquence complète
+## SAquence complAte
 
 ### Fonction d'initialisation
 ```c
@@ -245,28 +245,28 @@ void emulator_power_up(Emulator* emu) {
     // Charger le Boot ROM
     mmu_load_boot_rom(&emu->mmu);
     
-    // Démarrer l'exécution
+    // DAmarrer l'exAcution
     emu->running = true;
-    emu->cpu.pc = 0x0000;  // Démarre au Boot ROM
+    emu->cpu.pc = 0x0000;  // DAmarre au Boot ROM
 }
 ```
 
-**Pourquoi cette séquence ?** L'ordre d'initialisation est important pour éviter les conflits.
+**Pourquoi cette sAquence ?** L'ordre d'initialisation est important pour Aviter les conflits.
 
 ### Boot ROM
 ```c
 void mmu_load_boot_rom(MMU* mmu) {
-    // Le Boot ROM est chargé dans la zone 0x0000-0x00FF
-    // Il vérifie l'intégrité de la cartouche et affiche le logo Nintendo
+    // Le Boot ROM est chargA dans la zone 0x0000-0x00FF
+    // Il vArifie l'intAgritA de la cartouche et affiche le logo Nintendo
     
-    // À la fin, il saute à 0x0100 (début de la ROM du jeu)
-    // et désactive l'accès au Boot ROM
+    // A la fin, il saute A  0x0100 (dAbut de la ROM du jeu)
+    // et dAsactive l'accAs au Boot ROM
 }
 ```
 
-**Pourquoi un Boot ROM ?** Il fournit une séquence de démarrage standardisée et vérifie l'intégrité de la cartouche.
+**Pourquoi un Boot ROM ?** Il fournit une sAquence de dAmarrage standardisAe et vArifie l'intAgritA de la cartouche.
 
-## Tests de conformité
+## Tests de conformitA
 
 ### Test des valeurs de power-up
 ```c
@@ -274,26 +274,26 @@ void test_power_up_values() {
     Emulator emu;
     emulator_power_up(&emu);
     
-    // Vérifier les valeurs CPU
+    // VArifier les valeurs CPU
     assert(emu.cpu.a == 0x01);
     assert(emu.cpu.f == 0xB0);
     assert(emu.cpu.sp == 0xFFFE);
     assert(emu.cpu.pc == 0x0000);
     
-    // Vérifier les valeurs PPU
+    // VArifier les valeurs PPU
     assert(emu.ppu.lcdc == 0x91);
     assert(emu.ppu.stat == 0x85);
     assert(emu.ppu.ly == 0x00);
     
-    // Vérifier les valeurs Timer
+    // VArifier les valeurs Timer
     assert(emu.timer.div == 0xAB);
     assert(emu.timer.tima == 0x00);
     assert(emu.timer.tac == 0xF8);
 }
 ```
 
-**Pourquoi ces tests ?** Ils vérifient que l'initialisation respecte les valeurs exactes de la Game Boy.
+**Pourquoi ces tests ?** Ils vArifient que l'initialisation respecte les valeurs exactes de la Game Boy.
 
-## Références Pan Docs
+## RAfArences Pan Docs
 
 - [Power-Up Sequence](https://gbdev.io/pandocs/Power_Up_Sequence.html)

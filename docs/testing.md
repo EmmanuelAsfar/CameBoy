@@ -1,14 +1,14 @@
-Retour à l’index: [docs/README.md](./README.md) · [Architecture](./architecture.md) · [Utilisation](./usage.md) · [Scripts](./scripts.md) · [Glossaire](./glossaire.md)
+﻿Retour A  laindex: [docs/README.md](./README.md) A [Architecture](./architecture.md) A [Utilisation](./usage.md) A [Scripts](./scripts.md) A [Glossaire](./glossaire.md)
 
-### Stratégie de tests
+### StratAgie de tests
 
-Ce document décrit les tests unitaires, les tests ROM (série/visuels) et l’organisation des logs.
+Ce document dAcrit les tests unitaires, les tests ROM (sArie/visuels) et laorganisation des logs.
 
 ### Types de tests
 
 - Tests unitaires C: binaire par composant (CPU, MMU, PPU, Timer, Interrupt, Joypad).
-- Tests ROM (dossier `tests/rom/`): petites ROMs affichant texte/sorties série ou visuels (PPM/logs).
-- Conformité Blargg/Mooneye: ROMs de référence à exécuter manuellement/plus tard dans CI.
+- Tests ROM (dossier `tests/rom/`): petites ROMs affichant texte/sorties sArie ou visuels (PPM/logs).
+- ConformitA Blargg/Mooneye: ROMs de rAfArence A  exAcuter manuellement/plus tard dans CI.
 
 ### Lancer les tests unitaires (Windows)
 
@@ -17,7 +17,7 @@ cameboy.bat test
 type logs\test_results.log | more
 ```
 
-Le script compile chaque test en `build\bin\test_*.exe`, les exécute et cumule les résultats.
+Le script compile chaque test en `build\bin\test_*.exe`, les exAcute et cumule les rAsultats.
 
 Sortie attendue (extrait):
 
@@ -31,11 +31,11 @@ SUCCES test_cpu PASSED
 Total: 6/6 tests passed
 ```
 
-Logs associés:
+Logs associAs:
 - `logs\test_build.log`: compilation des tests (OK/FAIL + timestamps)
-- `logs\test_results.log`: exécution agrégée
+- `logs\test_results.log`: exAcution agrAgAe
 
-### Exécuter un test unitaire précis
+### ExAcuter un test unitaire prAcis
 
 ```cmd
 build\bin\test_cpu.exe
@@ -47,28 +47,28 @@ ou recompiler unitairement via Makefile (Linux/macOS possible):
 make test
 ```
 
-### Tests ROM (série/visuels)
+### Tests ROM (sArie/visuels)
 
-Le batch `tests\rom\run_rom_tests.bat` lance un sous-ensemble de ROMs de démonstration et stocke:
-- `.log`: log d’exécution
-- `.serial.txt`: sortie série de la ROM (via 0xFF01)
-- `.ppm`: capture visuelle (si activée par la ROM ou l’émulateur)
+Le batch `tests\rom\run_rom_tests.bat` lance un sous-ensemble de ROMs de dAmonstration et stocke:
+- `.log`: log daexAcution
+- `.serial.txt`: sortie sArie de la ROM (via 0xFF01)
+- `.ppm`: capture visuelle (si activAe par la ROM ou laAmulateur)
 
-Exemple de fichiers générés (dans `logs/rom/`):
+Exemple de fichiers gAnArAs (dans `logs/rom/`):
 - `pass.log`, `pass_serial.txt`, `pass.ppm`
 - `visual_grid.log`, `visual_grid.ppm`
 
-### Critères de conformité (cible)
+### CritAres de conformitA (cible)
 
 - Blargg CPU: toutes les suites `cpu_instrs`, `instr_timing`, `halt_bug`.
 - Mooneye: `acceptance` (timings PPU/Timer/Interrupts), `oam_bug`.
 
 Note: certaines zones sont en cours de stabilisation (voir `README_AGENT.md`).
 
-### Débug et triage
+### DAbug et triage
 
-- Compiler en debug: ajouter `-g` (déjà présent) et lancer sous `gdb` (Linux) ou `lldb`.
-- Inspecter `logs\emulator.log` et `logs\rom\<rom>_serial.txt` pour comprendre les séquences.
-- Pour la GUI, stdout/stderr sont captés en direct dans le panneau Logs, et le Port Série dans le panneau dédié.
+- Compiler en debug: ajouter `-g` (dAjA  prAsent) et lancer sous `gdb` (Linux) ou `lldb`.
+- Inspecter `logs\emulator.log` et `logs\rom\<rom>_serial.txt` pour comprendre les sAquences.
+- Pour la GUI, stdout/stderr sont captAs en direct dans le panneau Logs, et le Port SArie dans le panneau dAdiA.
 
 

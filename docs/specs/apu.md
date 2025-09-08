@@ -1,23 +1,23 @@
-# APU (Audio Processing Unit) – Spécifications d'implémentation
+﻿# APU (Audio Processing Unit) a" SpAcifications d'implAmentation
 
-Retour: [Index specs](./README.md) · [Architecture](../architecture.md)
+Retour: [Index specs](./README.md) A [Architecture](../architecture.md)
 
 ## Vue d'ensemble
 
-L'APU de la Game Boy génère le son via 4 canaux:
-- Canal 1: onde carrée + sweep
-- Canal 2: onde carrée
-- Canal 3: onde personnalisée (wave)
+L'APU de la Game Boy gAnAre le son via 4 canaux:
+- Canal 1: onde carrAe + sweep
+- Canal 2: onde carrAe
+- Canal 3: onde personnalisAe (wave)
 - Canal 4: bruit (LFSR)
 
 ### Pourquoi cette conception ?
-- Économie matérielle: générateurs simples (carré, LFSR) peu coûteux
-- Flexibilité: enveloppes de volume, sweep, duty cycle
-- Compatibilité: registres mappés mémoire pour contrôle depuis le CPU
+- Aconomie matArielle: gAnArateurs simples (carrA, LFSR) peu coAteux
+- FlexibilitA: enveloppes de volume, sweep, duty cycle
+- CompatibilitA: registres mappAs mAmoire pour contrAle depuis le CPU
 
-## Carte des registres (0xFF10–0xFF3F)
+## Carte des registres (0xFF10a"0xFF3F)
 
-```mermaid
+```
 graph TD
   NR10[NR10 (FF10) Sweep C1]
   NR11[NR11 (FF11) Duty/Length C1]
@@ -45,37 +45,37 @@ graph TD
   NR51[NR51 (FF25) Panning]
   NR52[NR52 (FF26) Master On]
 
-  WAVE[Wave RAM FF30–FF3F]
+  WAVE[Wave RAM FF30a"FF3F]
 ```
 
-Réf: [Pan Docs – Audio Registers](https://gbdev.io/pandocs/Audio_Registers.html)
+RAf: [Pan Docs a" Audio Registers](https://gbdev.io/pandocs/Audio_Registers.html)
 
-## Modèle d’horloge et pas audio
+## ModAle dahorloge et pas audio
 
-- Fréquence de base: 4.194304 MHz
+- FrAquence de base: 4.194304 MHz
 - Frame sequencer: 512 Hz (pilote length, sweep, enveloppe)
-- Sortie audio: échantillonnage côté hôte (mixage → buffer) à une fréquence cible (ex: 44100 Hz)
+- Sortie audio: Achantillonnage cAtA hAte (mixage a' buffer) A  une frAquence cible (ex: 44100 Hz)
 
-```mermaid
+```
 sequenceDiagram
   participant CPU
   participant APU
   participant MIX as Mixer/Host
-  CPU->>APU: écrit registres NRxx
+  CPU->>APU: Acrit registres NRxx
   APU->>APU: 512 Hz frame sequencer (length/sweep/envelope)
-  APU->>MIX: ticks audio (génération ondes)
+  APU->>MIX: ticks audio (gAnAration ondes)
   MIX->>MIX: resampling/low-pass vers 44.1 kHz
 ```
 
 ## Canaux
 
-### Canaux 1 et 2 (onde carrée)
+### Canaux 1 et 2 (onde carrAe)
 - Duty cycle: 12.5%, 25%, 50%, 75%
-- Enveloppe volume: montée/descente à intervalle réglable
-- Fréquence: 11 bits (NR13/NR14 ou NR23/NR24)
-- Canal 1: sweep (NR10) modifie la fréquence au fil du temps
+- Enveloppe volume: montAe/descente A  intervalle rAglable
+- FrAquence: 11 bits (NR13/NR14 ou NR23/NR24)
+- Canal 1: sweep (NR10) modifie la frAquence au fil du temps
 
-Implémentation (esquisse):
+ImplAmentation (esquisse):
 ```c
 typedef struct {
   bool enabled; u16 freq; u8 duty; u8 duty_pos;
@@ -93,21 +93,21 @@ static inline int8_t square_sample(SquareChannel* ch) {
 ```
 
 ### Canal 3 (wave)
-- Wave RAM: 32 échantillons 4-bit (FF30–FF3F)
-- Lecture avec facteur d’échelle (NR32)
+- Wave RAM: 32 Achantillons 4-bit (FF30a"FF3F)
+- Lecture avec facteur daAchelle (NR32)
 
 ### Canal 4 (bruit)
-- LFSR 15-bit (ou 7-bit) pour générer du bruit
-- Paramètres: clock shift, width mode, divisor (NR43)
+- LFSR 15-bit (ou 7-bit) pour gAnArer du bruit
+- ParamAtres: clock shift, width mode, divisor (NR43)
 
 ## Sequencer 512 Hz
 
-- Étapes sur 8 ticks (0..7):
+- Atapes sur 8 ticks (0..7):
   - Length: ticks 0,2,4,6
   - Sweep (C1): ticks 2,6
   - Envelope: tick 7
 
-```mermaid
+```
 gantt
   dateFormat X
   axisFormat %s
@@ -127,31 +127,31 @@ gantt
 - NR50: volume gauche/droite master
 - NR51: panning des canaux vers L/R
 - NR52: master on/off + flags canaux actifs
-- Mixer: sommer canaux (avec clipping/scale) → buffer hôte
+- Mixer: sommer canaux (avec clipping/scale) a' buffer hAte
 
 ## Reset / Power-up
 
-- NR52 bit7=0 → APU off; écrire 1 pour activer
-- Réinitialiser canaux, buffers, wave RAM
+- NR52 bit7=0 a' APU off; Acrire 1 pour activer
+- RAinitialiser canaux, buffers, wave RAM
 
-## Tests et conformité
+## Tests et conformitA
 
 - ROMs de tests audio (blargg: dmg_sound, cgb_sound)
-- Vérifier sweep, enveloppes, timing frame sequencer, LFSR
+- VArifier sweep, enveloppes, timing frame sequencer, LFSR
 
-## Références
+## RAfArences
 - [Audio](https://gbdev.io/pandocs/Audio.html)
 - [Audio Registers](https://gbdev.io/pandocs/Audio_Registers.html)
 - [Audio Details](https://gbdev.io/pandocs/Audio_Details.html)
 
 
-### D�tails importants (p�dagogique)
+### Details importants (pedagogique)
 
-- NR52 master on/off: contr�le global des canaux.
-- � DAC off �: mettre � 0 le DAC d�un canal le coupe imm�diatement.
-- Sweep (C1): overflow/invalid freq ? canal coup�; horloge 512 Hz (ticks 2/6 du frame sequencer).
-- Envelope: � zombie mode � (certaines �critures relancent l�enveloppe).
-- Canal 3 (wave): contraintes d�acc�s � la Wave RAM selon l��tat de lecture.
+- NR52 master on/off: controle global des canaux.
+-  DAC off : mettre a 0 le DAC d'un canal le coupe immediatement.
+- Sweep (C1): overflow/invalid freq ? canal coupe; horloge 512 Hz (ticks 2/6 du frame sequencer).
+- Envelope:  zombie mode  (certaines ecritures relancent l'enveloppe).
+- Canal 3 (wave): contraintes d'acces a la Wave RAM selon l'etat de lecture.
 - Length counters: horloge 512 Hz (ticks 0/2/4/6), interactions avec trigger.
 
-R�fs Pan Docs: Audio, Audio Registers, Audio Details.
+Refs Pan Docs: Audio, Audio Registers, Audio Details.

@@ -1,20 +1,20 @@
-# Accès VRAM/OAM – Spécifications d'implémentation
+﻿# AccAs VRAM/OAM a" SpAcifications d'implAmentation
 
-Retour: [Index specs](./README.md) · [Architecture](../architecture.md) · [Utilisation](../usage.md)
+Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Utilisation](../usage.md)
 
 ## Vue d'ensemble
 
-L'accès à la VRAM et à l'OAM est restreint pendant certaines phases du rendu pour éviter les corruptions. Ces restrictions sont cruciales pour la compatibilité des jeux.
+L'accAs A  la VRAM et A  l'OAM est restreint pendant certaines phases du rendu pour Aviter les corruptions. Ces restrictions sont cruciales pour la compatibilitA des jeux.
 
 ### Pourquoi des restrictions ?
 
 Le PPU lit la VRAM et l'OAM pendant le rendu :
-- **VRAM** : Données des tuiles et des cartes
-- **OAM** : Données des sprites
-- **Conflits** : Accès simultanés causent des corruptions
-- **Timing** : Le rendu doit être synchronisé
+- **VRAM** : DonnAes des tuiles et des cartes
+- **OAM** : DonnAes des sprites
+- **Conflits** : AccAs simultanAs causent des corruptions
+- **Timing** : Le rendu doit Atre synchronisA
 
-## Zones concernées
+## Zones concernAes
 
 ### VRAM (0x8000-0x9FFF)
 ```c
@@ -22,15 +22,15 @@ Le PPU lit la VRAM et l'OAM pendant le rendu :
 #define VRAM_END   0x9FFF
 
 // Sous-zones de la VRAM
-#define TILE_DATA_0_START 0x8000  // Données des tuiles (0x8000-0x87FF)
-#define TILE_DATA_1_START 0x8800  // Données des tuiles (0x8800-0x8FFF)
-#define TILE_MAP_0_START  0x9800  // Carte d'arrière-plan 0 (0x9800-0x9BFF)
-#define TILE_MAP_1_START  0x9C00  // Carte d'arrière-plan 1 (0x9C00-0x9FFF)
+#define TILE_DATA_0_START 0x8000  // DonnAes des tuiles (0x8000-0x87FF)
+#define TILE_DATA_1_START 0x8800  // DonnAes des tuiles (0x8800-0x8FFF)
+#define TILE_MAP_0_START  0x9800  // Carte d'arriAre-plan 0 (0x9800-0x9BFF)
+#define TILE_MAP_1_START  0x9C00  // Carte d'arriAre-plan 1 (0x9C00-0x9FFF)
 ```
 
-**Pourquoi ces zones ?** Chaque zone a un rôle spécifique dans le rendu :
-- **TILE_DATA** : Données des tuiles (8x8 pixels)
-- **TILE_MAP** : Cartes d'arrière-plan (quelles tuiles afficher)
+**Pourquoi ces zones ?** Chaque zone a un rAle spAcifique dans le rendu :
+- **TILE_DATA** : DonnAes des tuiles (8x8 pixels)
+- **TILE_MAP** : Cartes d'arriAre-plan (quelles tuiles afficher)
 
 ### OAM (0xFE00-0xFE9F)
 ```c
@@ -41,22 +41,22 @@ Le PPU lit la VRAM et l'OAM pendant le rendu :
 typedef struct {
     u8 y;        // Position Y
     u8 x;        // Position X
-    u8 tile;     // Numéro de tuile
-    u8 flags;    // Attributs (priorité, palette, etc.)
+    u8 tile;     // NumAro de tuile
+    u8 flags;    // Attributs (prioritA, palette, etc.)
 } Sprite;
 ```
 
-**Pourquoi cette structure ?** C'est le format standard des sprites Game Boy, défini par le matériel.
+**Pourquoi cette structure ?** C'est le format standard des sprites Game Boy, dAfini par le matAriel.
 
 ## Modes PPU et restrictions
 
 ### Restrictions par mode
 ```c
 typedef enum {
-    PPU_MODE_HBLANK = 0,      // HBlank : accès libre
-    PPU_MODE_VBLANK = 1,      // VBlank : accès libre
-    PPU_MODE_OAM_SEARCH = 2,  // OAM Search : OAM bloqué
-    PPU_MODE_PIXEL_TRANSFER = 3  // Pixel Transfer : VRAM et OAM bloqués
+    PPU_MODE_HBLANK = 0,      // HBlank : accAs libre
+    PPU_MODE_VBLANK = 1,      // VBlank : accAs libre
+    PPU_MODE_OAM_SEARCH = 2,  // OAM Search : OAM bloquA
+    PPU_MODE_PIXEL_TRANSFER = 3  // Pixel Transfer : VRAM et OAM bloquAs
 } PPUMode;
 
 bool can_access_vram(PPUMode mode) {
@@ -68,15 +68,15 @@ bool can_access_oam(PPUMode mode) {
 }
 ```
 
-**Pourquoi ces restrictions ?** Chaque mode correspond à une phase du rendu :
-- **HBlank/VBlank** : Pas de rendu actif, accès libre
-- **OAM Search** : Lecture de l'OAM, écriture bloquée
-- **Pixel Transfer** : Lecture de la VRAM, écriture bloquée
+**Pourquoi ces restrictions ?** Chaque mode correspond A  une phase du rendu :
+- **HBlank/VBlank** : Pas de rendu actif, accAs libre
+- **OAM Search** : Lecture de l'OAM, Acriture bloquAe
+- **Pixel Transfer** : Lecture de la VRAM, Acriture bloquAe
 
 ### Diagramme des restrictions
-```mermaid
+```
 gantt
-    title Restrictions d'accès VRAM/OAM
+    title Restrictions d'accAs VRAM/OAM
     dateFormat X
     axisFormat %s
     
@@ -86,29 +86,29 @@ gantt
     
     section Mode 2 (OAM Search)
     VRAM libre    :204, 284
-    OAM bloqué    :204, 284
+    OAM bloquA    :204, 284
     
     section Mode 3 (Pixel Transfer)
-    VRAM bloqué   :284, 456
-    OAM bloqué    :284, 456
+    VRAM bloquA   :284, 456
+    OAM bloquA    :284, 456
 ```
 
-## Gestion des accès
+## Gestion des accAs
 
-### Vérification des accès
+### VArification des accAs
 ```c
 bool mmu_can_access_vram(MMU* mmu, u16 addr) {
-    // Vérifier que l'adresse est dans la VRAM
+    // VArifier que l'adresse est dans la VRAM
     if (addr < VRAM_START || addr > VRAM_END) {
         return true;  // Pas de VRAM
     }
     
-    // Vérifier le mode PPU
+    // VArifier le mode PPU
     if (!can_access_vram(mmu->ppu.mode)) {
-        return false;  // Accès bloqué
+        return false;  // AccAs bloquA
     }
     
-    // Vérifier le DMA
+    // VArifier le DMA
     if (mmu->dma.active) {
         return false;  // DMA en cours
     }
@@ -117,17 +117,17 @@ bool mmu_can_access_vram(MMU* mmu, u16 addr) {
 }
 
 bool mmu_can_access_oam(MMU* mmu, u16 addr) {
-    // Vérifier que l'adresse est dans l'OAM
+    // VArifier que l'adresse est dans l'OAM
     if (addr < OAM_START || addr > OAM_END) {
         return true;  // Pas d'OAM
     }
     
-    // Vérifier le mode PPU
+    // VArifier le mode PPU
     if (!can_access_oam(mmu->ppu.mode)) {
-        return false;  // Accès bloqué
+        return false;  // AccAs bloquA
     }
     
-    // Vérifier le DMA
+    // VArifier le DMA
     if (mmu->dma.active) {
         return false;  // DMA en cours
     }
@@ -136,7 +136,7 @@ bool mmu_can_access_oam(MMU* mmu, u16 addr) {
 }
 ```
 
-**Pourquoi ces vérifications ?** Elles empêchent les accès non autorisés qui causeraient des corruptions.
+**Pourquoi ces vArifications ?** Elles empAchent les accAs non autorisAs qui causeraient des corruptions.
 
 ### Lecture avec restrictions
 ```c
@@ -159,13 +159,13 @@ u8 mmu_read_oam(MMU* mmu, u16 addr) {
 }
 ```
 
-**Pourquoi 0xFF ?** C'est le comportement matériel. Les zones bloquées retournent 0xFF.
+**Pourquoi 0xFF ?** C'est le comportement matAriel. Les zones bloquAes retournent 0xFF.
 
-### Écriture avec restrictions
+### Acriture avec restrictions
 ```c
 void mmu_write_vram(MMU* mmu, u16 addr, u8 value) {
     if (!mmu_can_access_vram(mmu, addr)) {
-        // Pendant les restrictions, ignorer l'écriture
+        // Pendant les restrictions, ignorer l'Acriture
         return;
     }
     
@@ -174,7 +174,7 @@ void mmu_write_vram(MMU* mmu, u16 addr, u8 value) {
 
 void mmu_write_oam(MMU* mmu, u16 addr, u8 value) {
     if (!mmu_can_access_oam(mmu, addr)) {
-        // Pendant les restrictions, ignorer l'écriture
+        // Pendant les restrictions, ignorer l'Acriture
         return;
     }
     
@@ -182,20 +182,20 @@ void mmu_write_oam(MMU* mmu, u16 addr, u8 value) {
 }
 ```
 
-**Pourquoi ignorer ?** Pendant les restrictions, les écritures sont ignorées pour éviter les corruptions.
+**Pourquoi ignorer ?** Pendant les restrictions, les Acritures sont ignorAes pour Aviter les corruptions.
 
 ## Gestion des conflits
 
-### Détection des conflits
+### DAtection des conflits
 ```c
 void mmu_check_access_conflicts(MMU* mmu, u16 addr, bool is_write) {
     if (addr >= VRAM_START && addr <= VRAM_END) {
         if (!mmu_can_access_vram(mmu, addr)) {
             if (is_write) {
-                // Écriture bloquée dans la VRAM
+                // Acriture bloquAe dans la VRAM
                 mmu->vram_write_blocked = true;
             } else {
-                // Lecture bloquée dans la VRAM
+                // Lecture bloquAe dans la VRAM
                 mmu->vram_read_blocked = true;
             }
         }
@@ -204,10 +204,10 @@ void mmu_check_access_conflicts(MMU* mmu, u16 addr, bool is_write) {
     if (addr >= OAM_START && addr <= OAM_END) {
         if (!mmu_can_access_oam(mmu, addr)) {
             if (is_write) {
-                // Écriture bloquée dans l'OAM
+                // Acriture bloquAe dans l'OAM
                 mmu->oam_write_blocked = true;
             } else {
-                // Lecture bloquée dans l'OAM
+                // Lecture bloquAe dans l'OAM
                 mmu->oam_read_blocked = true;
             }
         }
@@ -215,26 +215,26 @@ void mmu_check_access_conflicts(MMU* mmu, u16 addr, bool is_write) {
 }
 ```
 
-**Pourquoi détecter ?** Pour informer l'utilisateur des accès bloqués et aider au débogage.
+**Pourquoi dAtecter ?** Pour informer l'utilisateur des accAs bloquAs et aider au dAbogage.
 
 ### Gestion des erreurs
 ```c
 void mmu_handle_access_error(MMU* mmu, u16 addr, bool is_write) {
     if (mmu->vram_write_blocked || mmu->oam_write_blocked) {
         // Log de l'erreur
-        printf("ERREUR: Écriture bloquée à 0x%04X (mode PPU: %d)\n", 
+        printf("ERREUR: Acriture bloquAe A  0x%04X (mode PPU: %d)\n", 
                addr, mmu->ppu.mode);
     }
     
     if (mmu->vram_read_blocked || mmu->oam_read_blocked) {
         // Log de l'erreur
-        printf("ERREUR: Lecture bloquée à 0x%04X (mode PPU: %d)\n", 
+        printf("ERREUR: Lecture bloquAe A  0x%04X (mode PPU: %d)\n", 
                addr, mmu->ppu.mode);
     }
 }
 ```
 
-**Pourquoi gérer les erreurs ?** Pour aider au débogage et à la compréhension des restrictions.
+**Pourquoi gArer les erreurs ?** Pour aider au dAbogage et A  la comprAhension des restrictions.
 
 ## Optimisations
 
@@ -259,9 +259,9 @@ void mmu_update_access_cache(MMU* mmu) {
 }
 ```
 
-**Pourquoi un cache ?** Évite de recalculer les restrictions à chaque accès.
+**Pourquoi un cache ?** Avite de recalculer les restrictions A  chaque accAs.
 
-### Vérification rapide
+### VArification rapide
 ```c
 bool mmu_can_access_vram_fast(MMU* mmu, u16 addr) {
     if (addr < VRAM_START || addr > VRAM_END) {
@@ -273,9 +273,9 @@ bool mmu_can_access_vram_fast(MMU* mmu, u16 addr) {
 }
 ```
 
-**Pourquoi cette optimisation ?** Améliore les performances en évitant les calculs répétitifs.
+**Pourquoi cette optimisation ?** AmAliore les performances en Avitant les calculs rApAtitifs.
 
-## Tests de conformité
+## Tests de conformitA
 
 ### Test des restrictions
 ```c
@@ -283,29 +283,29 @@ void test_vram_access_restrictions() {
     MMU mmu;
     mmu_init(&mmu);
     
-    // Mode OAM Search (VRAM libre, OAM bloqué)
+    // Mode OAM Search (VRAM libre, OAM bloquA)
     mmu.ppu.mode = PPU_MODE_OAM_SEARCH;
     
-    // VRAM doit être accessible
+    // VRAM doit Atre accessible
     assert(mmu_can_access_vram(&mmu, 0x8000));
     
-    // OAM doit être bloqué
+    // OAM doit Atre bloquA
     assert(!mmu_can_access_oam(&mmu, 0xFE00));
     
-    // Mode Pixel Transfer (VRAM et OAM bloqués)
+    // Mode Pixel Transfer (VRAM et OAM bloquAs)
     mmu.ppu.mode = PPU_MODE_PIXEL_TRANSFER;
     
-    // VRAM doit être bloqué
+    // VRAM doit Atre bloquA
     assert(!mmu_can_access_vram(&mmu, 0x8000));
     
-    // OAM doit être bloqué
+    // OAM doit Atre bloquA
     assert(!mmu_can_access_oam(&mmu, 0xFE00));
 }
 ```
 
-**Pourquoi ces tests ?** Ils vérifient que les restrictions sont appliquées correctement.
+**Pourquoi ces tests ?** Ils vArifient que les restrictions sont appliquAes correctement.
 
-## Références Pan Docs
+## RAfArences Pan Docs
 
 - [Accessing VRAM and OAM](https://gbdev.io/pandocs/Accessing_VRAM_and_OAM.html)
 - [OAM Corruption Bug](https://gbdev.io/pandocs/OAM_Corruption_Bug.html)

@@ -1,42 +1,42 @@
-# Spécifications d'implémentation CameBoy
+﻿# SpAcifications d'implAmentation CameBoy
 
-Cette section synthétise, en français et de façon didactique, les règles à appliquer pour coder l'émulateur, avec explications « expert » et « non-expert » (déjargonisées) et schémas.
+Cette section synthAtise, en franAais et de faAon didactique, les rAgles A  appliquer pour coder l'Amulateur, avec explications A expert A et A non-expert A (dAjargonisAes) et schAmas.
 
 ## Pourquoi cette approche ?
 
-L'émulation Game Boy nécessite de reproduire fidèlement le comportement matériel. Chaque détail compte car les jeux s'appuient sur des comportements spécifiques, parfois non documentés, pour fonctionner correctement.
+L'Amulation Game Boy nAcessite de reproduire fidAlement le comportement matAriel. Chaque dAtail compte car les jeux s'appuient sur des comportements spAcifiques, parfois non documentAs, pour fonctionner correctement.
 
-## Structure des spécifications
+## Structure des spAcifications
 
-- [Mémoire (Memory Map)](./memory.md) - Comment organiser l'accès aux données
+- [MAmoire (Memory Map)](./memory.md) - Comment organiser l'accAs aux donnAes
 - [CPU (LR35902)](./cpu.md) - Le cerveau de la Game Boy
-- [PPU (Vidéo)](./ppu.md) - Comment dessiner l'écran
+- [PPU (VidAo)](./ppu.md) - Comment dessiner l'Acran
 - [Timers](./timers.md) - Compteurs et minuteries
-- [Interruptions](./interrupts.md) - Gestion des événements
-- [Joypad](./joypad.md) - Contrôles utilisateur
-- [Port Série](./serial.md) - Communication externe
+- [Interruptions](./interrupts.md) - Gestion des AvAnements
+- [Joypad](./joypad.md) - ContrAles utilisateur
+- [Port SArie](./serial.md) - Communication externe
 - [MBC (Cartouches)](./mbc.md) - Gestion des cartouches
-- [DMA/OAM](./dma.md) - Transferts de données rapides
-- [Accès VRAM/OAM](./vram-access.md) - Restrictions d'accès
-- [Séquence de démarrage](./power-up.md) - Initialisation système
-- [APU (Audio)](./apu.md) - Génération sonore et registres
+- [DMA/OAM](./dma.md) - Transferts de donnAes rapides
+- [AccAs VRAM/OAM](./vram-access.md) - Restrictions d'accAs
+- [SAquence de dAmarrage](./power-up.md) - Initialisation systAme
+- [APU (Audio)](./apu.md) - GAnAration sonore et registres
 - [Bug de corruption OAM](./oam-bug.md) - Cas limites PPU
-- [CGB (Game Boy Color)](./cgb.md) - Différences et cadrage
+- [CGB (Game Boy Color)](./cgb.md) - DiffArences et cadrage
 
 ## Pour en savoir plus (optionnel)
 
 - Super Game Boy (SGB): commandes et transferts
 - Infrarouge (CGB): communication IR
-- Accessoires: Imprimante, Caméra, Adaptateur 4 joueurs
-- Connectique: ports externes et câblage
+- Accessoires: Imprimante, CamAra, Adaptateur 4 joueurs
+- Connectique: ports externes et cAblage
 - Cheats: Game Genie/Shark
 - Comparaison LR35902 vs Z80
 
-Réfs correspondantes: voir [Pan Docs](https://gbdev.io/pandocs/)
+RAfs correspondantes: voir [Pan Docs](https://gbdev.io/pandocs/)
 
-## Comment utiliser ces spécifications
+## Comment utiliser ces spAcifications
 
-1. **Lisez d'abord** la section "Pourquoi ça fonctionne comme ça" pour comprendre le contexte
-2. **Consultez** les schémas pour visualiser les flux
-3. **Implémentez** étape par étape en respectant les contraintes
-4. **Testez** avec les suites Blargg/Mooneye pour valider la conformité
+1. **Lisez d'abord** la section "Pourquoi Aa fonctionne comme Aa" pour comprendre le contexte
+2. **Consultez** les schAmas pour visualiser les flux
+3. **ImplAmentez** Atape par Atape en respectant les contraintes
+4. **Testez** avec les suites Blargg/Mooneye pour valider la conformitA

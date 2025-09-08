@@ -1,17 +1,17 @@
-# Joypad – Spécifications d'implémentation
+﻿# Joypad a" SpAcifications d'implAmentation
 
-Retour: [Index specs](./README.md) · [Architecture](../architecture.md) · [Tests](../testing.md)
+Retour: [Index specs](./README.md) A [Architecture](../architecture.md) A [Tests](../testing.md)
 
 ## Vue d'ensemble
 
-Le joypad de la Game Boy gère les entrées utilisateur via un système de matrices de boutons. C'est un composant essentiel pour l'interaction avec les jeux.
+Le joypad de la Game Boy gAre les entrAes utilisateur via un systAme de matrices de boutons. C'est un composant essentiel pour l'interaction avec les jeux.
 
 ### Pourquoi cette approche ?
 
-La Game Boy utilise un système de matrices pour économiser les broches :
+La Game Boy utilise un systAme de matrices pour Aconomiser les broches :
 - **8 boutons** : 4 directions + 4 boutons d'action
-- **2 lignes** : Sélection des groupes de boutons
-- **1 registre** : P1 (0xFF00) pour tout gérer
+- **2 lignes** : SAlection des groupes de boutons
+- **1 registre** : P1 (0xFF00) pour tout gArer
 
 ## Structure du joypad
 
@@ -34,7 +34,7 @@ typedef enum {
 - **Boutons d'action** : A, B, Start, Select
 
 ### Matrice de boutons
-```mermaid
+```
 graph TD
     A[P1 Registre] --> B[P15: Directions]
     A --> C[P14: Boutons]
@@ -46,7 +46,7 @@ graph TD
     style C fill:#bfb,stroke:#333,stroke-width:2px
 ```
 
-**Pourquoi une matrice ?** Économie de broches. Au lieu d'avoir 8 broches pour 8 boutons, on utilise 2 broches de sélection + 4 broches de lecture.
+**Pourquoi une matrice ?** Aconomie de broches. Au lieu d'avoir 8 broches pour 8 boutons, on utilise 2 broches de sAlection + 4 broches de lecture.
 
 ## Registre P1 (0xFF00)
 
@@ -54,7 +54,7 @@ graph TD
 ```c
 #define P1_REG 0xFF00
 
-// Bits de sélection (écriture)
+// Bits de sAlection (Acriture)
 #define P1_SELECT_DIRECTIONS 0x20  // P15 = 0, P14 = 1
 #define P1_SELECT_BUTTONS   0x10  // P15 = 1, P14 = 0
 #define P1_SELECT_NONE      0x30  // P15 = 1, P14 = 1
@@ -70,7 +70,7 @@ graph TD
 #define P1_START  0x08
 ```
 
-**Pourquoi cette organisation ?** Les bits de sélection permettent de choisir quel groupe de boutons lire, les bits de lecture indiquent quels boutons sont pressés.
+**Pourquoi cette organisation ?** Les bits de sAlection permettent de choisir quel groupe de boutons lire, les bits de lecture indiquent quels boutons sont pressAs.
 
 ### Lecture du joypad
 ```c
@@ -78,17 +78,17 @@ u8 joypad_read(MMU* mmu) {
     u8 p1 = mmu_read8(mmu, P1_REG);
     u8 result = 0xFF;
     
-    // Vérifier quelle ligne est sélectionnée
+    // VArifier quelle ligne est sAlectionnAe
     if (!(p1 & P1_SELECT_DIRECTIONS)) {
         // Lire les directions
-        result &= ~P1_RIGHT;  // 0 = pressé
+        result &= ~P1_RIGHT;  // 0 = pressA
         if (mmu->joypad->right) result |= P1_RIGHT;
         // ... autres directions
     }
     
     if (!(p1 & P1_SELECT_BUTTONS)) {
         // Lire les boutons
-        result &= ~P1_A;  // 0 = pressé
+        result &= ~P1_A;  // 0 = pressA
         if (mmu->joypad->a) result |= P1_A;
         // ... autres boutons
     }
@@ -97,18 +97,18 @@ u8 joypad_read(MMU* mmu) {
 }
 ```
 
-**Pourquoi 0 = pressé ?** C'est le comportement matériel. Un bouton pressé court-circuite la ligne, donnant 0.
+**Pourquoi 0 = pressA ?** C'est le comportement matAriel. Un bouton pressA court-circuite la ligne, donnant 0.
 
-## Gestion des entrées
+## Gestion des entrAes
 
-### État des boutons
+### Atat des boutons
 ```c
 typedef struct {
-    // État actuel des boutons
+    // Atat actuel des boutons
     bool right, left, up, down;
     bool a, b, start, select;
     
-    // État précédent (pour détecter les changements)
+    // Atat prAcAdent (pour dAtecter les changements)
     bool prev_right, prev_left, prev_up, prev_down;
     bool prev_a, prev_b, prev_start, prev_select;
     
@@ -119,17 +119,17 @@ typedef struct {
 } Joypad;
 ```
 
-**Pourquoi stocker l'état précédent ?** Pour détecter les transitions (appui/relâchement) et déclencher des événements.
+**Pourquoi stocker l'Atat prAcAdent ?** Pour dAtecter les transitions (appui/relAchement) et dAclencher des AvAnements.
 
-### Mise à jour des boutons
+### Mise A  jour des boutons
 ```c
 void joypad_update(Joypad* joypad, u8 button, bool pressed) {
-    // Mettre à jour l'état précédent
+    // Mettre A  jour l'Atat prAcAdent
     joypad->prev_right = joypad->right;
     joypad->prev_left = joypad->left;
     // ... autres boutons
     
-    // Mettre à jour l'état actuel
+    // Mettre A  jour l'Atat actuel
     switch (button) {
         case JOYPAD_RIGHT:  joypad->right = pressed; break;
         case JOYPAD_LEFT:   joypad->left = pressed; break;
@@ -141,21 +141,21 @@ void joypad_update(Joypad* joypad, u8 button, bool pressed) {
         case JOYPAD_SELECT: joypad->select = pressed; break;
     }
     
-    // Vérifier les changements
+    // VArifier les changements
     joypad_check_changes(joypad);
 }
 ```
 
-**Pourquoi vérifier les changements ?** Pour déclencher des événements (interruptions, callbacks) seulement quand l'état change.
+**Pourquoi vArifier les changements ?** Pour dAclencher des AvAnements (interruptions, callbacks) seulement quand l'Atat change.
 
 ## Interruptions joypad
 
-### Déclenchement d'interruption
+### DAclenchement d'interruption
 ```c
 void joypad_check_changes(Joypad* joypad) {
     if (!joypad->irq_enabled) return;
     
-    // Vérifier si un bouton a été pressé
+    // VArifier si un bouton a AtA pressA
     bool button_pressed = false;
     if (joypad->right && !joypad->prev_right) button_pressed = true;
     if (joypad->left && !joypad->prev_left) button_pressed = true;
@@ -172,7 +172,7 @@ void joypad_check_changes(Joypad* joypad) {
 }
 ```
 
-**Pourquoi seulement les appuis ?** C'est le comportement de la Game Boy. Les interruptions joypad se déclenchent seulement à l'appui, pas au relâchement.
+**Pourquoi seulement les appuis ?** C'est le comportement de la Game Boy. Les interruptions joypad se dAclenchent seulement A  l'appui, pas au relAchement.
 
 ### Configuration des interruptions
 ```c
@@ -186,9 +186,9 @@ void joypad_enable_irq(Joypad* joypad, bool enable) {
 }
 ```
 
-**Pourquoi un callback ?** Permet de découpler le joypad de la MMU. Le joypad peut signaler les changements sans connaître les détails de la MMU.
+**Pourquoi un callback ?** Permet de dAcoupler le joypad de la MMU. Le joypad peut signaler les changements sans connaAtre les dAtails de la MMU.
 
-## Intégration avec la MMU
+## IntAgration avec la MMU
 
 ### Lecture depuis le CPU
 ```c
@@ -200,13 +200,13 @@ u8 mmu_read_joypad(MMU* mmu, u16 addr) {
 }
 ```
 
-**Pourquoi passer par la MMU ?** Le CPU lit le joypad via le bus mémoire, pas directement.
+**Pourquoi passer par la MMU ?** Le CPU lit le joypad via le bus mAmoire, pas directement.
 
-### Écriture depuis le CPU
+### Acriture depuis le CPU
 ```c
 void mmu_write_joypad(MMU* mmu, u16 addr, u8 value) {
     if (addr == P1_REG) {
-        // L'écriture dans P1 ne change que les bits de sélection
+        // L'Acriture dans P1 ne change que les bits de sAlection
         u8 current = mmu_read8(mmu, P1_REG);
         u8 new_value = (current & 0x0F) | (value & 0xF0);
         mmu_write8(mmu, P1_REG, new_value);
@@ -214,11 +214,11 @@ void mmu_write_joypad(MMU* mmu, u16 addr, u8 value) {
 }
 ```
 
-**Pourquoi préserver les bits de lecture ?** Les bits de lecture sont contrôlés par l'état des boutons, pas par l'écriture.
+**Pourquoi prAserver les bits de lecture ?** Les bits de lecture sont contrAlAs par l'Atat des boutons, pas par l'Acriture.
 
-## Gestion des entrées multiples
+## Gestion des entrAes multiples
 
-### Détection des combinaisons
+### DAtection des combinaisons
 ```c
 bool joypad_is_combination_pressed(Joypad* joypad, u8 buttons) {
     bool all_pressed = true;
@@ -236,12 +236,12 @@ bool joypad_is_combination_pressed(Joypad* joypad, u8 buttons) {
 }
 ```
 
-**Pourquoi gérer les combinaisons ?** Certains jeux utilisent des combinaisons de boutons (ex: A+B pour sauvegarder).
+**Pourquoi gArer les combinaisons ?** Certains jeux utilisent des combinaisons de boutons (ex: A+B pour sauvegarder).
 
 ### Anti-rebond
 ```c
 void joypad_debounce(Joypad* joypad) {
-    // Attendre quelques frames avant de considérer un changement valide
+    // Attendre quelques frames avant de considArer un changement valide
     static u8 debounce_counter = 0;
     
     if (debounce_counter > 0) {
@@ -249,7 +249,7 @@ void joypad_debounce(Joypad* joypad) {
         return;
     }
     
-    // Vérifier les changements seulement si le debounce est terminé
+    // VArifier les changements seulement si le debounce est terminA
     joypad_check_changes(joypad);
     
     if (joypad_has_changes(joypad)) {
@@ -258,7 +258,7 @@ void joypad_debounce(Joypad* joypad) {
 }
 ```
 
-**Pourquoi l'anti-rebond ?** Évite les appuis multiples accidentels dus aux vibrations mécaniques.
+**Pourquoi l'anti-rebond ?** Avite les appuis multiples accidentels dus aux vibrations mAcaniques.
 
 ## Initialisation
 
@@ -282,9 +282,9 @@ void joypad_init(Joypad* joypad) {
 }
 ```
 
-**Pourquoi ces valeurs ?** Tous les boutons sont relâchés au démarrage.
+**Pourquoi ces valeurs ?** Tous les boutons sont relAchAs au dAmarrage.
 
-## Tests de conformité
+## Tests de conformitA
 
 ### Test de lecture
 ```c
@@ -295,17 +295,17 @@ void test_joypad_read() {
     // Simuler un appui sur A
     joypad.a = true;
     
-    // Lire avec P1 configuré pour les boutons
+    // Lire avec P1 configurA pour les boutons
     u8 p1 = P1_SELECT_BUTTONS;
     u8 result = joypad_read_with_p1(&joypad, p1);
     
-    // A doit être à 0 (pressé)
+    // A doit Atre A  0 (pressA)
     assert(!(result & P1_A));
 }
 ```
 
-**Pourquoi ces tests ?** Ils vérifient que le comportement du joypad est conforme aux spécifications.
+**Pourquoi ces tests ?** Ils vArifient que le comportement du joypad est conforme aux spAcifications.
 
-## Références Pan Docs
+## RAfArences Pan Docs
 
 - [Joypad Input](https://gbdev.io/pandocs/Joypad_Input.html)
