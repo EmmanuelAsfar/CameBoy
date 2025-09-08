@@ -833,6 +833,8 @@ void test_ppu_window_edge_cases(void) {
     assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 3));
     
     // Test WY = 144 (window après l'écran)
+    // Remettre la BG map à 0 pour que le fond soit bien "background" par défaut
+    vram[0x1800] = 0; // BG map / window map 9800h, (0,0)
     ppu.wy = 144; ppu.wx = 7;
     ppu.ly = 0; 
     // Nettoyer le framebuffer avant le test
@@ -874,7 +876,8 @@ void test_ppu_window_edge_cases(void) {
     ppu.lcdc = 0x91 | 0x20; // Tile selection 8800h
     ppu.wy = 0; ppu.wx = 7;
     vram[0x1800] = 0x80; // Tile -128 (0x80) dans window map
-    vram[0] = 0xFF; vram[1] = 0xFF; // Tile -128: couleur 3
+    // En addressing signé (0x8800), la tile -128 commence à 0x8800 => index 0x8800-0x8000 = 0x800 dans le buffer VRAM
+    vram[0x800] = 0xFF; vram[0x801] = 0xFF; // Tile -128: couleur 3
     ppu.ly = 0; ppu_render_line(&ppu, vram);
     assert(ppu.framebuffer[0] == ppu_get_pixel_color(&ppu, 3));
 }

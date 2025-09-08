@@ -207,6 +207,10 @@ void ppu_render_line(PPU* ppu, u8* vram) {
     bool tile_sel_8000 = (ppu->lcdc & 0x10) != 0;
 
     u8 line = ppu->ly;
+    if (ppu->wy >= 144) {
+        // Fenêtre hors écran verticalement: désactiver pour cette ligne
+        win_enable = false;
+    }
 
     // Buffer des indices BG/Window pour la priorité sprites (0..3)
     u8 bg_index_line[GB_WIDTH];
@@ -215,13 +219,17 @@ void ppu_render_line(PPU* ppu, u8* vram) {
         u8 tile_y = 0, pixel_y = 0;
         u16 map_addr = 0;
 
-        if (win_enable && line >= ppu->wy) {
+        // Fenêtre visible si 0 <= WY <= 143, avec clamp horizontal (WX-7 peut être < 0)
+        if (win_enable && ppu->wy < 144 && line >= ppu->wy) {
             int wx_screen = (int)ppu->wx - 7; // Pan Docs: WX = window X + 7
-            if (x >= wx_screen && wx_screen < GB_WIDTH) {
+            // Comportement de clamp: si WX-7 < 0, la fenêtre est visible mais démarre visuellement
+            // un pixel après le bord gauche, et son index de tuile redémarre à 0.
+            int win_start_x = wx_screen < 0 ? 1 : wx_screen;
+            if (x >= win_start_x && wx_screen < GB_WIDTH) {
                 tile_y  = (u8)((line - ppu->wy) >> 3);
                 pixel_y = (u8)((line - ppu->wy) & 7);
-                u8 tile_x  = (u8)((x - wx_screen) >> 3);
-                u8 pixel_x = (u8)((x - wx_screen) & 7);
+                u8 tile_x  = (u8)((x - win_start_x) >> 3);
+                u8 pixel_x = (u8)((x - win_start_x) & 7);
                 map_addr = win_map + (tile_y * 32) + tile_x;
                 u8 tile_index = vram[map_addr - 0x8000];
                 u16 data_addr;
