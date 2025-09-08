@@ -560,7 +560,7 @@ echo ^| **Total des tests** ^| %total% ^| >> "%TEST_MD%"
 echo ^| **Tests réussis** ^| %passed% ^| >> "%TEST_MD%"
 set /a "FAILED=%total%-%passed%"
 echo ^| **Tests échoués** ^| !FAILED! ^| >> "%TEST_MD%"
-echo ^| **Taux de réussite** ^| %PERCENTAGE%%%% ^| >> "%TEST_MD%"
+echo ^| **Taux de reussite** ^| %PERCENTAGE%%%% ^| >> "%TEST_MD%"
 echo. >> "%TEST_MD%"
 
 REM Compter les tests par rubrique
