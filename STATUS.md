@@ -7,18 +7,8 @@ This file tracks the live state of the project for all contributors: what passes
 
 Unit Test Status
 ----------------
-- CPU: PASS (24/24)
-- MMU: PASS (10/10)
-- Interrupts: PASS (8/8)
-- Joypad: PASS (7/7) — includes IRQ trigger
-- Timer: FAIL — Overflow behavior mismatch
-  - Reference: `logs/test_results.log`
-  - Failure: `tests/unit/test_timer.c:174` expects TIMA reload to TMA on overflow and proper IRQ flagging
-  - Action: validate TIMA increment on falling edge of selected DIV bit, reload timing, and IF bit per Pan Docs
-- PPU: FAIL — Sprite Priority Detailed case
-  - Reference: `tests/unit/test_ppu.c:918`
-  - Failure: BG vs OBJ priority and transparency rules not respected in a specific case
-  - Action: fix per Pan Docs: BG color 0 is transparent to OBJs; OBJ priority bit; mixing order
+- **Résultats détaillés :** [TEST_RESULTS.md](TEST_RESULTS.md) *(généré automatiquement)*
+- **Logs complets :** `logs/test_results.log`
 
 ROM Test Status
 ---------------

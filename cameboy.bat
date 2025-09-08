@@ -269,10 +269,18 @@ echo Total: %passed%/%total% tests passed >> "%LOGS_DIR%\test_results.log"
 if %passed%==%total% (
     echo TOUS LES TESTS REUSSIS!
     echo TOUS LES TESTS REUSSIS! >> "%LOGS_DIR%\test_results.log"
+    set "TEST_STATUS=✅ TOUS LES TESTS REUSSIS"
+    set "TEST_STATUS_CLASS=success"
 ) else (
     echo CERTAINS TESTS ONT ECHOUE
     echo CERTAINS TESTS ONT ECHOUE >> "%LOGS_DIR%\test_results.log"
+    set "TEST_STATUS=❌ CERTAINS TESTS ONT ECHOUE"
+    set "TEST_STATUS_CLASS=failure"
 )
+
+REM Generer le fichier markdown des resultats
+echo Generation du rapport markdown...
+call :generate_test_report
 if errorlevel 1 (
     echo.
     echo Certains tests ont echoue
@@ -528,3 +536,87 @@ echo BUILD EXEMPLES TERMINE
 echo ========================================
 
 goto end
+
+:generate_test_report
+REM Generer le fichier markdown des resultats de tests
+set "TEST_MD=%PROJECT_DIR%TEST_RESULTS.md"
+echo # Résultats des Tests Unitaires - CameBoy > "%TEST_MD%"
+echo. >> "%TEST_MD%"
+echo **Date:** %DATE% %TIME% >> "%TEST_MD%"
+echo **Status:** %TEST_STATUS% >> "%TEST_MD%"
+echo. >> "%TEST_MD%"
+echo ## Résumé >> "%TEST_MD%"
+echo. >> "%TEST_MD%"
+echo - **Tests passés:** %passed%/%total% >> "%TEST_MD%"
+echo - **Taux de réussite:** %passed%/%total% (%%%passed%/%total%*100) >> "%TEST_MD%"
+echo. >> "%TEST_MD%"
+echo ## Détails des Tests >> "%TEST_MD%"
+echo. >> "%TEST_MD%"
+
+REM Ajouter les details de chaque test
+for %%t in (cpu mmu ppu timer interrupt joypad) do (
+    if exist "%BIN_DIR%\test_%%t.exe" (
+        echo ### test_%%t >> "%TEST_MD%"
+        echo. >> "%TEST_MD%"
+        echo **Status:** >> "%TEST_MD%"
+        "%BIN_DIR%\test_%%t.exe" >nul 2>&1
+        if !errorlevel! equ 0 (
+            echo ✅ **PASSED** >> "%TEST_MD%"
+        ) else (
+            echo ❌ **FAILED** >> "%TEST_MD%"
+        )
+        echo. >> "%TEST_MD%"
+        echo **Log:** >> "%TEST_MD%"
+        echo ``` >> "%TEST_MD%"
+        "%BIN_DIR%\test_%%t.exe" >> "%TEST_MD%" 2>&1
+        echo ``` >> "%TEST_MD%"
+        echo. >> "%TEST_MD%"
+    )
+)
+
+if exist "%BIN_DIR%\test_joypad_irq.exe" (
+    echo ### test_joypad_irq >> "%TEST_MD%"
+    echo. >> "%TEST_MD%"
+    echo **Status:** >> "%TEST_MD%"
+    "%BIN_DIR%\test_joypad_irq.exe" >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo ✅ **PASSED** >> "%TEST_MD%"
+    ) else (
+        echo ❌ **FAILED** >> "%TEST_MD%"
+    )
+    echo. >> "%TEST_MD%"
+    echo **Log:** >> "%TEST_MD%"
+    echo ``` >> "%TEST_MD%"
+    "%BIN_DIR%\test_joypad_irq.exe" >> "%TEST_MD%" 2>&1
+    echo ``` >> "%TEST_MD%"
+    echo. >> "%TEST_MD%"
+)
+
+if exist "%BIN_DIR%\test_cpu_flags.exe" (
+    echo ### test_cpu_flags >> "%TEST_MD%"
+    echo. >> "%TEST_MD%"
+    echo **Status:** >> "%TEST_MD%"
+    "%BIN_DIR%\test_cpu_flags.exe" >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo ✅ **PASSED** >> "%TEST_MD%"
+    ) else (
+        echo ❌ **FAILED** >> "%TEST_MD%"
+    )
+    echo. >> "%TEST_MD%"
+    echo **Log:** >> "%TEST_MD%"
+    echo ``` >> "%TEST_MD%"
+    "%BIN_DIR%\test_cpu_flags.exe" >> "%TEST_MD%" 2>&1
+    echo ``` >> "%TEST_MD%"
+    echo. >> "%TEST_MD%"
+)
+
+echo ## Logs Complets >> "%TEST_MD%"
+echo. >> "%TEST_MD%"
+echo Pour plus de détails, consultez le fichier de log complet: >> "%TEST_MD%"
+echo - [test_results.log](logs/test_results.log) >> "%TEST_MD%"
+echo. >> "%TEST_MD%"
+echo --- >> "%TEST_MD%"
+echo *Généré automatiquement par cameboy.bat* >> "%TEST_MD%"
+
+echo Rapport markdown genere: %TEST_MD%
+exit /b 0
