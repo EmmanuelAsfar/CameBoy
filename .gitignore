@@ -1,6 +1,13 @@
-# Logs
-logs/**
-!logs/.gitkeep
+# Logs d'exécution (exclure)
+logs/emulator.log
+logs/emulator_gui.log
+logs/last_run.txt
+logs/last_*.txt
+logs/rom/
+
+# Logs de tests (inclure)
+!logs/test_results.log
+!logs/test_build.log
 
 # Build outputs (keep resources under build/resources)
 build/**

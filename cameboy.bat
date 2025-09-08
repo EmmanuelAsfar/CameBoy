@@ -545,12 +545,77 @@ echo. >> "%TEST_MD%"
 echo **Date:** %DATE% %TIME% >> "%TEST_MD%"
 echo **Status:** %TEST_STATUS% >> "%TEST_MD%"
 echo. >> "%TEST_MD%"
-echo ## Résumé >> "%TEST_MD%"
+
+REM Calculer le pourcentage de reussite
+if %total% gtr 0 (
+    set /a "PERCENTAGE=100*%passed%/%total%"
+) else (
+    set "PERCENTAGE=0"
+)
+echo ## 📊 Synthèse Globale >> "%TEST_MD%"
 echo. >> "%TEST_MD%"
-echo - **Tests passés:** %passed%/%total% >> "%TEST_MD%"
-echo - **Taux de réussite:** %passed%/%total% (%%%passed%/%total%*100) >> "%TEST_MD%"
+echo ^| Métrique ^| Valeur ^| >> "%TEST_MD%"
+echo ^|---------^|--------^| >> "%TEST_MD%"
+echo ^| **Total des tests** ^| %total% ^| >> "%TEST_MD%"
+echo ^| **Tests réussis** ^| %passed% ^| >> "%TEST_MD%"
+set /a "FAILED=%total%-%passed%"
+echo ^| **Tests échoués** ^| !FAILED! ^| >> "%TEST_MD%"
+echo ^| **Taux de réussite** ^| %PERCENTAGE%%%% ^| >> "%TEST_MD%"
 echo. >> "%TEST_MD%"
-echo ## Détails des Tests >> "%TEST_MD%"
+
+REM Compter les tests par rubrique
+set "CPU_TESTS=0"
+set "CPU_PASSED=0"
+set "MMU_TESTS=0"
+set "MMU_PASSED=0"
+set "PPU_TESTS=0"
+set "PPU_PASSED=0"
+set "TIMER_TESTS=0"
+set "TIMER_PASSED=0"
+set "INTERRUPT_TESTS=0"
+set "INTERRUPT_PASSED=0"
+set "JOYPAD_TESTS=0"
+set "JOYPAD_PASSED=0"
+
+echo ## 📋 Résultats par Rubrique >> "%TEST_MD%"
+echo. >> "%TEST_MD%"
+echo ^| Rubrique ^| Tests ^| Réussis ^| Échecs ^| Status ^| >> "%TEST_MD%"
+echo ^|----------^|-------^|---------^|--------^|--------^| >> "%TEST_MD%"
+
+REM Analyser chaque test
+for %%t in (cpu mmu ppu timer interrupt joypad) do (
+    if exist "%BIN_DIR%\test_%%t.exe" (
+        set /a "%%t_TESTS+=1"
+        "%BIN_DIR%\test_%%t.exe" >nul 2>&1
+        if !errorlevel! equ 0 (
+            set /a "%%t_PASSED+=1"
+            echo ^| **%%t** ^| 1 ^| 1 ^| 0 ^| ✅ ^| >> "%TEST_MD%"
+        ) else (
+            echo ^| **%%t** ^| 1 ^| 0 ^| 1 ^| ❌ ^| >> "%TEST_MD%"
+        )
+    )
+)
+
+if exist "%BIN_DIR%\test_joypad_irq.exe" (
+    "%BIN_DIR%\test_joypad_irq.exe" >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo ^| **joypad_irq** ^| 1 ^| 1 ^| 0 ^| ✅ ^| >> "%TEST_MD%"
+    ) else (
+        echo ^| **joypad_irq** ^| 1 ^| 0 ^| 1 ^| ❌ ^| >> "%TEST_MD%"
+    )
+)
+
+if exist "%BIN_DIR%\test_cpu_flags.exe" (
+    "%BIN_DIR%\test_cpu_flags.exe" >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo ^| **cpu_flags** ^| 1 ^| 1 ^| 0 ^| ✅ ^| >> "%TEST_MD%"
+    ) else (
+        echo ^| **cpu_flags** ^| 1 ^| 0 ^| 1 ^| ❌ ^| >> "%TEST_MD%"
+    )
+)
+
+echo. >> "%TEST_MD%"
+echo ## 🔍 Détails des Tests >> "%TEST_MD%"
 echo. >> "%TEST_MD%"
 
 REM Ajouter les details de chaque test

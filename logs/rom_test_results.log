@@ -1,0 +1,18 @@
+======================================== 
+ROM Test Run - 08/09/2025 12:21:40,07 
+======================================== 
+FAIL 2420ROMPackV 
+FAIL 4in1 
+FAIL circle_r30 
+FAIL cpu_zc_add 
+FAIL joypad_default 
+FAIL key_serial 
+PASS pass 
+FAIL player_square 
+FAIL simple_square 
+FAIL timer_basic 
+FAIL toto_counter 
+FAIL vertical_lines 
+FAIL visual_grid 
+FAIL visual_grid_v2 
+--- Blargg ROMs (quick) --- 

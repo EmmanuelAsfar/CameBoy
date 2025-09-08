@@ -1,0 +1,403 @@
+======================================== 
+Test build started 08/09/2025  1:03:04,21 
+OK: test_cpu compiled at 08/09/2025  1:03:05,16 
+OK: test_mmu compiled at 08/09/2025  1:03:05,79 
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2050): undefined reference to `ppu_bg_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x207d): undefined reference to `ppu_bg_fifo_full'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x20c0): undefined reference to `ppu_bg_fifo_push'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x20cc): undefined reference to `ppu_bg_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x20fc): undefined reference to `ppu_bg_fifo_full'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2167): undefined reference to `ppu_sprite_fifo_push'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x219f): undefined reference to `ppu_bg_fifo_pop'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2242): undefined reference to `ppu_sprite_fifo_pop'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x22de): undefined reference to `ppu_bg_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x230b): undefined reference to `ppu_sprite_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x233c): undefined reference to `ppu_bg_fifo_pop'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2370): undefined reference to `ppu_sprite_fifo_pop'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x23ec): undefined reference to `ppu_bg_fifo_push'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x243c): undefined reference to `ppu_bg_fifo_full'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2469): undefined reference to `ppu_bg_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x249c): undefined reference to `ppu_bg_fifo_push'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x24d0): undefined reference to `ppu_bg_fifo_full'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x24fd): undefined reference to `ppu_fifos_clear'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2509): undefined reference to `ppu_bg_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2536): undefined reference to `ppu_sprite_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x2563): undefined reference to `ppu_bg_fifo_full'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x32e0): undefined reference to `ppu_fetcher_start'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x334e): undefined reference to `ppu_fetcher_tick'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x336d): undefined reference to `ppu_bg_fifo_empty'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x33db): undefined reference to `ppu_bg_fifo_pop'
+C:/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\EMMANU~1\AppData\Local\Temp\ccqDzpd6.o:test_ppu.c:(.text+0x3491): undefined reference to `ppu_bg_fifo_empty'
+collect2.exe: error: ld returned 1 exit status
+FAIL: test_ppu compilation at 08/09/2025  1:03:06,12 
+OK: test_timer compiled at 08/09/2025  1:03:06,41 
+OK: test_interrupt compiled at 08/09/2025  1:03:07,40 
+OK: test_joypad compiled at 08/09/2025  1:03:07,68 
+OK: test_joypad_irq compiled at 08/09/2025  1:03:07,96 
+OK: test_cpu_flags compiled at 08/09/2025  1:03:08,88 
+Test build ended 08/09/2025  1:03:09,70 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:06:28,61 
+OK: test_cpu compiled at 08/09/2025  1:06:29,56 
+OK: test_mmu compiled at 08/09/2025  1:06:30,20 
+OK: test_ppu compiled at 08/09/2025  1:06:30,55 
+OK: test_timer compiled at 08/09/2025  1:06:30,84 
+OK: test_interrupt compiled at 08/09/2025  1:06:31,85 
+OK: test_joypad compiled at 08/09/2025  1:06:32,15 
+OK: test_joypad_irq compiled at 08/09/2025  1:06:32,45 
+OK: test_cpu_flags compiled at 08/09/2025  1:06:33,41 
+Test build ended 08/09/2025  1:06:35,20 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:08:13,66 
+OK: test_cpu compiled at 08/09/2025  1:08:14,92 
+OK: test_mmu compiled at 08/09/2025  1:08:15,55 
+OK: test_ppu compiled at 08/09/2025  1:08:15,92 
+OK: test_timer compiled at 08/09/2025  1:08:16,22 
+OK: test_interrupt compiled at 08/09/2025  1:08:17,30 
+OK: test_joypad compiled at 08/09/2025  1:08:17,60 
+OK: test_joypad_irq compiled at 08/09/2025  1:08:17,89 
+OK: test_cpu_flags compiled at 08/09/2025  1:08:18,86 
+Test build ended 08/09/2025  1:08:20,68 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:09:37,29 
+OK: test_cpu compiled at 08/09/2025  1:09:38,26 
+OK: test_mmu compiled at 08/09/2025  1:09:38,90 
+OK: test_ppu compiled at 08/09/2025  1:09:39,25 
+OK: test_timer compiled at 08/09/2025  1:09:39,55 
+OK: test_interrupt compiled at 08/09/2025  1:09:40,56 
+OK: test_joypad compiled at 08/09/2025  1:09:40,86 
+OK: test_joypad_irq compiled at 08/09/2025  1:09:41,16 
+OK: test_cpu_flags compiled at 08/09/2025  1:09:42,11 
+Test build ended 08/09/2025  1:09:43,88 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:11:24,24 
+OK: test_cpu compiled at 08/09/2025  1:11:25,20 
+OK: test_mmu compiled at 08/09/2025  1:11:25,84 
+OK: test_ppu compiled at 08/09/2025  1:11:26,20 
+OK: test_timer compiled at 08/09/2025  1:11:26,49 
+OK: test_interrupt compiled at 08/09/2025  1:11:27,56 
+OK: test_joypad compiled at 08/09/2025  1:11:27,86 
+OK: test_joypad_irq compiled at 08/09/2025  1:11:28,15 
+OK: test_cpu_flags compiled at 08/09/2025  1:11:29,10 
+Test build ended 08/09/2025  1:11:30,97 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:15:48,87 
+OK: test_cpu compiled at 08/09/2025  1:15:49,83 
+OK: test_mmu compiled at 08/09/2025  1:15:50,47 
+OK: test_ppu compiled at 08/09/2025  1:15:50,83 
+OK: test_timer compiled at 08/09/2025  1:15:51,13 
+OK: test_interrupt compiled at 08/09/2025  1:15:52,17 
+OK: test_joypad compiled at 08/09/2025  1:15:52,47 
+OK: test_joypad_irq compiled at 08/09/2025  1:15:52,77 
+OK: test_cpu_flags compiled at 08/09/2025  1:15:53,75 
+Test build ended 08/09/2025  1:15:55,60 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:20:20,65 
+OK: test_cpu compiled at 08/09/2025  1:20:21,96 
+OK: test_mmu compiled at 08/09/2025  1:20:22,66 
+OK: test_ppu compiled at 08/09/2025  1:20:23,03 
+OK: test_timer compiled at 08/09/2025  1:20:23,32 
+OK: test_interrupt compiled at 08/09/2025  1:20:24,31 
+OK: test_joypad compiled at 08/09/2025  1:20:24,61 
+OK: test_joypad_irq compiled at 08/09/2025  1:20:24,92 
+OK: test_cpu_flags compiled at 08/09/2025  1:20:25,93 
+Test build ended 08/09/2025  1:20:28,04 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:21:01,48 
+OK: test_cpu compiled at 08/09/2025  1:21:02,43 
+OK: test_mmu compiled at 08/09/2025  1:21:03,08 
+OK: test_ppu compiled at 08/09/2025  1:21:03,44 
+OK: test_timer compiled at 08/09/2025  1:21:03,73 
+OK: test_interrupt compiled at 08/09/2025  1:21:04,76 
+OK: test_joypad compiled at 08/09/2025  1:21:05,06 
+OK: test_joypad_irq compiled at 08/09/2025  1:21:05,35 
+OK: test_cpu_flags compiled at 08/09/2025  1:21:06,39 
+Test build ended 08/09/2025  1:21:08,15 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:23:10,77 
+OK: test_cpu compiled at 08/09/2025  1:23:11,73 
+OK: test_mmu compiled at 08/09/2025  1:23:12,37 
+OK: test_ppu compiled at 08/09/2025  1:23:12,76 
+OK: test_timer compiled at 08/09/2025  1:23:13,09 
+OK: test_interrupt compiled at 08/09/2025  1:23:14,25 
+OK: test_joypad compiled at 08/09/2025  1:23:14,55 
+OK: test_joypad_irq compiled at 08/09/2025  1:23:14,84 
+OK: test_cpu_flags compiled at 08/09/2025  1:23:15,81 
+Test build ended 08/09/2025  1:23:17,55 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:42:59,15 
+OK: test_cpu compiled at 08/09/2025  1:43:00,12 
+OK: test_mmu compiled at 08/09/2025  1:43:00,78 
+OK: test_ppu compiled at 08/09/2025  1:43:01,15 
+OK: test_timer compiled at 08/09/2025  1:43:01,45 
+OK: test_interrupt compiled at 08/09/2025  1:43:02,45 
+OK: test_joypad compiled at 08/09/2025  1:43:02,74 
+OK: test_joypad_irq compiled at 08/09/2025  1:43:03,01 
+OK: test_cpu_flags compiled at 08/09/2025  1:43:03,95 
+Test build ended 08/09/2025  1:43:05,73 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:46:55,22 
+OK: test_cpu compiled at 08/09/2025  1:46:56,27 
+OK: test_mmu compiled at 08/09/2025  1:46:56,96 
+OK: test_ppu compiled at 08/09/2025  1:46:57,36 
+OK: test_timer compiled at 08/09/2025  1:46:57,69 
+OK: test_interrupt compiled at 08/09/2025  1:46:58,76 
+OK: test_joypad compiled at 08/09/2025  1:46:59,07 
+OK: test_joypad_irq compiled at 08/09/2025  1:46:59,36 
+OK: test_cpu_flags compiled at 08/09/2025  1:47:00,35 
+Test build ended 08/09/2025  1:47:02,18 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:47:57,72 
+OK: test_cpu compiled at 08/09/2025  1:47:58,71 
+OK: test_mmu compiled at 08/09/2025  1:47:59,40 
+OK: test_ppu compiled at 08/09/2025  1:47:59,78 
+OK: test_timer compiled at 08/09/2025  1:48:00,09 
+OK: test_interrupt compiled at 08/09/2025  1:48:01,16 
+OK: test_joypad compiled at 08/09/2025  1:48:01,50 
+OK: test_joypad_irq compiled at 08/09/2025  1:48:01,80 
+OK: test_cpu_flags compiled at 08/09/2025  1:48:02,76 
+Test build ended 08/09/2025  1:48:04,55 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:53:32,54 
+OK: test_cpu compiled at 08/09/2025  1:53:33,54 
+OK: test_mmu compiled at 08/09/2025  1:53:34,20 
+OK: test_ppu compiled at 08/09/2025  1:53:34,57 
+OK: test_timer compiled at 08/09/2025  1:53:34,86 
+OK: test_interrupt compiled at 08/09/2025  1:53:35,88 
+OK: test_joypad compiled at 08/09/2025  1:53:36,17 
+OK: test_joypad_irq compiled at 08/09/2025  1:53:36,46 
+OK: test_cpu_flags compiled at 08/09/2025  1:53:37,39 
+Test build ended 08/09/2025  1:53:39,27 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:56:01,94 
+OK: test_cpu compiled at 08/09/2025  1:56:03,96 
+OK: test_mmu compiled at 08/09/2025  1:56:04,68 
+OK: test_ppu compiled at 08/09/2025  1:56:05,11 
+OK: test_timer compiled at 08/09/2025  1:56:05,44 
+OK: test_interrupt compiled at 08/09/2025  1:56:06,59 
+OK: test_joypad compiled at 08/09/2025  1:56:06,91 
+OK: test_joypad_irq compiled at 08/09/2025  1:56:07,20 
+OK: test_cpu_flags compiled at 08/09/2025  1:56:08,22 
+Test build ended 08/09/2025  1:56:10,11 
+======================================== 
+======================================== 
+Test build started 08/09/2025  1:59:11,79 
+OK: test_cpu compiled at 08/09/2025  1:59:12,81 
+OK: test_mmu compiled at 08/09/2025  1:59:13,48 
+OK: test_ppu compiled at 08/09/2025  1:59:13,86 
+OK: test_timer compiled at 08/09/2025  1:59:14,16 
+OK: test_interrupt compiled at 08/09/2025  1:59:15,19 
+OK: test_joypad compiled at 08/09/2025  1:59:15,49 
+OK: test_joypad_irq compiled at 08/09/2025  1:59:15,78 
+OK: test_cpu_flags compiled at 08/09/2025  1:59:16,73 
+Test build ended 08/09/2025  1:59:18,53 
+======================================== 
+======================================== 
+Test build started 08/09/2025  2:04:35,81 
+OK: test_cpu compiled at 08/09/2025  2:04:36,80 
+OK: test_mmu compiled at 08/09/2025  2:04:37,46 
+OK: test_ppu compiled at 08/09/2025  2:04:37,83 
+OK: test_timer compiled at 08/09/2025  2:04:38,13 
+OK: test_interrupt compiled at 08/09/2025  2:04:39,22 
+OK: test_joypad compiled at 08/09/2025  2:04:39,58 
+OK: test_joypad_irq compiled at 08/09/2025  2:04:39,91 
+OK: test_cpu_flags compiled at 08/09/2025  2:04:41,00 
+Test build ended 08/09/2025  2:04:43,14 
+======================================== 
+======================================== 
+Test build started 08/09/2025  2:09:42,08 
+OK: test_cpu compiled at 08/09/2025  2:09:43,08 
+OK: test_mmu compiled at 08/09/2025  2:09:43,74 
+OK: test_ppu compiled at 08/09/2025  2:09:44,11 
+OK: test_timer compiled at 08/09/2025  2:09:44,39 
+OK: test_interrupt compiled at 08/09/2025  2:09:45,41 
+OK: test_joypad compiled at 08/09/2025  2:09:45,71 
+OK: test_joypad_irq compiled at 08/09/2025  2:09:46,00 
+OK: test_cpu_flags compiled at 08/09/2025  2:09:46,96 
+Test build ended 08/09/2025  2:09:48,75 
+======================================== 
+======================================== 
+Test build started 08/09/2025  2:11:44,42 
+OK: test_cpu compiled at 08/09/2025  2:11:45,41 
+OK: test_mmu compiled at 08/09/2025  2:11:46,07 
+OK: test_ppu compiled at 08/09/2025  2:11:46,43 
+OK: test_timer compiled at 08/09/2025  2:11:46,72 
+OK: test_interrupt compiled at 08/09/2025  2:11:47,74 
+OK: test_joypad compiled at 08/09/2025  2:11:48,03 
+OK: test_joypad_irq compiled at 08/09/2025  2:11:48,32 
+OK: test_cpu_flags compiled at 08/09/2025  2:11:49,28 
+Test build ended 08/09/2025  2:11:51,10 
+======================================== 
+======================================== 
+Test build started 08/09/2025  2:16:40,89 
+OK: test_cpu compiled at 08/09/2025  2:16:41,89 
+OK: test_mmu compiled at 08/09/2025  2:16:42,54 
+OK: test_ppu compiled at 08/09/2025  2:16:42,90 
+OK: test_timer compiled at 08/09/2025  2:16:43,20 
+OK: test_interrupt compiled at 08/09/2025  2:16:44,28 
+OK: test_joypad compiled at 08/09/2025  2:16:44,59 
+OK: test_joypad_irq compiled at 08/09/2025  2:16:44,88 
+OK: test_cpu_flags compiled at 08/09/2025  2:16:45,81 
+Test build ended 08/09/2025  2:16:47,59 
+======================================== 
+======================================== 
+Test build started 08/09/2025  2:31:12,35 
+OK: test_cpu compiled at 08/09/2025  2:31:13,39 
+OK: test_mmu compiled at 08/09/2025  2:31:14,09 
+OK: test_ppu compiled at 08/09/2025  2:31:14,47 
+OK: test_timer compiled at 08/09/2025  2:31:14,76 
+OK: test_interrupt compiled at 08/09/2025  2:31:15,81 
+OK: test_joypad compiled at 08/09/2025  2:31:16,12 
+OK: test_joypad_irq compiled at 08/09/2025  2:31:16,42 
+OK: test_cpu_flags compiled at 08/09/2025  2:31:17,40 
+Test build ended 08/09/2025  2:31:19,23 
+======================================== 
+======================================== 
+Test build started 08/09/2025  2:32:28,84 
+OK: test_cpu compiled at 08/09/2025  2:32:29,90 
+OK: test_mmu compiled at 08/09/2025  2:32:30,60 
+OK: test_ppu compiled at 08/09/2025  2:32:31,00 
+OK: test_timer compiled at 08/09/2025  2:32:31,32 
+OK: test_interrupt compiled at 08/09/2025  2:32:32,42 
+OK: test_joypad compiled at 08/09/2025  2:32:32,74 
+OK: test_joypad_irq compiled at 08/09/2025  2:32:33,06 
+OK: test_cpu_flags compiled at 08/09/2025  2:32:34,12 
+Test build ended 08/09/2025  2:32:35,98 
+======================================== 
+======================================== 
+Test build started 08/09/2025  2:33:24,93 
+OK: test_cpu compiled at 08/09/2025  2:33:26,16 
+OK: test_mmu compiled at 08/09/2025  2:33:26,91 
+OK: test_ppu compiled at 08/09/2025  2:33:27,32 
+OK: test_timer compiled at 08/09/2025  2:33:27,73 
+OK: test_interrupt compiled at 08/09/2025  2:33:28,93 
+OK: test_joypad compiled at 08/09/2025  2:33:29,28 
+OK: test_joypad_irq compiled at 08/09/2025  2:33:29,60 
+OK: test_cpu_flags compiled at 08/09/2025  2:33:30,59 
+Test build ended 08/09/2025  2:33:32,51 
+======================================== 
+======================================== 
+Test build started 08/09/2025 10:10:49,83 
+OK: test_cpu compiled at 08/09/2025 10:10:51,27 
+OK: test_mmu compiled at 08/09/2025 10:10:51,99 
+OK: test_ppu compiled at 08/09/2025 10:10:52,36 
+OK: test_timer compiled at 08/09/2025 10:10:52,65 
+OK: test_interrupt compiled at 08/09/2025 10:10:53,68 
+OK: test_joypad compiled at 08/09/2025 10:10:53,97 
+OK: test_joypad_irq compiled at 08/09/2025 10:10:54,25 
+OK: test_cpu_flags compiled at 08/09/2025 10:10:55,19 
+Test build ended 08/09/2025 10:11:00,75 
+======================================== 
+======================================== 
+Test build started 08/09/2025 12:15:35,72 
+OK: test_cpu compiled at 08/09/2025 12:15:41,40 
+OK: test_mmu compiled at 08/09/2025 12:15:42,40 
+OK: test_ppu compiled at 08/09/2025 12:15:42,82 
+OK: test_timer compiled at 08/09/2025 12:15:43,16 
+OK: test_interrupt compiled at 08/09/2025 12:15:44,27 
+OK: test_joypad compiled at 08/09/2025 12:15:44,62 
+OK: test_joypad_irq compiled at 08/09/2025 12:15:44,96 
+OK: test_cpu_flags compiled at 08/09/2025 12:15:45,97 
+Test build ended 08/09/2025 12:15:48,82 
+======================================== 
+src\cpu.c:88:13: warning: 'inst_stop_legacy' defined but not used [-Wunused-function]
+   88 | static void inst_stop_legacy(CPU* cpu, MMU* mmu) {
+      |             ^~~~~~~~~~~~~~~~
+src\ppu.c: In function 'ppu_render_line':
+src\ppu.c:294:17: warning: unused variable 'obj_x' [-Wunused-variable]
+  294 |             int obj_x = (int)sx - 8;
+      |                 ^~~~~
+src\emulator_simple.c: In function 'emulator_simple_run':
+src\emulator_simple.c:468:25: warning: comparison is always false due to limited range of data type [-Wtype-limits]
+  468 |         if (emu->cpu.pc >= 0x10000) {
+      |                         ^~
+======================================== 
+Test build started 08/09/2025 12:21:08,18 
+OK: test_cpu compiled at 08/09/2025 12:21:09,15 
+OK: test_mmu compiled at 08/09/2025 12:21:09,82 
+OK: test_ppu compiled at 08/09/2025 12:21:10,17 
+OK: test_timer compiled at 08/09/2025 12:21:10,47 
+OK: test_interrupt compiled at 08/09/2025 12:21:11,49 
+OK: test_joypad compiled at 08/09/2025 12:21:11,78 
+OK: test_joypad_irq compiled at 08/09/2025 12:21:12,08 
+OK: test_cpu_flags compiled at 08/09/2025 12:21:13,09 
+Test build ended 08/09/2025 12:21:15,71 
+======================================== 
+src\cpu.c:88:13: warning: 'inst_stop_legacy' defined but not used [-Wunused-function]
+   88 | static void inst_stop_legacy(CPU* cpu, MMU* mmu) {
+      |             ^~~~~~~~~~~~~~~~
+src\ppu.c: In function 'ppu_render_line':
+src\ppu.c:294:17: warning: unused variable 'obj_x' [-Wunused-variable]
+  294 |             int obj_x = (int)sx - 8;
+      |                 ^~~~~
+src\emulator_simple.c: In function 'emulator_simple_run':
+src\emulator_simple.c:468:25: warning: comparison is always false due to limited range of data type [-Wtype-limits]
+  468 |         if (emu->cpu.pc >= 0x10000) {
+      |                         ^~
+======================================== 
+Test build started 08/09/2025 12:34:16,16 
+OK: test_cpu compiled at 08/09/2025 12:34:17,36 
+OK: test_mmu compiled at 08/09/2025 12:34:18,04 
+OK: test_ppu compiled at 08/09/2025 12:34:18,39 
+OK: test_timer compiled at 08/09/2025 12:34:18,68 
+OK: test_interrupt compiled at 08/09/2025 12:34:19,65 
+OK: test_joypad compiled at 08/09/2025 12:34:19,94 
+OK: test_joypad_irq compiled at 08/09/2025 12:34:20,21 
+OK: test_cpu_flags compiled at 08/09/2025 12:34:21,12 
+Test build ended 08/09/2025 12:34:28,05 
+======================================== 
+======================================== 
+Test build started 08/09/2025 12:38:53,25 
+OK: test_cpu compiled at 08/09/2025 12:38:54,84 
+OK: test_mmu compiled at 08/09/2025 12:38:55,63 
+OK: test_ppu compiled at 08/09/2025 12:38:56,14 
+OK: test_timer compiled at 08/09/2025 12:38:56,55 
+OK: test_interrupt compiled at 08/09/2025 12:38:57,92 
+OK: test_joypad compiled at 08/09/2025 12:38:58,36 
+OK: test_joypad_irq compiled at 08/09/2025 12:38:58,74 
+OK: test_cpu_flags compiled at 08/09/2025 12:38:59,99 
+======================================== 
+Test build started 08/09/2025 12:41:44,37 
+OK: test_cpu compiled at 08/09/2025 12:41:45,52 
+OK: test_mmu compiled at 08/09/2025 12:41:46,27 
+OK: test_ppu compiled at 08/09/2025 12:41:46,67 
+OK: test_timer compiled at 08/09/2025 12:41:46,97 
+OK: test_interrupt compiled at 08/09/2025 12:41:48,03 
+OK: test_joypad compiled at 08/09/2025 12:41:48,33 
+OK: test_joypad_irq compiled at 08/09/2025 12:41:48,62 
+OK: test_cpu_flags compiled at 08/09/2025 12:41:49,59 
+======================================== 
+Test build started 08/09/2025 12:42:51,10 
+OK: test_cpu compiled at 08/09/2025 12:42:52,38 
+OK: test_mmu compiled at 08/09/2025 12:42:53,12 
+OK: test_ppu compiled at 08/09/2025 12:42:53,55 
+OK: test_timer compiled at 08/09/2025 12:42:53,87 
+OK: test_interrupt compiled at 08/09/2025 12:42:55,00 
+OK: test_joypad compiled at 08/09/2025 12:42:55,37 
+OK: test_joypad_irq compiled at 08/09/2025 12:42:55,74 
+OK: test_cpu_flags compiled at 08/09/2025 12:42:56,83 
+======================================== 
+Test build started 08/09/2025 12:44:47,51 
+OK: test_cpu compiled at 08/09/2025 12:44:48,51 
+OK: test_mmu compiled at 08/09/2025 12:44:49,18 
+OK: test_ppu compiled at 08/09/2025 12:44:49,55 
+OK: test_timer compiled at 08/09/2025 12:44:49,85 
+OK: test_interrupt compiled at 08/09/2025 12:44:50,93 
+OK: test_joypad compiled at 08/09/2025 12:44:51,25 
+OK: test_joypad_irq compiled at 08/09/2025 12:44:51,56 
+OK: test_cpu_flags compiled at 08/09/2025 12:44:52,57 
+Test build ended 08/09/2025 12:45:05,94 
+======================================== 

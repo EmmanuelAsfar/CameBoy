@@ -1,38 +1,8 @@
-# Résultats des Tests Unitaires - CameBoy 
+======================================== 
+CameBoy Unit Tests - 08/09/2025 12:44:52,57 
+======================================== 
  
-**Date:** 08/09/2025 12:45:02,29 
-**Status:** ❌ CERTAINS TESTS ONT ECHOUE 
- 
-## 📊 Synthèse Globale 
- 
-| Métrique | Valeur | 
-|---------|--------| 
-| **Total des tests** | 8 | 
-| **Tests réussis** | 7 | 
-| **Tests échoués** | 1 | 
- 
-## 📋 Résultats par Rubrique 
- 
-| Rubrique | Tests | Réussis | Échecs | Status | 
-|----------|-------|---------|--------|--------| 
-| **cpu** | 1 | 1 | 0 | ✅ | 
-| **mmu** | 1 | 1 | 0 | ✅ | 
-| **ppu** | 1 | 0 | 1 | ❌ | 
-| **timer** | 1 | 1 | 0 | ✅ | 
-| **interrupt** | 1 | 1 | 0 | ✅ | 
-| **joypad** | 1 | 1 | 0 | ✅ | 
-| **joypad_irq** | 1 | 1 | 0 | ✅ | 
-| **cpu_flags** | 1 | 1 | 0 | ✅ | 
- 
-## 🔍 Détails des Tests 
- 
-### test_cpu 
- 
-**Status:** 
-✅ **PASSED** 
- 
-**Log:** 
-``` 
+Running test_cpu... 
 === TESTS UNITAIRES CPU LR35902 ===
 
 Test 1: CPU Initialisation... PASS
@@ -64,15 +34,9 @@ Test 25: STOP + KEY1 speed switch (CGB)... PASS
 === RÉSULTATS ===
 Tests passés: 25/25
 ✅ TOUS LES TESTS SONT PASSÉS !
-``` 
+SUCCES test_cpu PASSED 
  
-### test_mmu 
- 
-**Status:** 
-✅ **PASSED** 
- 
-**Log:** 
-``` 
+Running test_mmu... 
 === TESTS UNITAIRES MMU ===
 
 Test 1: MMU Initialisation... PASS
@@ -90,15 +54,9 @@ Test 10: MMU DMA Timed & BusLock... PASS
 === RÉSULTATS ===
 Tests passés: 10/10
 ✅ TOUS LES TESTS SONT PASSÉS !
-``` 
+SUCCES test_mmu PASSED 
  
-### test_ppu 
- 
-**Status:** 
-❌ **FAILED** 
- 
-**Log:** 
-``` 
+Running test_ppu... 
 === TESTS UNITAIRES PPU ===
 
 Test 1: PPU Initialisation... PASS
@@ -128,15 +86,9 @@ Test 24: PPU Mode Timings... PASS
 Test 25: PPU STAT IRQ Transitions... PASS
 Test 26: PPU Window Edge Cases... PASS
 Test 27: PPU Sprite Priority Detailed... Assertion failed: ppu.framebuffer[12] == ppu_get_pixel_color(&ppu, 1), file tests\unit\test_ppu.c, line 918
-``` 
+ERREUR test_ppu FAILED 
  
-### test_timer 
- 
-**Status:** 
-✅ **PASSED** 
- 
-**Log:** 
-``` 
+Running test_timer... 
 === TESTS UNITAIRES TIMER ===
 
 Test 1: Timer Initialisation... PASS
@@ -151,15 +103,9 @@ Test 8: Timer Edge-based increments... PASS
 === RÉSULTATS ===
 Tests passés: 8/8
 ✅ TOUS LES TESTS SONT PASSÉS !
-``` 
+SUCCES test_timer PASSED 
  
-### test_interrupt 
- 
-**Status:** 
-✅ **PASSED** 
- 
-**Log:** 
-``` 
+Running test_interrupt... 
 === TESTS UNITAIRES INTERRUPTIONS ===
 
 Test 1: Interrupt Initialisation... PASS
@@ -174,15 +120,9 @@ Test 8: Interrupt LCD STAT... PASS
 === RÉSULTATS ===
 Tests passés: 8/8
 ✅ TOUS LES TESTS SONT PASSÉS !
-``` 
+SUCCES test_interrupt PASSED 
  
-### test_joypad 
- 
-**Status:** 
-✅ **PASSED** 
- 
-**Log:** 
-``` 
+Running test_joypad... 
 === TESTS UNITAIRES JOYPAD ===
 
 Test 1: Joypad Initialisation... PASS
@@ -196,34 +136,18 @@ Test 7: Joypad Mixed Input... PASS
 === RÉSULTATS ===
 Tests passés: 7/7
 ✅ TOUS LES TESTS SONT PASSÉS !
-``` 
+SUCCES test_joypad PASSED 
  
-### test_joypad_irq 
- 
-**Status:** 
-✅ **PASSED** 
- 
-**Log:** 
-``` 
+Running test_joypad_irq... 
 === TEST JOYPAD IRQ ===
 PASS
-``` 
+SUCCES test_joypad_irq PASSED 
  
-### test_cpu_flags 
- 
-**Status:** 
-✅ **PASSED** 
- 
-**Log:** 
-``` 
+Running test_cpu_flags... 
 === TEST CPU FLAGS ===
 PASS
-``` 
+SUCCES test_cpu_flags PASSED 
  
-## Logs Complets 
- 
-Pour plus de détails, consultez le fichier de log complet: 
-- [test_results.log](logs/test_results.log) 
- 
---- 
-*Généré automatiquement par cameboy.bat* 
+======================================== 
+Total: 7/8 tests passed 
+CERTAINS TESTS ONT ECHOUE 

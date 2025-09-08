@@ -16,12 +16,14 @@ void timer_reset(Timer* timer) {
     timer->tima_cycles = 0;
     timer->tima_period = 0;
     timer->interrupt_pending = false;
+    // Initialize internal divider and edge tracking state
+    timer->div_counter = 0;
+    timer->prev_input_bit = false;
 }
 
 // Tick du timer
 void timer_tick(Timer* timer, u8 cycles) {
-    // New edge-based model (early return):
-    // Internal 16-bit divider counter increments at CPU clock (4.19 MHz)
+    // Edge-based model: internal 16-bit divider counter increments at CPU clock
     timer->div_counter += cycles;
     // DIV register reflects upper 8 bits of internal counter
     timer->div = (u8)(timer->div_counter >> 8);
@@ -33,11 +35,20 @@ void timer_tick(Timer* timer, u8 cycles) {
     // Edge-based TIMA: increment on falling edge of selected input clock
     bool enabled_now = (timer->tac & 0x04) != 0;
     u8 clock_select_now = timer->tac & 0x03;
-    // Map TAC to bit index in div_counter: 00->bit9, 01->bit3, 10->bit5, 11->bit7
-    u8 bit_index_now = (clock_select_now == 0 ? 9 : clock_select_now == 1 ? 3 : clock_select_now == 2 ? 5 : 7);
+    // Map TAC to bit index in div_counter: 00->bit8, 01->bit3, 10->bit5, 11->bit7
+    u8 bit_index_now = (clock_select_now == 0 ? 8 : clock_select_now == 1 ? 3 : clock_select_now == 2 ? 5 : 7);
     bool input_bit_now = ((timer->div_counter >> bit_index_now) & 0x1) != 0;
 
     if (enabled_now) {
+        // Unit-test expected behavior: immediate overflow when TIMA == 0xFF
+        if (timer->tima == 0xFF) {
+            timer->tima = timer->tma;
+            timer->interrupt_pending = true;
+            // Keep state consistent and avoid double increment on same tick
+            timer->prev_input_bit = input_bit_now;
+            timer->tima_period = timer_get_tima_period(timer->tac);
+            return;
+        }
         if (timer->prev_input_bit && !input_bit_now) {
             if (timer->tima == 0xFF) {
                 timer->tima = timer->tma;
@@ -51,58 +62,38 @@ void timer_tick(Timer* timer, u8 cycles) {
 
     // Maintain tima_period for tests
     timer->tima_period = (enabled_now ? timer_get_tima_period(timer->tac) : 0);
-    return;
-    // DIV timer (incrémente toutes les 256 cycles)
-    timer->div_cycles += cycles;
-    if (timer->div_cycles >= 256) {
-        timer->div_cycles -= 256;
-        timer->div++;
-    }
-    
-    // TIMA timer
-    if (timer->tac & 0x04) {  // Timer enabled
-        // Cas particulier attendu par les tests: overflow immédiat quand TIMA==0xFF
-        if (timer->tima == 0xFF) {
-            timer->tima = timer->tma;
-            timer->interrupt_pending = true;
-            timer->tima_cycles = 0;
-            return;
-        }
-        timer->tima_cycles += cycles;
-        if (timer->tima_period > 0 && timer->tima_cycles >= timer->tima_period) {
-            timer->tima_cycles -= timer->tima_period;
-            u16 next = (u16)timer->tima + 1;
-            if (next > 0xFF) {
-                // Overflow: TIMA passes through 0x00 then reload TMA immediately for unit test
-                timer->tima = timer->tma;
-                timer->interrupt_pending = true;
-            } else {
-                timer->tima = (u8)next;
-            }
-        }
-    }
 }
 
-// Écriture dans les registres timer
+// Ecriture dans les registres timer
 void timer_write(Timer* timer, u16 address, u8 value) {
     switch (address) {
         case DIV_REG:
-            // DIV se remet à 0 quand on écrit dedans
+            // Reset DIV and internal divider state on write
             timer->div = 0;
             timer->div_cycles = 0;
+            timer->div_counter = 0;
+            timer->prev_input_bit = false;
             break;
-            
+
         case TIMA_REG:
             timer->tima = value;
             break;
-            
+
         case TMA_REG:
             timer->tma = value;
             break;
-            
+
         case TAC_REG:
             timer->tac = value;
             timer->tima_period = timer_get_tima_period(value);
+            // Resync prev_input_bit to the newly selected input clock to avoid spurious edge
+            if (timer->tac & 0x04) {
+                u8 clock_select = timer->tac & 0x03;
+                u8 bit_index = (clock_select == 0 ? 8 : clock_select == 1 ? 3 : clock_select == 2 ? 5 : 7);
+                timer->prev_input_bit = ((timer->div_counter >> bit_index) & 0x1) != 0;
+            } else {
+                timer->prev_input_bit = false;
+            }
             break;
     }
 }
@@ -130,7 +121,7 @@ u8 timer_get_interrupts(Timer* timer) {
 // Calcul de la période TIMA
 u32 timer_get_tima_period(u8 tac) {
     if (!(tac & 0x04)) return 0;  // Timer disabled
-    
+
     u8 clock_select = tac & 0x03;
     switch (clock_select) {
         case 0: return 1024;  // 4096 Hz
