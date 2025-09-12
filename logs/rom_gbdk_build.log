@@ -1,0 +1,17 @@
+[GBDK] Build started 12/09/2025 23:19:44,44 
+--- cpu --- 
+[GBDK] OK cpu 
+--- dma --- 
+[GBDK] OK dma 
+--- interrupt --- 
+[GBDK] OK interrupt 
+--- joypad --- 
+[GBDK] OK joypad 
+--- memory --- 
+[GBDK] OK memory 
+--- ppu --- 
+[GBDK] OK ppu 
+--- serial --- 
+[GBDK] OK serial 
+--- timer --- 
+[GBDK] OK timer 

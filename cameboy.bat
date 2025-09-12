@@ -4,6 +4,8 @@ REM CameBoy - Script principal pour Windows
 REM Compile, teste et lance l'émulateur
 REM =============================================================================
 
+REM Force UTF-8 code page for proper accent handling
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 REM Configuration

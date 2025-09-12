@@ -1,0 +1,16 @@
+# CONFIG.CYCLES=4000000
+# CONFIG.SKIP=0
+
+# Interrupt component suite — priority, IF/IE, IME delay, HALT behavior.
+
+TEST.1.SERIAL=TEST 1 PASS
+TEST.1.DESC=Priority and vector jump order
+TEST.1.STATUS=NOT_IMPLEMENTED
+
+TEST.2.SERIAL=TEST 2 PASS
+TEST.2.DESC=IME enables after next instruction (EI)
+TEST.2.STATUS=NOT_IMPLEMENTED
+
+TEST.3.SERIAL=TEST 3 PASS
+TEST.3.DESC=HALT exit on pending IRQ
+TEST.3.STATUS=NOT_IMPLEMENTED

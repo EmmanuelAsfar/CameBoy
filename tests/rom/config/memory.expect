@@ -1,0 +1,19 @@
+# CONFIG.CYCLES=4000000
+# CONFIG.SKIP=0
+
+# Memory/MMU component suite — access windows and IO behavior.
+
+TEST.1.SERIAL=TEST 1 PASS
+TEST.1.DESC=VRAM access blocked in mode 3
+TEST.1.STATUS=NOT_IMPLEMENTED
+ 
+
+TEST.2.SERIAL=TEST 2 PASS
+TEST.2.DESC=OAM access blocked in modes 2/3
+TEST.2.STATUS=NOT_IMPLEMENTED
+ 
+
+TEST.3.SERIAL=TEST 3 PASS
+TEST.3.DESC=HRAM/IO read/write mirrors
+TEST.3.STATUS=NOT_IMPLEMENTED
+ 

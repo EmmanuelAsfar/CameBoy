@@ -920,11 +920,11 @@ void test_ppu_sprite_priority_detailed(void) {
     // Test transparence (couleur 0)
     ppu.oam[8] = 20; // SY = 20 (Y = 4)
     ppu.oam[9] = 28; // SX = 28 (X = 20)
-    ppu.oam[10] = 0; // Tile 0
+    ppu.oam[10] = 2; // Tile 2 (sera rendu transparent ci-dessous)
     ppu.oam[11] = 0; // Attr: priorité normale, OBP0
     
-    // Tile avec couleur 0 (transparente)
-    vram[0x0020] = 0x00; vram[0x0021] = 0x00; // Tile 0: couleur 0 (transparente)
+    // Tile 2: couleur 0 (transparente) pour le sprite test (ligne 0)
+    vram[0x0020] = 0x00; vram[0x0021] = 0x00; // Tile 2: transparence
     
     ppu.ly = 4; ppu_render_line(&ppu, vram);
     

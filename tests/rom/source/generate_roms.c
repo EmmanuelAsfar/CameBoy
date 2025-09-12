@@ -1,20 +1,22 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
-// Génère une ROM minimale qui écrit "PASS\n" sur le port série
-// à l'adresse d'entrée 0x0100.
+static void write_serial_sender(uint8_t *rom, uint16_t entry_addr, uint16_t msg_addr_pass, uint8_t pass_len, uint16_t msg_addr_fail, uint8_t fail_len);
+
+// GÃ©nÃ¨re une ROM minimale qui Ã©crit "PASS\n" sur le port sÃ©rie
+// Ã  l'adresse d'entrÃ©e 0x0100.
 
 static void write_header(uint8_t *rom, const char *title) {
     // Vecteurs init/boot (dummy)
     memset(rom, 0x00, 0x150);
-    // Entrée à 0x0100 : JP 0x0150
+    // EntrÃ©e Ã  0x0100 : JP 0x0150
     rom[0x0100] = 0xC3; // JP nn
     rom[0x0101] = 0x50; // low
     rom[0x0102] = 0x01; // high
 
-    // Logo Nintendo requis (copié depuis Pan Docs)
+    // Logo Nintendo requis (copiÃ© depuis Pan Docs)
     const uint8_t nintendo_logo[48] = {
         0xCE,0xED,0x66,0x66,0xCC,0x0D,0x00,0x0B,
         0x03,0x73,0x00,0x83,0x00,0x0C,0x00,0x0D,
@@ -47,9 +49,9 @@ static void write_header(uint8_t *rom, const char *title) {
 }
 
 static void write_program_pass(uint8_t *rom) {
-    // Code à 0x0150 : écrire "PASS\n" sur SB/SC (FF01/FF02)
+    // Code Ã  0x0150 : Ã©crire "PASS\n" sur SB/SC (FF01/FF02)
     // Routine simple: pour chaque octet dans la table, ldh (SB),a ; ld a,$81 ; ldh (SC),a ; loop attend SC bit7=0 ; suivant
-    // Table à 0x0200
+    // Table Ã  0x0200
     const char *msg = "PASS\n";
     memcpy(&rom[0x0200], msg, strlen(msg));
 
@@ -68,7 +70,7 @@ static void write_program_pass(uint8_t *rom) {
     *c++ = 0xE0; *c++ = 0x01;
     // LD A,0x81 (start + internal clock)
     *c++ = 0x3E; *c++ = 0x81;
-    // LDH (FF02),A (transfert immédiat simulé par l'émulateur)
+    // LDH (FF02),A (transfert immÃ©diat simulÃ© par l'Ã©mulateur)
     *c++ = 0xE0; *c++ = 0x02;
     // INC HL
     *c++ = 0x23;
@@ -79,6 +81,31 @@ static void write_program_pass(uint8_t *rom) {
     *c++ = 0x20; *c++ = (uint8_t)rel_loop;
     // HALT
     *c++ = 0x76;
+}
+
+// PPU basic: wait until LY == 144 (start of VBlank) then report PASS via serial
+static void write_program_ppu_ly_vblank(uint8_t *rom) {
+    const char *pass = "PPU:VBL\n";
+    const char *fail = "FAIL\n";
+    memcpy(&rom[0x0260], pass, strlen(pass));
+    memcpy(&rom[0x0270], fail, strlen(fail));
+
+    uint16_t p = 0x0150;
+    uint8_t *c = &rom[p];
+
+    // Enable LCD (LCDC at FF40) with BG on
+    *c++ = 0x3E; *c++ = 0x91; // LD A,91h
+    *c++ = 0xE0; *c++ = 0x40; // LDH (FF40),A
+
+    // Poll LY until 144
+    uint16_t loop = (uint16_t)(p + (c - &rom[p]));
+    *c++ = 0xF0; *c++ = 0x44; // LDH A,(FF44)
+    *c++ = 0xFE; *c++ = 0x90; // CP 90h
+    int8_t rel_loop = (int8_t)(loop - (((p + (c - &rom[p])) + 2)));
+    *c++ = 0x20; *c++ = (uint8_t)rel_loop; // JR NZ,loop
+
+    // Z=1 here -> PASS path of serial sender
+    write_serial_sender(rom, (uint16_t)(p + (c - &rom[p])), 0x0260, (uint8_t)strlen(pass), 0x0270, (uint8_t)strlen(fail));
 }
 
 static void write_serial_sender(uint8_t *rom, uint16_t entry_addr, uint16_t msg_addr_pass, uint8_t pass_len, uint16_t msg_addr_fail, uint8_t fail_len) {
@@ -269,51 +296,51 @@ int main(void) {
     // 1) pass.gb
     {
         uint8_t *rom = calloc(1, 32768);
-        if (!rom) { fprintf(stderr, "Alloc ROM pass échouée\n"); return 1; }
+        if (!rom) { fprintf(stderr, "Alloc ROM pass Ã©chouÃ©e\n"); return 1; }
         write_header(rom, "ROM PASS    ");
         write_program_pass(rom);
         FILE *f = fopen("pass.gb", "wb");
-        if (!f) { fprintf(stderr, "Créer pass.gb échoué\n"); free(rom); return 1; }
+        if (!f) { fprintf(stderr, "CrÃ©er pass.gb Ã©chouÃ©\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
 
     // 2) joypad_default.gb
     {
         uint8_t *rom = calloc(1, 32768);
-        if (!rom) { fprintf(stderr, "Alloc ROM joypad échouée\n"); return 1; }
+        if (!rom) { fprintf(stderr, "Alloc ROM joypad Ã©chouÃ©e\n"); return 1; }
         write_header(rom, "JOY PAD DEF ");
         write_program_joypad_default(rom);
         FILE *f = fopen("joypad_default.gb", "wb");
-        if (!f) { fprintf(stderr, "Créer joypad_default.gb échoué\n"); free(rom); return 1; }
+        if (!f) { fprintf(stderr, "CrÃ©er joypad_default.gb Ã©chouÃ©\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
 
     // 3) timer_basic.gb
     {
         uint8_t *rom = calloc(1, 32768);
-        if (!rom) { fprintf(stderr, "Alloc ROM timer échouée\n"); return 1; }
+        if (!rom) { fprintf(stderr, "Alloc ROM timer Ã©chouÃ©e\n"); return 1; }
         write_header(rom, "TIMER BASIC ");
         write_program_timer_basic(rom);
         FILE *f = fopen("timer_basic.gb", "wb");
-        if (!f) { fprintf(stderr, "Créer timer_basic.gb échoué\n"); free(rom); return 1; }
+        if (!f) { fprintf(stderr, "CrÃ©er timer_basic.gb Ã©chouÃ©\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
 
     // 4) cpu_zc_add.gb
     {
         uint8_t *rom = calloc(1, 32768);
-        if (!rom) { fprintf(stderr, "Alloc ROM cpu échouée\n"); return 1; }
+        if (!rom) { fprintf(stderr, "Alloc ROM cpu Ã©chouÃ©e\n"); return 1; }
         write_header(rom, "CPU ZC ADD  ");
         write_program_cpu_zc_add(rom);
         FILE *f = fopen("cpu_zc_add.gb", "wb");
-        if (!f) { fprintf(stderr, "Créer cpu_zc_add.gb échoué\n"); free(rom); return 1; }
+        if (!f) { fprintf(stderr, "CrÃ©er cpu_zc_add.gb Ã©chouÃ©\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
 
     // 5) visual_grid.gb - Checkerboard BG (32x18 tile area)
     {
         uint8_t *rom = calloc(1, 32768);
-        if (!rom) { fprintf(stderr, "Alloc ROM visual échouée\n"); return 1; }
+        if (!rom) { fprintf(stderr, "Alloc ROM visual Ã©chouÃ©e\n"); return 1; }
         write_header(rom, "VISUAL GRID  ");
 
         // Program at 0x0150: write two tiles and fill BG map alternated, then loop
@@ -375,21 +402,32 @@ int main(void) {
         *c++ = 0x18; *c++ = 0xFE; // JR $-2 (infinite loop)
 
         FILE *f = fopen("visual_grid.gb", "wb");
-        if (!f) { fprintf(stderr, "Créer visual_grid.gb échoué\n"); free(rom); return 1; }
+        if (!f) { fprintf(stderr, "CrÃ©er visual_grid.gb Ã©chouÃ©\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
 
     // 6) simple_square.gb - Simple 10x10 black square at center
     {
         uint8_t *rom = calloc(1, 32768);
-        if (!rom) { fprintf(stderr, "Alloc ROM simple échouée\n"); return 1; }
+        if (!rom) { fprintf(stderr, "Alloc ROM simple Ã©chouÃ©e\n"); return 1; }
         write_header(rom, "SIMPLE SQUARE");
         write_program_simple_square(rom);
         FILE *f = fopen("simple_square.gb", "wb");
-        if (!f) { fprintf(stderr, "Créer simple_square.gb échoué\n"); free(rom); return 1; }
+        if (!f) { fprintf(stderr, "CrÃ©er simple_square.gb Ã©chouÃ©\n"); free(rom); return 1; }
         fwrite(rom, 1, 32768, f); fclose(f); free(rom);
     }
 
-    printf("ROMs générées: pass.gb, joypad_default.gb, timer_basic.gb, cpu_zc_add.gb, visual_grid.gb, simple_square.gb\n");
+    // 7) ppu_ly_vblank.gb - Poll LY until 144 then PASS via serial
+    {
+        uint8_t *rom = calloc(1, 32768);
+        if (!rom) { fprintf(stderr, "Alloc ROM ppu echouee\n"); return 1; }
+        write_header(rom, "PPU LY VBL ");
+        write_program_ppu_ly_vblank(rom);
+        FILE *f = fopen("ppu_ly_vblank.gb", "wb");
+        if (!f) { fprintf(stderr, "Creer ppu_ly_vblank.gb echoue\n"); free(rom); return 1; }
+        fwrite(rom, 1, 32768, f); fclose(f); free(rom);
+    }
+
+    printf("ROMs gÃ©nÃ©rÃ©es: pass.gb, joypad_default.gb, timer_basic.gb, cpu_zc_add.gb, visual_grid.gb, simple_square.gb, ppu_ly_vblank.gb\n");
     return 0;
 }

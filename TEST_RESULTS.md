@@ -1,15 +1,15 @@
 # Résultats des Tests Unitaires - CameBoy 
  
-**Date:** 08/09/2025 13:06:54,49 
-**Status:** ❌ CERTAINS TESTS ONT ECHOUE 
+**Date:** 12/09/2025 23:17:29,91 
+**Status:** ✅ TOUS LES TESTS REUSSIS 
  
 ## 📊 Synthèse Globale 
  
 | Métrique | Valeur | 
 |---------|--------| 
 | **Total des tests** | 8 | 
-| **Tests réussis** | 7 | 
-| **Tests échoués** | 1 | 
+| **Tests réussis** | 8 | 
+| **Tests échoués** | 0 | 
  
 ## 📋 Résultats par Rubrique 
  
@@ -21,7 +21,7 @@
 | **test_joypad** | 7 | 7 | 0 | ✅ | 
 | **test_joypad_irq** | 0 | 0 | 0 | ✅ | 
 | **test_mmu** | 10 | 10 | 0 | ✅ | 
-| **test_ppu** | 27 | 26 | 1 | ❌ | 
+| **test_ppu** | 28 | 28 | 0 | ✅ | 
 | **test_timer** | 8 | 8 | 0 | ✅ | 
  
 ## 🔍 Détails des Tests 
@@ -162,7 +162,7 @@ Tests passés: 10/10
 ### test_ppu 
  
 **Status:** 
-❌ **FAILED** 
+✅ **PASSED** 
  
 **Log:** 
 ``` 
@@ -194,7 +194,12 @@ Test 23: PPU FIFO Overflow... PASS
 Test 24: PPU Mode Timings... PASS
 Test 25: PPU STAT IRQ Transitions... PASS
 Test 26: PPU Window Edge Cases... PASS
-Test 27: PPU Sprite Priority Detailed... Assertion failed: ppu.framebuffer[12] == ppu_get_pixel_color(&ppu, 1), file tests\unit\test_ppu.c, line 918
+Test 27: PPU Sprite Priority Detailed... PASS
+Test 28: PPU Fetcher Basic... PASS
+
+=== RÉSULTATS ===
+Tests passés: 28/28
+✅ TOUS LES TESTS SONT PASSÉS !
 ``` 
  
 ### test_timer 

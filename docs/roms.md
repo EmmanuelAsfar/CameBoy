@@ -109,6 +109,23 @@ void main() {
 
 - Docs: `https://gbdk-2020.github.io/`
 
+### 3) Intégration aux tests ROM du projet
+
+- Emplacements des sources de test:
+  - `tests/rom/source/gbdk/<component>/main.c`
+  - `tests/rom/source/rgbds/<component>/main.asm`
+- Builders:
+  - `tests/rom/source/build_roms_gbdk.bat` (détecte `tools\gbdk\bin\lcc.exe`)
+  - `tests/rom/source/build_roms_rgbds.bat` (détecte `tools\rgbds\bin\rgbasm|rgblink|rgbfix`)
+- Sortie: les ROMs générées sont déposées dans `tests/rom/*.gb`.
+- Évaluation: `tests/rom/run_rom_tests.bat` exécute les ROMs, capture la sortie série et vérifie les fichiers `.expect`/`.cfg`.
+
+Conventions de sortie série (recommandées pour les suites par composant):
+- `SUITE START <COMP>` au démarrage
+- `TEST <id> START <name>` facultatif
+- `TEST <id> PASS` / `TEST <id> FAIL <reason>`
+
+
 ## Bonnes pratiques
 - Respecter laen-tAte (logo, tailles, checksums) pour compatibilitA maximale
 - Choisir MBC adaptA (taille ROM/RAM)

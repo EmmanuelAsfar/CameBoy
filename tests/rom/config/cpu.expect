@@ -1,0 +1,85 @@
+﻿# CONFIG.CYCLES=6000000
+# CONFIG.SKIP=0
+
+# CPU suite (Pan Docs: docs/specs/cpu.md) — Each TEST.<n> describes a focused behavior.
+# Runner looks for each TEST.<n>.SERIAL token in serial output. DESC explains the check.
+
+# 8-bit arithmetic / flags
+TEST.1.SERIAL=TEST 1 PASS
+TEST.1.DESC=ADD A,0xFF with A=0x01 -> 0x00 sets Z=1 N=0 H=1 C=1
+
+TEST.2.SERIAL=TEST 2 PASS
+TEST.2.DESC=ADC A,0x00 with A=0xFF and C=1 -> 0x00 sets Z=1 N=0 H=1 C=1
+
+TEST.3.SERIAL=TEST 3 PASS
+TEST.3.DESC=SUB A,0x01 with A=0x00 -> 0xFF sets Z=0 N=1 H=1 C=1
+
+TEST.4.SERIAL=TEST 4 PASS
+TEST.4.DESC=SBC A,0x00 with A=0x00 and C=1 -> 0xFF sets Z=0 N=1 H=1 C=1
+
+# INC/DEC half-carry and zero
+TEST.5.SERIAL=TEST 5 PASS
+TEST.5.DESC=INC A from 0x0F -> 0x10 sets Z=0 N=0 H=1 (C unchanged)
+TEST.5.STATUS=NOT_IMPLEMENTED
+
+TEST.6.SERIAL=TEST 6 PASS
+TEST.6.DESC=DEC A from 0x10 -> 0x0F sets Z=0 N=1 H=1 (C unchanged)
+TEST.6.STATUS=NOT_IMPLEMENTED
+
+# DAA / complement / carry ops
+TEST.7.SERIAL=TEST 7 PASS
+TEST.7.DESC=DAA after A=0x09 + 0x01 -> A=0x10 sets Z=0 N=0 H=0 C=0 (BCD)
+TEST.7.STATUS=NOT_IMPLEMENTED
+
+TEST.8.SERIAL=TEST 8 PASS
+TEST.8.DESC=CPL toggles A bits and sets N=1 H=1
+TEST.8.STATUS=NOT_IMPLEMENTED
+
+TEST.9.SERIAL=TEST 9 PASS
+TEST.9.DESC=SCF sets C=1 N=0 H=0 ; CCF flips C and clears N,H
+TEST.9.STATUS=NOT_IMPLEMENTED
+
+# 16-bit add effects
+TEST.10.SERIAL=TEST 10 PASS
+TEST.10.DESC=ADD HL,BC affects H/C only (Z,N unaffected)
+TEST.10.STATUS=NOT_IMPLEMENTED
+
+# Rotates/shifts
+TEST.11.SERIAL=TEST 11 PASS
+TEST.11.DESC=RLCA/RLA/RRCA/RRA correct rotates and flags
+TEST.11.STATUS=NOT_IMPLEMENTED
+
+TEST.12.SERIAL=TEST 12 PASS
+TEST.12.DESC=RLC/RL/RRC/RR/SLA/SRA/SRL/SWAP behavior and flags
+TEST.12.STATUS=NOT_IMPLEMENTED
+
+# Bit operations
+TEST.13.SERIAL=TEST 13 PASS
+TEST.13.DESC=BIT n,r sets Z by bit state; H=1 N=0
+TEST.13.STATUS=NOT_IMPLEMENTED
+
+TEST.14.SERIAL=TEST 14 PASS
+TEST.14.DESC=RES/SET n,r modify only targeted bit
+TEST.14.STATUS=NOT_IMPLEMENTED
+
+# Control flow
+TEST.15.SERIAL=TEST 15 PASS
+TEST.15.DESC=JR cc,e signed displacement and condition
+TEST.15.STATUS=NOT_IMPLEMENTED
+
+TEST.16.SERIAL=TEST 16 PASS
+TEST.16.DESC=JP cc,nn and JP (HL)
+TEST.16.STATUS=NOT_IMPLEMENTED
+
+TEST.17.SERIAL=TEST 17 PASS
+TEST.17.DESC=CALL/RET nested; RETI restores IME and returns
+TEST.17.STATUS=NOT_IMPLEMENTED
+
+# Interrupt timing
+TEST.18.SERIAL=TEST 18 PASS
+TEST.18.DESC=EI takes effect after next instruction (no early IRQ)
+TEST.18.STATUS=NOT_IMPLEMENTED
+
+TEST.19.SERIAL=TEST 19 PASS
+TEST.19.DESC=HALT bug minimal: PC increment behavior when IME=0 and IF pending
+TEST.19.STATUS=NOT_IMPLEMENTED

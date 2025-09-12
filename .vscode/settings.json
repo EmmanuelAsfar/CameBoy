@@ -1,3 +1,5 @@
 {
-    "chatgpt.openOnStartup": true
+    "chatgpt.openOnStartup": true,
+    "codex.acceptProposalsAutomatically": true,
+    "codex.confirmBeforeApplyingEdits": false
 }

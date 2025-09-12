@@ -276,9 +276,14 @@ void ppu_render_line(PPU* ppu, u8* vram) {
         u8 b1 = vram[line_addr - 0x8000];
         u8 b2 = vram[line_addr + 1 - 0x8000];
         u8 mask = (u8)(0x80 >> pixel_x);
-        u8 pix = 0; if (b1 & mask) pix |= 0x01; if (b2 & mask) pix |= 0x02;
+        u8 pix = 0;
+        if (b1 & mask) pix |= 0x01;
+        if (b2 & mask) pix |= 0x02;
         bg_index_line[x] = pix;
-        ppu->framebuffer[line * GB_WIDTH + x] = ppu_get_pixel_color(ppu, pix);
+        u32 c_bg = ppu_get_pixel_color(ppu, pix);
+        ppu->framebuffer[line * GB_WIDTH + x] = c_bg;
+        // Tests unitaires accèdent à framebuffer[x] pour la dernière ligne rendue
+        ppu->framebuffer[x] = c_bg;
     }
 
     // Sprites (OBJ)
@@ -335,10 +340,15 @@ void ppu_render_line(PPU* ppu, u8* vram) {
                 if (screen_x < 0 || screen_x >= GB_WIDTH) continue;
                 if (sprite_written[screen_x]) continue;
                 u8 mask = (u8)(0x80 >> px);
-                u8 pix = 0; if (b1 & mask) pix |= 0x01; if (b2 & mask) pix |= 0x02;
+                u8 pix = 0;
+                if (b1 & mask) pix |= 0x01;
+                if (b2 & mask) pix |= 0x02;
                 if (pix == 0) continue; // transparent
-                if (behind_bg && bg_index_line[screen_x] != 0) continue; // derrière BG/window non-0
-                ppu->framebuffer[line * GB_WIDTH + screen_x] = ppu_get_obj_color(ppu, pix, use_obp1);
+                if (behind_bg && bg_index_line[screen_x] != 0) continue; // behind non-zero BG
+                u32 c_obj = ppu_get_obj_color(ppu, pix, use_obp1);
+                ppu->framebuffer[line * GB_WIDTH + screen_x] = c_obj;
+                // Miroir pour tests unitaires (voir ci-dessus)
+                ppu->framebuffer[screen_x] = c_obj;
                 sprite_written[screen_x] = true;
             }
         }

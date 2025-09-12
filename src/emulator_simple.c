@@ -9,6 +9,17 @@
 #include "apu.h"
 #include "graphics_win32.h"
 
+// Serial capture (console/headless): write bytes to logs/rom/<rom>_serial.txt and stdout
+static FILE* g_serial_file = NULL;
+static void emulator_serial_cb(u8 data) {
+    if (g_serial_file) {
+        fputc((int)data, g_serial_file);
+        fflush(g_serial_file);
+    }
+    fputc((int)data, stdout);
+    fflush(stdout);
+}
+
 // Déclaration anticipée
 void load_ascii_tiles(u8* vram);
 
@@ -310,6 +321,9 @@ void emulator_simple_init(EmulatorSimple* emu) {
     // Connecter le timer et l'APU au MMU
     emu->mmu.timer = &emu->timer;
     emu->mmu.apu = &emu->apu;
+    // Connecter aussi le joypad et le PPU pour des acces corrects via la MMU
+    mmu_set_joypad(&emu->mmu, &emu->joypad);
+    mmu_set_ppu(&emu->mmu, &emu->ppu);
     
     // Initialiser les graphiques (caché par défaut)
     if (!graphics_win32_init(&emu->graphics)) {

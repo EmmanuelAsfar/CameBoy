@@ -115,6 +115,11 @@ bool emulator_init(Emulator* emu) {
     timer_init(&emu->timer);
     joypad_init(&emu->joypad);
     interrupt_init(&emu->interrupt);
+    // Link components to MMU for coherent access
+    emu->mmu.timer = &emu->timer;
+    mmu_set_joypad(&emu->mmu, &emu->joypad);
+    mmu_set_ppu(&emu->mmu, &emu->ppu);
+    mmu_set_serial_callback(&emu->mmu, gui_serial_callback);
     
     // Les composants sont indépendants, pas besoin de les lier
     
@@ -212,20 +217,16 @@ void emulator_run(Emulator* emu) {
         u8 cycles = cpu_step(&emu->cpu, &emu->mmu);
         warmup_cycles += cycles;
         timer_tick(&emu->timer, cycles);
-        ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
-        
-        // Gérer interruptions pendant warmup (même logique que version run)
-        u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
-        u8 ie_reg = mmu_read8(&emu->mmu, IE_REG);
-        if (emu->cpu.ime && (if_reg & ie_reg)) {
-            for (int i = 0; i < 5; i++) {
-                u8 interrupt = (u8)(1 << i);
-                if ((if_reg & interrupt) && (ie_reg & interrupt)) {
-                    cpu_interrupt(&emu->cpu, &emu->mmu, interrupt);
-                    mmu_write8(&emu->mmu, IF_REG, (u8)(if_reg & (u8)~interrupt));
-                    break;
-                }
-            }
+        u8 ppu_interrupts_warm = ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
+        mmu_dma_tick(&emu->mmu, cycles);
+        u8 timer_interrupts_warm = timer_get_interrupts(&emu->timer);
+        if (ppu_interrupts_warm) interrupt_request(&emu->interrupt, ppu_interrupts_warm);
+        if (timer_interrupts_warm) interrupt_request(&emu->interrupt, timer_interrupts_warm);
+        interrupt_write_ie(&emu->interrupt, mmu_read8(&emu->mmu, IE_REG));
+        interrupt_write_if(&emu->interrupt, mmu_read8(&emu->mmu, IF_REG));
+        u8 handled_warm = interrupt_handle(&emu->interrupt, &emu->cpu, &emu->mmu);
+        if (handled_warm) {
+            mmu_write8(&emu->mmu, IF_REG, interrupt_read_if(&emu->interrupt));
         }
     }
     
@@ -250,21 +251,17 @@ void emulator_run(Emulator* emu) {
         // Mettre à jour le timer
         timer_tick(&emu->timer, cycles);
         
-        // Mettre à jour le PPU
-        ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
-
-        // Gérer les interruptions (aligné sur version run)
-        u8 if_reg = mmu_read8(&emu->mmu, IF_REG);
-        u8 ie_reg = mmu_read8(&emu->mmu, IE_REG);
-        if (emu->cpu.ime && (if_reg & ie_reg)) {
-            for (int i = 0; i < 5; i++) {
-                u8 interrupt = (u8)(1 << i);
-                if ((if_reg & interrupt) && (ie_reg & interrupt)) {
-                    cpu_interrupt(&emu->cpu, &emu->mmu, interrupt);
-                    mmu_write8(&emu->mmu, IF_REG, (u8)(if_reg & (u8)~interrupt));
-                    break;
-                }
-            }
+        // Update PPU and DMA; collect and handle interrupts via unified path
+        u8 ppu_interrupts = ppu_tick(&emu->ppu, cycles, emu->mmu.vram);
+        mmu_dma_tick(&emu->mmu, cycles);
+        u8 timer_interrupts = timer_get_interrupts(&emu->timer);
+        if (ppu_interrupts) interrupt_request(&emu->interrupt, ppu_interrupts);
+        if (timer_interrupts) interrupt_request(&emu->interrupt, timer_interrupts);
+        interrupt_write_ie(&emu->interrupt, mmu_read8(&emu->mmu, IE_REG));
+        interrupt_write_if(&emu->interrupt, mmu_read8(&emu->mmu, IF_REG));
+        u8 handled = interrupt_handle(&emu->interrupt, &emu->cpu, &emu->mmu);
+        if (handled) {
+            mmu_write8(&emu->mmu, IF_REG, interrupt_read_if(&emu->interrupt));
         }
         
         // Vérifier si on doit rendre une frame complète (comme la version run)

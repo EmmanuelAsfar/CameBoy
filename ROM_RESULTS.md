@@ -1,3 +1,10 @@
+ROM Test Results - CameBoy 
+Date: 12/09/2025 23:20:02,47 
+Status: 0/8 passed 
+ROMs NI: 0 
+ROMs FAIL: 8 
+ 
+--- rom_test_results.log excerpt --- 
 ======================================== 
 ROM Test Run - 12/09/2025 23:19:44,39 
 ======================================== 
